@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonObject>
 #include <QJsonDocument>
 
 CWThemeManager::CWThemeManager(const AppPaths *paths, QObject *parent)

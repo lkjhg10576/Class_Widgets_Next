@@ -34,6 +34,7 @@ void AppCentral::initialize()
     m_notification = new NotificationStub(this);
     m_scheduleManager = new ScheduleManagerStub(m_configs, this);
     m_scheduleRuntime = new ScheduleRuntimeStub(this);
+    m_scheduleEditor = new ScheduleEditorStub(this);
     m_windowManager = new WindowManagerStub(this);
     m_classSwapManager = new ClassSwapManagerStub(this);
     m_utilsBackend = new UtilsBackendStub(this);
@@ -90,6 +91,15 @@ QVariant AppCentral::globalConfig() const
 {
     return m_configs ? m_configs->data() : QVariant();
 }
+
+// 返回 QObject* 的 Q_PROPERTY 访问器：stub 类型在此处是完整类型，可安全向上转型
+QObject *AppCentral::scheduleRuntime() const { return m_scheduleRuntime; }
+QObject *AppCentral::notification() const { return m_notification; }
+QObject *AppCentral::scheduleEditor() const { return m_scheduleEditor; }
+QObject *AppCentral::classSwapManager() const { return m_classSwapManager; }
+QObject *AppCentral::scheduleManager() const { return m_scheduleManager; }
+QObject *AppCentral::translator() const { return m_translator; }
+QObject *AppCentral::themeManager() const { return m_themeManager; }
 
 void AppCentral::quit()
 {

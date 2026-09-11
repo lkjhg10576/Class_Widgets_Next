@@ -79,6 +79,11 @@ WindowManagerStub::WindowManagerStub(QObject *parent)
 {
 }
 
+ScheduleEditorStub::ScheduleEditorStub(QObject *parent)
+    : QObject(parent)
+{
+}
+
 void WindowManagerStub::openSettings()
 {
     cwn::Log::warn(QStringLiteral("WindowManager.openSettings: windows arrive in M3"));

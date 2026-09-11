@@ -54,13 +54,15 @@ public:
     void setWidgetsWindow(WidgetsWindow *window) { m_widgetsWindow = window; }
 
     // --- QML 契约 ---
-    QObject *scheduleRuntime() const { return m_scheduleRuntime; }
-    QObject *notification() const { return m_notification; }
-    QObject *scheduleEditor() const { return m_scheduleEditor; }
-    QObject *classSwapManager() const { return m_classSwapManager; }
-    QObject *scheduleManager() const { return m_scheduleManager; }
-    QObject *translator() const { return m_translator; }
-    QObject *themeManager() const { return m_themeManager; }
+    // ⚠️ 返回 QObject* 的访问器必须在 AppCentral.cpp 中定义（类内只能前向声明
+    // 这些 stub 类型，不完整类型无法向上转型）
+    QObject *scheduleRuntime() const;
+    QObject *notification() const;
+    QObject *scheduleEditor() const;
+    QObject *classSwapManager() const;
+    QObject *scheduleManager() const;
+    QObject *translator() const;
+    QObject *themeManager() const;
     bool restartRequired() const { return m_restartRequired; }
     QVariant globalConfig() const;
 
@@ -106,6 +108,7 @@ private:
     TranslatorStub *m_translator = nullptr;
     NotificationStub *m_notification = nullptr;
     ScheduleRuntimeStub *m_scheduleRuntime = nullptr;
+    ScheduleEditorStub *m_scheduleEditor = nullptr;
     ScheduleManagerStub *m_scheduleManager = nullptr;
     WindowManagerStub *m_windowManager = nullptr;
     ClassSwapManagerStub *m_classSwapManager = nullptr;

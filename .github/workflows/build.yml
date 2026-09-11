@@ -44,12 +44,24 @@ jobs:
             Select-Object -First 10
           $errors | ForEach-Object { Add-Content $env:GITHUB_STEP_SUMMARY $_.Line }
           Add-Content $env:GITHUB_STEP_SUMMARY $fence
-          # ::error:: 注解可通过公开 API 读取（check-runs annotations）
+          # ::error:: 注解可通过公开 API 读取（check-runs annotations，上限 10 条）
           $errors | ForEach-Object {
             $line = $_.Line
             if ($line.Length -gt 800) { $line = $line.Substring(0, 800) }
             Write-Host "::error::$line"
           }
+
+      - name: Commit full build errors (on failure, for public readback)
+        if: failure()
+        shell: pwsh
+        run: |
+          Select-String -Path build-output.log -Pattern 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:' |
+            ForEach-Object { $_.Line } | Set-Content -Encoding utf8 build-errors.txt
+          git config user.name "ci-log-bot"
+          git config user.email "ci-log-bot@users.noreply.github.com"
+          git add build-errors.txt
+          git commit -m "CI: build error log [skip ci]"
+          git push
 
       - name: Install to dist
         # 安装 exe + app/ 运行时资源（src/qml、assets、RinUI、themes、configs）

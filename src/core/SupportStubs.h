@@ -97,6 +97,15 @@ private:
     QVariantList m_schedules;
 };
 
+// 对应 core/schedule/editor.py ScheduleEditor —— M2 落地（编辑器窗口后端）；
+// AppCentral.scheduleEditor 属性的占位，M1 加载的 QML 未引用
+class ScheduleEditorStub : public QObject
+{
+    Q_OBJECT
+public:
+    explicit ScheduleEditorStub(QObject *parent = nullptr);
+};
+
 // 对应 core/windows/manager.py AppWindowManager —— M3 落地（10 类窗口工厂）
 class WindowManagerStub : public QObject
 {
