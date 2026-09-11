@@ -12,6 +12,7 @@
 
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QWindow>
 
 AppCentral::AppCentral(QObject *parent)
     : QObject(parent)

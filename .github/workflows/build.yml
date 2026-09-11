@@ -33,16 +33,23 @@ jobs:
           cmake --build build --config Release --parallel 2>&1 | Tee-Object -FilePath build-output.log
           exit $LASTEXITCODE
 
-      - name: Dump compile errors to summary (on failure)
+      - name: Dump compile errors to annotations (on failure)
         if: failure()
         shell: pwsh
         run: |
           $fence = [string][char]96 + [char]96 + [char]96
           Add-Content $env:GITHUB_STEP_SUMMARY "### Build errors"
           Add-Content $env:GITHUB_STEP_SUMMARY $fence
-          Select-String -Path build-output.log -Pattern 'error C\d|fatal error|error LNK|Error( s)? occurred|ninja: build stopped' |
-            Select-Object -First 80 | ForEach-Object { Add-Content $env:GITHUB_STEP_SUMMARY $_.Line }
+          $errors = Select-String -Path build-output.log -Pattern 'error C\d|fatal error|error LNK|Error( s)? occurred|ninja: build stopped' |
+            Select-Object -First 10
+          $errors | ForEach-Object { Add-Content $env:GITHUB_STEP_SUMMARY $_.Line }
           Add-Content $env:GITHUB_STEP_SUMMARY $fence
+          # ::error:: 注解可通过公开 API 读取（check-runs annotations）
+          $errors | ForEach-Object {
+            $line = $_.Line
+            if ($line.Length -gt 800) { $line = $line.Substring(0, 800) }
+            Write-Host "::error::$line"
+          }
 
       - name: Install to dist
         # 安装 exe + app/ 运行时资源（src/qml、assets、RinUI、themes、configs）
