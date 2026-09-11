@@ -23,3 +23,4 @@ CMakeLists.txt.user
 # 系统杂项
 Thumbs.db
 .DS_Store
+build-errors.txt

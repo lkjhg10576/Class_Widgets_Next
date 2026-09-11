@@ -1,1 +1,0 @@
-Unable to find dependent libraries of D:\a\Class_Widgets_Next\Qt\6.10.3\msvc2022_64\bin\Qt6ShaderTools.dll :Cannot open 'D:/a/Class_Widgets_Next/Qt/6.10.3/msvc2022_64/bin/Qt6ShaderTools.dll': The system cannot find the file specified.
