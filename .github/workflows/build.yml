@@ -1,0 +1,75 @@
+name: Build ClassWidgetsNext (Windows)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Qt 官方不提供 Linux->Windows 交叉编译，Windows 产物必须在 windows runner 产出
+      # （详见仓库 docs：改名与构建可行性记录 §2）
+      - name: Install Qt 6.10 (MSVC 2022 x64)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          arch: win64_msvc2022_64
+          # Qt5Compat 是独立模块：WidgetsContainer.qml 依赖 Qt5Compat.GraphicalEffects
+          modules: 'qt5compat'
+          cache: true
+
+      - name: Configure (CMake)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Install to dist
+        # 安装 exe + app/ 运行时资源（src/qml、assets、RinUI、themes、configs）
+        run: cmake --install build --prefix dist
+
+      - name: Deploy Qt runtime (windeployqt)
+        run: |
+          windeployqt --release --compiler-runtime `
+            --qmldir app `
+            dist/ClassWidgetsNext.exe
+
+      - name: Add offscreen platform plugin (for smoke test)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force "dist\platforms" | Out-Null
+          Copy-Item "$env:QT_ROOT_DIR\plugins\platforms\qoffscreen.dll" "dist\platforms\"
+          Get-ChildItem "dist\platforms"
+
+      - name: Smoke test (offscreen)
+        # CI 冒烟测试：offscreen 平台加载 MainInterface.qml，
+        # widgetsLoader 就绪后自动退出；exit 0 = 通过，3 = 超时未就绪
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          $env:QT_LOGGING_RULES = '*.debug=false'
+          $p = Start-Process -FilePath "dist\ClassWidgetsNext.exe" `
+            -ArgumentList "--smoke-test" -Wait -PassThru
+          Write-Host "Smoke test exit code: $($p.ExitCode)"
+          if (Test-Path "dist\logs") {
+            Get-ChildItem "dist\logs" | ForEach-Object { Get-Content $_.FullName }
+          }
+          exit $p.ExitCode
+
+      - name: Package (zip)
+        shell: pwsh
+        run: Compress-Archive -Path "dist\*" -DestinationPath "ClassWidgetsNext-Windows-x64.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClassWidgetsNext-Windows-x64
+          path: |
+            ClassWidgetsNext-Windows-x64.zip
+          if-no-files-found: error

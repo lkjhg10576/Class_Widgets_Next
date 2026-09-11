@@ -1,0 +1,7 @@
+module ClassWidgets.Theme
+
+Widget 1.0 components/Widget.qml
+ProgressBar 1.0 components/ProgressBar.qml
+Title 1.0 components/Title.qml
+Icon 1.0 components/Icon.qml
+ProgressRing 1.0 components/ProgressRing.qml

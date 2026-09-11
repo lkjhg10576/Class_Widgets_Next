@@ -1,0 +1,101 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import RinUI
+import ClassWidgets.Components
+
+
+FluentWindow {
+    id: settingsWindow
+    icon: PathManager.assets("images/icons/cwn_settings.png")
+    title: qsTr("Settings")
+    width: Math.max(Screen.width * 0.6, 900)
+    height: Math.max(Screen.height * 0.7, 640)
+    minimumWidth: 600
+    // visible: true
+
+    onClosing: function(event) {
+        event.accepted = false
+        WindowManager.closeSettings()
+    }
+
+    titleBarArea: RowLayout {
+        anchors.fill: parent
+
+        RestartButton {
+            Layout.alignment: Qt.AlignRight
+        }
+    }
+
+    navigationItems: [
+        {
+            title: qsTr("Home"),
+            page: PathManager.qml("pages/settings/Home.qml"),
+            icon: "ic_fluent_board_20_regular",
+            position: Position.Top,
+        },
+        {
+            title: qsTr("General"),
+            icon: "ic_fluent_settings_20_regular",
+            page: PathManager.qml("pages/settings/General/Index.qml"),
+            // subItems: [
+            //
+            // ]
+        },
+        {
+            title: qsTr("Widgets"),
+            page: PathManager.qml("pages/settings/General/Widgets.qml"),
+            icon: "ic_fluent_apps_20_regular"
+        },
+        {
+            title: qsTr("Interactions"),
+            page: PathManager.qml("pages/settings/General/Interactions.qml"),
+            icon: "ic_fluent_hand_draw_20_regular"
+        },
+        {
+            title: qsTr("Personalization"),
+            icon: "ic_fluent_paint_brush_sparkle_20_regular",
+            page: PathManager.qml("pages/settings/Personalization.qml"),
+        },
+        {
+            title: qsTr("Notification & Time"),
+            icon: "ic_fluent_alert_badge_20_regular",
+            subItems: [
+                {
+                    title: qsTr("Notification"),
+                    page: PathManager.qml("pages/settings/notificationAndTime/Notification.qml"),
+                    icon: "ic_fluent_alert_badge_20_regular"
+                },
+                {
+                    title: qsTr("Time"),
+                    page: PathManager.qml("pages/settings/notificationAndTime/Time.qml"),
+                    icon: "ic_fluent_clock_20_regular"
+                }
+            ]
+        },
+        {
+            title: qsTr("Plugins"),
+            page: PathManager.qml("pages/settings/Plugins.qml"),
+            icon: "ic_fluent_apps_add_in_20_regular",
+            expanded: true,
+            subItems: UtilsBackend && UtilsBackend.extraSettings && UtilsBackend.extraSettings.length > 0 ? UtilsBackend.extraSettings : null
+        },
+        {
+            title: qsTr("About"),
+            page: PathManager.qml("pages/settings/About.qml"),
+            icon: "ic_fluent_info_20_regular",
+            position: Position.Bottom
+        },
+        {
+            title: qsTr("Update"),
+            page: PathManager.qml("pages/settings/Update.qml"),
+            icon: "ic_fluent_arrow_sync_20_regular",
+            position: Position.Bottom
+        }
+    ]
+
+    // 测试水印
+    Watermark {
+        anchors.centerIn: parent
+    }
+}

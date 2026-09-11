@@ -1,0 +1,3 @@
+module ClassWidgets.Easing
+
+singleton BezierCurve 1.0 BezierCurve.qml

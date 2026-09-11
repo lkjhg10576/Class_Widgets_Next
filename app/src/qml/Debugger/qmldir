@@ -1,0 +1,14 @@
+module Debugger
+
+# Components
+VarStatus 1.0 components/VarStatus.qml
+DayEditor 1.0 components/DayEditor.qml
+EntryEditor 1.0 components/EntryEditor.qml
+
+# Contents
+Overview 1.0 contents/Overview.qml
+Dashboard 1.0 contents/Dashboard.qml
+
+# Window
+EditSchedule 1.0 EditSchedule.qml
+WidgetsEditor 1.0 WidgetsEditor.qml

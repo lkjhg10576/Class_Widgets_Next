@@ -1,0 +1,25 @@
+# 构建产物
+build/
+build-*/
+dist/
+out/
+cmake-build-*/
+
+# 运行时生成
+logs/
+app/logs/
+app/configs/configs.json
+app/configs/plugin-cache/
+app/configs/schedules/
+
+# IDE / 编辑器
+.vs/
+.vscode/
+.idea/
+CMakeLists.txt.user
+*.user
+*.autosave
+
+# 系统杂项
+Thumbs.db
+.DS_Store

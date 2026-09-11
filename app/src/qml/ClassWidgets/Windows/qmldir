@@ -1,0 +1,3 @@
+module ClassWidgets.Windows
+
+TrayPanel 1.0 TrayPanel.qml
