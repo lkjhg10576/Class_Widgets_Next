@@ -9,7 +9,7 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    # 失败时需把 build-errors.txt 提交回仓库供公开读取（新仓库默认 token 只读）
+    # 失败时需把错误日志提交回仓库供公开读取（新仓库默认 token 只读）
     permissions:
       contents: write
     steps:
@@ -17,7 +17,6 @@ jobs:
         uses: actions/checkout@v4
 
       # Qt 官方不提供 Linux->Windows 交叉编译，Windows 产物必须在 windows runner 产出
-      # （详见仓库 docs：改名与构建可行性记录 §2）
       - name: Install Qt 6.10 (MSVC 2022 x64)
         uses: jurplel/install-qt-action@v4
         with:
@@ -36,45 +35,17 @@ jobs:
           cmake --build build --config Release --parallel 2>&1 | Tee-Object -FilePath build-output.log
           exit $LASTEXITCODE
 
-      - name: Dump compile errors to annotations (on failure)
-        if: failure()
-        shell: pwsh
-        run: |
-          $fence = [string][char]96 + [char]96 + [char]96
-          Add-Content $env:GITHUB_STEP_SUMMARY "### Build errors"
-          Add-Content $env:GITHUB_STEP_SUMMARY $fence
-          $errors = Select-String -Path build-output.log -Pattern 'error C\d|fatal error|error LNK|Error( s)? occurred|ninja: build stopped' |
-            Select-Object -First 10
-          $errors | ForEach-Object { Add-Content $env:GITHUB_STEP_SUMMARY $_.Line }
-          Add-Content $env:GITHUB_STEP_SUMMARY $fence
-          # ::error:: 注解可通过公开 API 读取（check-runs annotations，上限 10 条）
-          $errors | ForEach-Object {
-            $line = $_.Line
-            if ($line.Length -gt 800) { $line = $line.Substring(0, 800) }
-            Write-Host "::error::$line"
-          }
-
-      - name: Commit full build errors (on failure, for public readback)
-        if: failure()
-        shell: pwsh
-        run: |
-          Select-String -Path build-output.log -Pattern 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:' |
-            ForEach-Object { $_.Line } | Set-Content -Encoding utf8 build-errors.txt
-          git config user.name "ci-log-bot"
-          git config user.email "ci-log-bot@users.noreply.github.com"
-          git add build-errors.txt
-          git commit -m "CI: build error log [skip ci]"
-          git push
-
       - name: Install to dist
         # 安装 exe + app/ 运行时资源（src/qml、assets、RinUI、themes、configs）
         run: cmake --install build --prefix dist
 
       - name: Deploy Qt runtime (windeployqt)
+        shell: pwsh
         run: |
-          windeployqt --release --compiler-runtime `
+          windeployqt --release --compiler-runtime --verbose 1 `
             --qmldir app `
-            dist/ClassWidgetsNext.exe
+            dist/ClassWidgetsNext.exe 2>&1 | Tee-Object -FilePath deploy-output.log
+          exit $LASTEXITCODE
 
       - name: Add offscreen platform plugin (for smoke test)
         shell: pwsh
@@ -93,9 +64,6 @@ jobs:
           $p = Start-Process -FilePath "dist\ClassWidgetsNext.exe" `
             -ArgumentList "--smoke-test" -Wait -PassThru
           Write-Host "Smoke test exit code: $($p.ExitCode)"
-          if (Test-Path "dist\logs") {
-            Get-ChildItem "dist\logs" | ForEach-Object { Get-Content $_.FullName }
-          }
           exit $p.ExitCode
 
       - name: Package (zip)
@@ -106,6 +74,44 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ClassWidgetsNext-Windows-x64
-          path: |
-            ClassWidgetsNext-Windows-x64.zip
+          path: ClassWidgetsNext-Windows-x64.zip
           if-no-files-found: error
+
+      # ---- 诊断步骤：必须放在最后，任何前置步骤失败都会触发 ----
+      - name: Dump failures to annotations (on failure)
+        if: failure()
+        shell: pwsh
+        run: |
+          $patterns = 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:'
+          foreach ($f in @('build-output.log', 'deploy-output.log')) {
+            if (-not (Test-Path $f)) { continue }
+            Select-String -Path $f -Pattern $patterns |
+              Select-Object -First 9 |
+              ForEach-Object {
+                $line = $_.Line
+                if ($line.Length -gt 700) { $line = $line.Substring(0, 700) }
+                Write-Host "::error::$f :: $line"
+              }
+          }
+
+      - name: Commit failure logs (on failure, for public readback)
+        if: failure()
+        shell: pwsh
+        run: |
+          $collected = @()
+          foreach ($f in @('build-output.log', 'deploy-output.log')) {
+            if (Test-Path $f) { $collected += $f }
+          }
+          if ($collected.Count -eq 0) { Write-Host "no logs"; exit 0 }
+          $collected | ForEach-Object {
+            Select-String -Path $_ -Pattern 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:|Unable to|Error:' |
+              ForEach-Object { $_.Line }
+          } | Set-Content -Encoding utf8 build-errors.txt
+          git config user.name "ci-log-bot"
+          git config user.email "ci-log-bot@users.noreply.github.com"
+          git add build-errors.txt
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { Write-Host "nothing new"; exit 0 }
+          git commit -m "CI: failure log [skip ci]"
+          git pull --rebase origin main
+          git push
