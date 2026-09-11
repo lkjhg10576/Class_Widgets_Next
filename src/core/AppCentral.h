@@ -47,8 +47,9 @@ public:
     void initialize();
 
     // 对应 central.py setup_qml_context：为每个引擎注册全部上下文属性，
-    // 属性名与 Python 版逐字一致（137 个 QML 零改动的底线）
-    void setupQmlContext(QQmlEngine *engine) const;
+    // 属性名与 Python 版逐字一致（137 个 QML 零改动的底线）。
+    // 非 const：setContextProperty 需要 QObject*，const 方法里 this 无法转换
+    void setupQmlContext(QQmlEngine *engine);
 
     // C++ 侧访问器
     WidgetsWindow *widgetsWindow() const { return m_widgetsWindow; }

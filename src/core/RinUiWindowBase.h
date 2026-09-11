@@ -7,6 +7,8 @@
 #include <QQmlApplicationEngine>
 #include <QUrl>
 
+class QWindow;
+
 class AppCentral;
 
 // 对应 pip 包 RinUI 的 RinUIWindow —— 风险 C 的落点（T9）。

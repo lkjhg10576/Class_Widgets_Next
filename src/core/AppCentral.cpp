@@ -73,7 +73,7 @@ void AppCentral::registerBuiltinWidgets()
     cwn::Log::info(QStringLiteral("Registered %1 builtin widgets").arg(definitions.size()));
 }
 
-void AppCentral::setupQmlContext(QQmlEngine *engine) const
+void AppCentral::setupQmlContext(QQmlEngine *engine)
 {
     // 名字逐字对齐 central.py:401-418
     QQmlContext *context = engine->rootContext();
