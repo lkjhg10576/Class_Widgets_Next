@@ -28,7 +28,21 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build --config Release --parallel
+        shell: pwsh
+        run: |
+          cmake --build build --config Release --parallel 2>&1 | Tee-Object -FilePath build-output.log
+          exit $LASTEXITCODE
+
+      - name: Dump compile errors to summary (on failure)
+        if: failure()
+        shell: pwsh
+        run: |
+          $fence = [string][char]96 + [char]96 + [char]96
+          Add-Content $env:GITHUB_STEP_SUMMARY "### Build errors"
+          Add-Content $env:GITHUB_STEP_SUMMARY $fence
+          Select-String -Path build-output.log -Pattern 'error C\d|fatal error|error LNK|Error( s)? occurred|ninja: build stopped' |
+            Select-Object -First 80 | ForEach-Object { Add-Content $env:GITHUB_STEP_SUMMARY $_.Line }
+          Add-Content $env:GITHUB_STEP_SUMMARY $fence
 
       - name: Install to dist
         # 安装 exe + app/ 运行时资源（src/qml、assets、RinUI、themes、configs）

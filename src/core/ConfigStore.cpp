@@ -324,16 +324,17 @@ void ConfigStore::setInternal(const QString &dottedKey, const QJsonValue &value)
     emit dataChanged();
 }
 
-void ConfigStore::set(const QString &key, const QVariant &value)
+void ConfigStore::set(const QString &key, const QVariant &newValue)
 {
     if (isKeyLocked(key)) {
         cwn::Log::warn(QStringLiteral("Attempt to modify locked config key: %1. Blocked.").arg(key));
         return;
     }
 
-    const QJsonValue jsonValue = QJsonValue::fromVariant(value);
+    const QJsonValue jsonValue = QJsonValue::fromVariant(newValue);
     // 值未变化时不发信号（对应 manager.py set 的相等短路）
-    if (std::optional<QJsonValue> current = value(key); current.has_value()) {
+    // （参数名不能叫 value，否则会遮蔽成员函数 value(key)）
+    if (std::optional<QJsonValue> current = this->value(key); current.has_value()) {
         if (*current == jsonValue)
             return;
     }
