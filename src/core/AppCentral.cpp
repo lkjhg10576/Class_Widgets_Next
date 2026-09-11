@@ -10,6 +10,7 @@
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
 
+#include <QCoreApplication>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QWindow>

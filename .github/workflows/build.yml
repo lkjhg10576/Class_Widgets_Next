@@ -9,6 +9,9 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    # 失败时需把 build-errors.txt 提交回仓库供公开读取（新仓库默认 token 只读）
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4

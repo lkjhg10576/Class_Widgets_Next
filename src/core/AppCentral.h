@@ -15,6 +15,7 @@ class WidgetBackend;
 class TranslatorStub;
 class NotificationStub;
 class ScheduleRuntimeStub;
+class ScheduleEditorStub;
 class ScheduleManagerStub;
 class WindowManagerStub;
 class ClassSwapManagerStub;
