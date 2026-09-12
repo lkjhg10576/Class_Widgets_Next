@@ -1,0 +1,70 @@
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  1>Checking Build System
+  Running qmlimportscanner for ClassWidgetsNext
+  Building Custom Rule D:/a/Class_Widgets_Next/Class_Widgets_Next/CMakeLists.txt
+  1>Automatic MOC and UIC for target ClassWidgetsNext
+  Building Custom Rule D:/a/Class_Widgets_Next/Class_Widgets_Next/CMakeLists.txt
+  main.cpp
+  AppPaths.cpp
+  Logger.cpp
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\Logger.cpp(53,16): warning C4834: discarding return value of function with [[nodiscard]] attribute [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\Logger.cpp(65,24): warning C4834: discarding return value of function with [[nodiscard]] attribute [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+  ConfigStore.cpp
+  WidgetsModel.cpp
+  BuiltinWidgets.cpp
+  CWThemeManager.cpp
+  SupportStubs.cpp
+  AppCentral.cpp
+  RinUiWindowBase.cpp
+  WidgetsWindow.cpp
+  TrayIcon.cpp
+  SingleInstanceGuard.cpp
+  UnionTimer.cpp
+  ScheduleModel.cpp
+  ScheduleParser.cpp
+  ScheduleManager.cpp
+  ScheduleIO.cpp
+  ScheduleRuntime.cpp
+  ScheduleEditor.cpp
+  Generating Code...
+  Compiling...
+  ClassSwapManager.cpp
+  ScheduleConverter.cpp
+  ConvertorBridge.cpp
+  ThemeLoader.cpp
+  ThemeUrlInterceptor.cpp
+  ThemeImporter.cpp
+  ThemeRecovery.cpp
+  ThemeLoadErrorDialog.cpp
+  AppWindowManager.cpp
+  NotificationProvider.cpp
+  NotificationService.cpp
+  LogListModel.cpp
+  AutoStartup.cpp
+  Calculator.cpp
+  Translator.cpp
+  UtilsBackend.cpp
+  UpdaterBridge.cpp
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\updater\UpdaterBridge.cpp(94,5): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\updater\UpdaterBridge.cpp(105,13): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\updater\UpdaterBridge.cpp(108,13): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+  UpdateDownloader.cpp
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\updater\UpdateDownloader.cpp(82,9): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\updater\UpdateDownloader.cpp(99,5): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\updater\UpdateDownloader.cpp(129,13): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+  AutomationManager.cpp
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\AutomationManager.cpp(64,9): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\AutomationManager.cpp(72,5): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\AutomationManager.cpp(82,9): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\AutomationManager.cpp(107,13): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\AutomationManager.cpp(110,13): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+  BuiltinTasks.cpp
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\BuiltinTasks.cpp(152,9): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+  Generating Code...
+  Compiling...
+  UpdateCheckTask.cpp
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\UpdateCheckTask.cpp(65,5): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+D:\a\Class_Widgets_Next\Class_Widgets_Next\src\core\automations\UpdateCheckTask.cpp(79,9): error C2653: 'Log': is not a class or namespace name [D:\a\Class_Widgets_Next\Class_Widgets_Next\build\ClassWidgetsNext.vcxproj]
+  mocs_compilation_Release.cpp
+  Generating Code...
