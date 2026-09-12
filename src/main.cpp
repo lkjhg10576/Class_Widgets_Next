@@ -78,8 +78,9 @@ int main(int argc, char *argv[])
     WidgetsWindow widgetsWindow(&central);
     central.setWidgetsWindow(&widgetsWindow);
 
-    // 托盘（T11）
+    // 托盘（T11 + M4 托盘菜单补全）
     TrayIcon trayIcon(&central);
+    central.setTrayIcon(&trayIcon); // 托盘菜单/系统通知的全部信号接线在 AppCentral 内完成
     if (trayIcon.isValid()) {
         QObject::connect(&trayIcon, &TrayIcon::togglePanel,
                          &central, &AppCentral::onTrayTogglePanel);

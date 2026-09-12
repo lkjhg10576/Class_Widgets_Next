@@ -131,7 +131,11 @@ ApplicationWindow {
         Qt.resolvedUrl("../pages/tutorial/Appearance.qml"),
         Qt.resolvedUrl("../pages/tutorial/Interactions.qml"),
         Qt.resolvedUrl("../pages/tutorial/Preferences.qml"),
-        Qt.resolvedUrl("../pages/tutorial/Plugins.qml"),
+        // [CWN-M3 §0.5.8] 插件页遮蔽：插件推荐/安装页依赖 TutorialRecommendationsBridge
+        // （Phase 2 恢复，记录于 QML_MODIFICATIONS.md）。移除后 Preferences（步骤 5）
+        // 直达 Complete；各 setup 页的 currentStep/totalSteps 为页内硬编码（1..6），
+        // 不受本数组长度影响。
+        // Qt.resolvedUrl("../pages/tutorial/Plugins.qml"),
         Qt.resolvedUrl("../pages/tutorial/Complete.qml")
     ]
 

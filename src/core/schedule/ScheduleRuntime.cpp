@@ -184,7 +184,7 @@ QJsonObject getDayEntries(const QJsonObject &schedule, const QDateTime &now,
     // 当前是第几周（可为负；service.py:180-187 _get_week_index）
     const QString startStr = startDate(schedule);
     const int rawWeekIndex = startStr.isEmpty() ? 1 : weekNumber(startStr, date);
-    const int maxWeekCycle = maxWeekCycle(schedule);
+    const int maxWeekCycleValue = ScheduleModel::maxWeekCycle(schedule);
 
     // 调休处理：优先使用调休映射表（service.py:29-34）
     int weekday = date.dayOfWeek();
@@ -193,7 +193,7 @@ QJsonObject getDayEntries(const QJsonObject &schedule, const QDateTime &now,
         weekday = rescheduled.toInt(weekday);
     }
 
-    int currentWeek = cycleWeek(rawWeekIndex, maxWeekCycle); // service.py:36-37
+    int currentWeek = cycleWeek(rawWeekIndex, maxWeekCycleValue); // service.py:36-37
 
     // 临时换课（service.py:40-47）
     if (classSwap.value(QLatin1String("date")).toString() == dateStr) {
@@ -202,7 +202,7 @@ QJsonObject getDayEntries(const QJsonObject &schedule, const QDateTime &now,
         if (swapWeekday.isDouble() && swapWeekday.toInt() >= 1 && swapWeekday.toInt() <= 7) {
             weekday = swapWeekday.toInt();
         }
-        if (swapWeek.isDouble() && swapWeek.toInt() >= 1 && swapWeek.toInt() <= maxWeekCycle) {
+        if (swapWeek.isDouble() && swapWeek.toInt() >= 1 && swapWeek.toInt() <= maxWeekCycleValue) {
             currentWeek = swapWeek.toInt();
         }
     }
@@ -214,7 +214,7 @@ QJsonObject getDayEntries(const QJsonObject &schedule, const QDateTime &now,
             const QStringList dowList = dayOfWeekList(day.value(QLatin1String("dayOfWeek")));
             if (!dowList.isEmpty()
                 && dowList.contains(QString::number(weekday))
-                && isInWeek(day.value(QLatin1String("weeks")), currentWeek, maxWeekCycle)) {
+                && isInWeek(day.value(QLatin1String("weeks")), currentWeek, maxWeekCycleValue)) {
                 matchedDay = day;
                 break;
             }
@@ -238,7 +238,7 @@ QJsonObject getDayEntries(const QJsonObject &schedule, const QDateTime &now,
             if (overrideEntryId(override_) != entryId(entry)) {
                 continue;
             }
-            if (!overrideApplies(override_, weekday, currentWeek, maxWeekCycle)) {
+            if (!overrideApplies(override_, weekday, currentWeek, maxWeekCycleValue)) {
                 continue;
             }
             const QString overrideSubject = override_.value(QLatin1String("subjectId")).toString();

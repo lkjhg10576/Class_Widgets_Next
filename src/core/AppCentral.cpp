@@ -9,13 +9,22 @@
 #include "TrayIcon.h"
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
+#include "notification/NotificationService.h"
 #include "schedule/ClassSwapManager.h"
 #include "schedule/ScheduleEditor.h"
 #include "schedule/ScheduleManager.h"
 #include "schedule/ScheduleRuntime.h"
 #include "schedule/UnionTimer.h"
+#include "themes/ThemeLoadErrorDialog.h"
+#include "themes/ThemeRecovery.h"
+#include "updater/UpdaterBridge.h"
+#include "utils/Translator.h"
+#include "utils/UtilsBackend.h"
+#include "windows/AppWindowManager.h"
+#include "automations/AutomationManager.h"
 
 #include <QCoreApplication>
+#include <QProcess>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QWindow>
@@ -35,11 +44,13 @@ void AppCentral::initialize()
     m_widgetsModel = new WidgetsModel(this);
     m_widgetsModel->setConfigStore(m_configs);
 
-    // 对应 _initialize_utils（stub 部分，M3-M4 逐个替换）
-    m_translator = new TranslatorStub(m_configs, this);
-    m_notification = new NotificationStub(this);
-    m_windowManager = new WindowManagerStub(this);
-    m_utilsBackend = new UtilsBackendStub(this);
+    // 对应 _initialize_utils（M3/M4 真实实现已就位）
+    m_translator = new Translator(m_configs, this);
+    m_notification = new NotificationService(m_configs, this);
+    m_windowManager = new AppWindowManager(this, this);
+    m_utilsBackend = new cwn::utils::UtilsBackend(m_configs, this);
+    m_utilsBackend->setNotificationService(m_notification);
+    m_utilsBackend->setWindowManager(m_windowManager);
     m_pluginManager = new PluginManagerStub(this);
 
     // 内置小组件注册表（替代 cw_widgets 插件，对应 _load_theme_and_plugins 的插件加载）
@@ -48,6 +59,11 @@ void AppCentral::initialize()
     // 加载配置与主题（对应 run() 里的 _load_config 与 _load_theme_and_plugins 的主题部分）
     m_configs->load();
     m_configs->startAutoSave();
+    m_themeManager->setConfigStore(m_configs); // 启用配置锁检查/回写
+
+    // M3 主题恢复链（对应 theme_recovery.py 与 windows.py 的 ThemeLoadErrorDialog）
+    m_themeRecovery = new ThemeRecovery(m_themeManager, this);
+    m_themeLoadErrorDialog = new ThemeLoadErrorDialog(this);
 
     // M2 课程表域（对应 central.py _load_schedule / _load_class_swap / _load_runtime）。
     // 放在 configs->load() 之后：各对象构造/初始化会读取配置键。
@@ -66,14 +82,118 @@ void AppCentral::initialize()
     m_scheduleRuntime->refreshWith(m_scheduleManager->schedule());
     UnionTimer::instance().start(); // 对应 central.py:461 统一秒级刷新
 
+    // M4 更新器与自动化（对应 central.py:464-467 _run_utils 的 updater/automation 部分）
+    m_updaterBridge = new UpdaterBridge(m_configs, this);
+    m_automationManager = new AutomationManager(m_configs, this);
+    m_automationManager->setUpdaterBridge(m_updaterBridge);
+    m_automationManager->initBuiltinTasks();
+    // AutoHideTask 构造时读初值（上游直接读 runtime.current_status），先推送当前状态
+    m_automationManager->onScheduleStatusChanged(m_scheduleRuntime->currentStatus());
+    m_updaterBridge->maybeNotifyUpdateComplete(); // 对应 central.py:467-470
+
     const QVariantMap preferences =
         m_configs->data().toMap().value(QStringLiteral("preferences")).toMap();
     m_themeManager->load();
     m_themeManager->applyConfiguredTheme(
         preferences.value(QStringLiteral("current_theme")).toString());
 
+    connectServices();
+
+    // 退出前的窗口资源释放（对应 central.py:318 清理步骤）
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this] {
+        if (m_windowManager)
+            m_windowManager->releaseAll();
+    });
+
     emit initialized();
     cwn::Log::info(QStringLiteral("AppCentral initialization completed"));
+}
+
+void AppCentral::connectServices()
+{
+    // ---- 通知 ↔ 课程表运行时（对应 runtime.py 的通知分发接线）----
+    m_notification->setScheduleRuntimeSource(m_scheduleRuntime);
+    connect(m_scheduleRuntime, &ScheduleRuntime::currentsChanged, m_notification,
+            qOverload<const QString &>(&NotificationService::dispatchStatusChange));
+    connect(m_scheduleRuntime, &ScheduleRuntime::updated, m_notification,
+            &NotificationService::checkPreparationBell);
+
+    // ---- 自动化任务驱动（对应 central.py:457 union_update_timer.tick → automation_manager.update）----
+    connect(&UnionTimer::instance(), &UnionTimer::tick,
+            m_automationManager, &AutomationManager::update);
+    connect(m_scheduleRuntime, &ScheduleRuntime::currentsChanged,
+            m_automationManager, &AutomationManager::onScheduleStatusChanged);
+
+    // ---- 更新器 ----
+    connect(m_updaterBridge, &UpdaterBridge::restartRequested,
+            this, &AppCentral::restart);
+
+    // ---- 主题恢复（对应 windows.py ThemeLoadErrorDialog 的请求链）----
+    connect(m_themeRecovery, &ThemeRecovery::errorDialogRequested,
+            m_themeLoadErrorDialog, &ThemeLoadErrorDialog::setErrorDetails);
+    connect(m_themeLoadErrorDialog, &ThemeLoadErrorDialog::showRequested, this, [this] {
+        if (m_windowManager) {
+            m_windowManager->openThemeLoadError(m_themeLoadErrorDialog->failedThemeId(),
+                                                m_themeLoadErrorDialog->recovered());
+        }
+    });
+
+    // ---- 托盘快捷方式转发（对应 central.py:175-177）----
+    connect(m_utilsBackend, &cwn::utils::UtilsBackend::trayShortcutRequested,
+            this, &AppCentral::trayShortcutRequested);
+
+    // ---- 翻译链（translator.py languageChanged → 全局 retranslate）----
+    connect(m_translator, &Translator::languageChanged, this, &AppCentral::retranslate);
+    connect(this, &AppCentral::retranslate,
+            m_utilsBackend, &cwn::utils::UtilsBackend::retranslate);
+    connect(this, &AppCentral::retranslate,
+            m_notification, &NotificationService::retranslateProviders);
+}
+
+void AppCentral::setWidgetsWindow(WidgetsWindow *window)
+{
+    m_widgetsWindow = window;
+    if (window && m_themeRecovery) {
+        // 主窗口主题加载失败 → 恢复流程（theme_recovery.py）
+        connect(window, &WidgetsWindow::themeLoadFailed,
+                m_themeRecovery, &ThemeRecovery::handleFailure);
+    }
+}
+
+void AppCentral::setTrayIcon(TrayIcon *icon)
+{
+    m_trayIcon = icon;
+    if (!icon || !m_windowManager)
+        return;
+
+    // 托盘菜单 → 窗口管理（tray.py 菜单语义）
+    connect(icon, &TrayIcon::openSettingsRequested,
+            m_windowManager, &AppWindowManager::openSettings);
+    connect(icon, &TrayIcon::openEditorRequested,
+            m_windowManager, &AppWindowManager::openEditor);
+    connect(icon, &TrayIcon::openClassSwapRequested,
+            m_windowManager, &AppWindowManager::openClassSwap);
+    connect(icon, &TrayIcon::openTutorialRequested,
+            m_windowManager, &AppWindowManager::openTutorial);
+    // 关于页是设置窗口的一页；托盘"关于"按上游语义打开设置（M3 简化，无页内跳转）
+    connect(icon, &TrayIcon::openAboutRequested,
+            m_windowManager, &AppWindowManager::openSettings);
+    // 迷你模式切换（tray.py toggle_mini_mode：写 preferences.mini_mode）
+    connect(icon, &TrayIcon::miniModeRequested, this, [this] {
+        bool current = false;
+        if (const auto v = m_configs->value(QStringLiteral("preferences.mini_mode")))
+            current = v->toBool();
+        m_configs->set(QStringLiteral("preferences.mini_mode"), !current);
+    });
+    connect(this, &AppCentral::retranslate, icon, &TrayIcon::retranslate);
+
+    // 系统级通知出口 → 托盘气泡（tray.py:57-59 showMessage）
+    connect(m_notification, &NotificationService::systemNotificationRequested,
+            icon, &TrayIcon::showEditNotification);
+    connect(m_updaterBridge, &UpdaterBridge::notificationRequested,
+            icon, &TrayIcon::showEditNotification);
+    connect(m_automationManager, &AutomationManager::taskNotification,
+            icon, &TrayIcon::showEditNotification);
 }
 
 void AppCentral::registerBuiltinWidgets()
@@ -104,6 +224,12 @@ void AppCentral::setupQmlContext(QQmlEngine *engine)
     context->setContextProperty(QStringLiteral("PathManager"), &AppPaths::instance());
     context->setContextProperty(QStringLiteral("ClassSwapManager"), m_classSwapManager);
     context->setContextProperty(QStringLiteral("UtilsBackend"), m_utilsBackend);
+    context->setContextProperty(QStringLiteral("UpdaterBridge"), m_updaterBridge);
+    context->setContextProperty(QStringLiteral("ThemeLoadErrorDialog"),
+                                m_themeLoadErrorDialog);
+    // 主题 URL 拦截器（对应 core.py:34 window.engine 挂拦截器）；
+    // 顺序敏感：import path 在 RinUiWindowBase 里已按 src/qml 优先设置
+    engine->addUrlInterceptor(m_themeManager->urlInterceptor());
 }
 
 QVariant AppCentral::globalConfig() const
@@ -125,12 +251,25 @@ void AppCentral::quit()
     QCoreApplication::quit();
 }
 
-void AppCentral::restart()
+void AppCentral::restart(const QString &reason)
 {
-    // central.py restart 用 QProcess.startDetached 重启自身；
-    // M1 先退出去，M5 与安装包/更新器串联时落地。
-    cwn::Log::warn(QStringLiteral("AppCentral.restart: full restart lands in M5, quitting now"));
+    // central.py restart 用 QProcess.startDetached 重启自身（可带 --update-done 等原因）；
+    // M4 先落地"延迟 2 秒自启 + 退出"，与更新器安装脚本的时序兼容，M5 再串联安装包。
+    cwn::Log::info(QStringLiteral("AppCentral.restart requested (reason=%1)")
+                       .arg(reason.isEmpty() ? QStringLiteral("user") : reason));
+    const QString appPath = QCoreApplication::applicationFilePath();
+    const QStringList args = reason.isEmpty()
+        ? QStringList{}
+        : QStringList{ reason };
+    QProcess::startDetached(appPath, args, QCoreApplication::applicationDirPath());
     QCoreApplication::quit();
+}
+
+void AppCentral::init()
+{
+    // 对应 central.py init()（启动编排）；本移植的启动编排已前移到 initialize()。
+    // CheckSingleInstanceDialog.qml 的"继续"按钮调用本方法以保持 QML 契约。
+    cwn::Log::info(QStringLiteral("AppCentral.init() called from QML (no-op in C++ port)"));
 }
 
 void AppCentral::markRestartRequired()
@@ -143,8 +282,11 @@ void AppCentral::markRestartRequired()
 
 void AppCentral::reportThemeLoadFailure(const QString &source)
 {
-    // WidgetLoader.qml:35 的错误入口；上游经 ThemeRecoveryController 弹恢复窗（M3）。
+    // WidgetLoader.qml:35 的错误入口；交由 ThemeRecovery 处理（theme_recovery.py），
+    // 需要弹窗时经 errorDialogRequested → ThemeLoadErrorDialog → 窗口层。
     cwn::Log::error(QStringLiteral("Theme component failed to load: %1").arg(source));
+    if (m_themeRecovery)
+        m_themeRecovery->reportComponentFailure(source);
 }
 
 void AppCentral::openDebugger()

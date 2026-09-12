@@ -6,20 +6,24 @@
 #include <QVariant>
 
 class AppPaths;
+class AppWindowManager;
+class AutomationManager;
+class ClassSwapManager;
 class ConfigStore;
 class CWThemeManager;
+class ScheduleEditor;
+class ScheduleManager;
+class ScheduleRuntime;
+class ThemeLoadErrorDialog;
+class ThemeRecovery;
+class Translator;
+class NotificationService;
+class UpdaterBridge;
 class WidgetsModel;
 class WidgetsWindow;
 class TrayIcon;
 class WidgetBackend;
-class TranslatorStub;
-class NotificationStub;
-class ScheduleRuntime;
-class ScheduleEditor;
-class ScheduleManager;
-class ClassSwapManager;
-class WindowManagerStub;
-class UtilsBackendStub;
+namespace cwn { namespace utils { class UtilsBackend; } }
 class PluginManagerStub;
 class QQmlEngine;
 
@@ -53,7 +57,10 @@ public:
 
     // C++ 侧访问器
     WidgetsWindow *widgetsWindow() const { return m_widgetsWindow; }
-    void setWidgetsWindow(WidgetsWindow *window) { m_widgetsWindow = window; }
+    void setWidgetsWindow(WidgetsWindow *window);
+    // main.cpp 创建托盘后注入；内部完成通知/托盘菜单的全部信号接线
+    void setTrayIcon(TrayIcon *icon);
+    AppWindowManager *windowManager() const { return m_windowManager; }
 
     // --- QML 契约 ---
     // ⚠️ 返回 QObject* 的访问器必须在 AppCentral.cpp 中定义（类内只能前向声明
@@ -69,8 +76,12 @@ public:
     QVariant globalConfig() const;
 
     Q_INVOKABLE void quit();
-    Q_INVOKABLE void restart();
+    // Tutorial.qml 调 restart("--update-done")：带可选原因的重启（更新完成后走同一路径）
+    Q_INVOKABLE void restart(const QString &reason = QString());
     Q_INVOKABLE void markRestartRequired();
+    // CheckSingleInstanceDialog.qml 调 AppCentral.init()：单实例对话框的"继续"按钮入口
+    // （上游 central.py init() 做启动编排；本移植启动编排已前移到 initialize()，此处兜底）
+    Q_INVOKABLE void init();
     Q_INVOKABLE void reportThemeLoadFailure(const QString &source);
     Q_INVOKABLE void openDebugger();
     Q_INVOKABLE void toggleWidgetsEditMode();
@@ -98,24 +109,30 @@ signals:
 
 private:
     void registerBuiltinWidgets();
+    // M2-M4 各域对象间的信号接线（initialize() 末尾统一执行）
+    void connectServices();
 
     ConfigStore *m_configs = nullptr;
     CWThemeManager *m_themeManager = nullptr;
+    ThemeRecovery *m_themeRecovery = nullptr;
+    ThemeLoadErrorDialog *m_themeLoadErrorDialog = nullptr;
     WidgetsModel *m_widgetsModel = nullptr;
     WidgetsWindow *m_widgetsWindow = nullptr;
     TrayIcon *m_trayIcon = nullptr;
     WidgetBackend *m_widgetBackend = nullptr;
 
-    // M1 占位（SupportStubs.h）；课程表域四个对象已在 M2 换为真实实现（schedule/）
-    TranslatorStub *m_translator = nullptr;
-    NotificationStub *m_notification = nullptr;
+    // M1 占位已全部替换（M2-M4）：SupportStubs 仅剩 PluginManagerStub
+    Translator *m_translator = nullptr;
+    NotificationService *m_notification = nullptr;
     ScheduleRuntime *m_scheduleRuntime = nullptr;
     ScheduleEditor *m_scheduleEditor = nullptr;
     ScheduleManager *m_scheduleManager = nullptr;
+    AppWindowManager *m_windowManager = nullptr;
     ClassSwapManager *m_classSwapManager = nullptr;
-    WindowManagerStub *m_windowManager = nullptr;
-    UtilsBackendStub *m_utilsBackend = nullptr;
+    cwn::utils::UtilsBackend *m_utilsBackend = nullptr;
     PluginManagerStub *m_pluginManager = nullptr;
+    UpdaterBridge *m_updaterBridge = nullptr;
+    AutomationManager *m_automationManager = nullptr;
 
     bool m_restartRequired = false;
 };

@@ -73,13 +73,14 @@ FluentWindow {
                 }
             ]
         },
-        {
-            title: qsTr("Plugins"),
-            page: PathManager.qml("pages/settings/Plugins.qml"),
-            icon: "ic_fluent_apps_add_in_20_regular",
-            expanded: true,
-            subItems: UtilsBackend && UtilsBackend.extraSettings && UtilsBackend.extraSettings.length > 0 ? UtilsBackend.extraSettings : null
-        },
+        // [CWN-M3 §0.5.8] 插件入口遮蔽：插件系统 Phase 2 恢复（记录于 QML_MODIFICATIONS.md）
+        // {
+        //     title: qsTr("Plugins"),
+        //     page: PathManager.qml("pages/settings/Plugins.qml"),
+        //     icon: "ic_fluent_apps_add_in_20_regular",
+        //     expanded: true,
+        //     subItems: UtilsBackend && UtilsBackend.extraSettings && UtilsBackend.extraSettings.length > 0 ? UtilsBackend.extraSettings : null
+        // },
         {
             title: qsTr("About"),
             page: PathManager.qml("pages/settings/About.qml"),

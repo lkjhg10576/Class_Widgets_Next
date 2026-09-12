@@ -436,7 +436,7 @@ QVariantMap ClassSwapManager::effectiveSubject(const QString &entryId, int dayOf
     for (const QJsonValue &v : dayList) {
         const QJsonArray entries = v.toObject().value(QLatin1String("entries")).toArray();
         for (const QJsonValue &ev : entries) {
-            if (entryId(ev.toObject()) == entryId) {
+            if (ScheduleModel::entryId(ev.toObject()) == entryId) {
                 entry = ev.toObject();
                 break;
             }

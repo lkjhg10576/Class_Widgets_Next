@@ -142,7 +142,8 @@ FluentPage {
                 Repeater {
                     model: [
                         { icon: "ic_fluent_alert_20_regular", title: qsTr("Notifications"), page: "notificationAndTime/Notification.qml" },
-                        { icon: "ic_fluent_apps_add_in_20_regular", title: qsTr("Plugins"), page: "Plugins.qml" },
+                        // [CWN-M3 §0.5.8] 插件入口遮蔽：Phase 2 恢复（记录于 QML_MODIFICATIONS.md）
+                        // { icon: "ic_fluent_apps_add_in_20_regular", title: qsTr("Plugins"), page: "Plugins.qml" },
                         { icon: "ic_fluent_resize_20_regular", title: qsTr("Widgets"), page: "General/Widgets.qml" }
                     ]
 

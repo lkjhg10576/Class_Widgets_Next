@@ -34,8 +34,10 @@ QtObject {
             "description": qsTr("A comprehensive plugin system architecture that supports third-party library imports, web-based plugin plaza, PluginAPI and UIAPI. Added edit mode detection properties to make plugin development more convenient."),
             "image": PathManager.images("whatsnew/plugin.png"),
             "icon": "ic_fluent_apps_add_in_20_regular",
-            "actionButtonText": qsTr("Visit Extension Plaza"),
-            "actionButtonAction": "openPluginPlaza"
+            // [CWN-M3 §0.5.8] 插件广场入口遮蔽：openPlaza 本阶段 no-op，隐藏死按钮
+            // （Phase 2 恢复，记录于 QML_MODIFICATIONS.md）
+            // "actionButtonText": qsTr("Visit Extension Plaza"),
+            // "actionButtonAction": "openPluginPlaza"
         },
         {
             "title": qsTr("Extended Multi-language Support"),

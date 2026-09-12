@@ -39,6 +39,29 @@ set(CWN_SOURCES
     src/core/schedule/ScheduleRuntime.cpp
     src/core/schedule/ScheduleEditor.cpp
     src/core/schedule/ClassSwapManager.cpp
+    # M3 主题系统
+    src/core/themes/ThemeLoader.cpp
+    src/core/themes/ThemeUrlInterceptor.cpp
+    src/core/themes/ThemeImporter.cpp
+    src/core/themes/ThemeRecovery.cpp
+    src/core/themes/ThemeLoadErrorDialog.cpp
+    # M3 窗口管理
+    src/core/windows/AppWindowManager.cpp
+    # M4 通知
+    src/core/notification/NotificationProvider.cpp
+    src/core/notification/NotificationService.cpp
+    # M4 工具层
+    src/core/utils/LogListModel.cpp
+    src/core/utils/AutoStartup.cpp
+    src/core/utils/Calculator.cpp
+    src/core/utils/Translator.cpp
+    src/core/utils/UtilsBackend.cpp
+    # M4 更新器与自动化
+    src/core/updater/UpdaterBridge.cpp
+    src/core/updater/UpdateDownloader.cpp
+    src/core/automations/AutomationManager.cpp
+    src/core/automations/BuiltinTasks.cpp
+    src/core/automations/UpdateCheckTask.cpp
 )
 
 qt_add_executable(ClassWidgetsNext WIN32 ${CWN_SOURCES})
@@ -60,6 +83,7 @@ target_link_libraries(ClassWidgetsNext PRIVATE
 
 if(WIN32)
     target_link_libraries(ClassWidgetsNext PRIVATE shell32)  # AppUserModelID
+    target_link_libraries(ClassWidgetsNext PRIVATE winmm)    # 通知音效 PlaySoundW/waveOutSetVolume
 endif()
 
 # 运行时资源整体安装：app/ 即运行时根（对应上游 ROOT_PATH）。
