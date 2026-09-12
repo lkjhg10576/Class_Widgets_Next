@@ -1187,7 +1187,7 @@ QString scalarText(const QJsonValue &value)
                 default:
                     if (c.unicode() < 0x20)
                         escaped.append(QStringLiteral("\\u%1")
-                                           .arg(c.unicode(), 4, 16, QLatin1Char('0')));
+                                           .arg(static_cast<int>(c.unicode()), 4, 16, QLatin1Char('0')));
                     else
                         escaped.append(c);
                 }
@@ -1696,7 +1696,7 @@ bool cw2ToCses(const QJsonObject &schedule, QJsonObject *outCses, QString *error
         }
 
         QString dayWeeksStr;
-        if (!weeksToCsesKey(day.value(QStringLiteral("weeks")), &dayWeeksStr, error))
+        if (!weeksToCsesKey(day.value(QStringLiteral("weeks")), &dayWeeksStr))
             return false; // converter.py:479
 
         for (const int dow : dayDows) {

@@ -147,7 +147,8 @@ void NotificationService::registerProvider(NotificationProvider *provider)
 
 void NotificationService::unregisterProvider(const QString &providerId)
 {
-    if (m_providers.remove(providerId) > 0) {
+    const qsizetype removedCount = m_providers.remove(providerId);
+    if (removedCount > 0) {
         // manager.py:39-43
         m_providerOrder.removeAll(providerId);
         cwn::Log::debug(QStringLiteral("Unregistered notification provider: %1").arg(providerId));
