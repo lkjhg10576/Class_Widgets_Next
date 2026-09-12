@@ -78,7 +78,14 @@ QVariantMap loadExternalMeta(const QFileInfo &themeDir)
     return meta;
 }
 
-} // namespace
+// namespace
+
+// 头文件声明了带默认参的构造函数，但主体缺失导致 LNK2019；此处补上
+// （无状态类：所有成员均有类内初始化，构造仅挂 parent）
+ThemeLoader::ThemeLoader(QObject *parent)
+    : QObject(parent)
+{
+}
 
 bool ThemeLoader::isApiCompatible(const QString &themeApiVersion)
 {
