@@ -83,6 +83,8 @@ set(CWN_SOURCES
     src/core/automations/AutomationManager.cpp
     src/core/automations/BuiltinTasks.cpp
     src/core/automations/UpdateCheckTask.cpp
+    # 天气小组件数据源（小米天气 wtr-v3）
+    src/core/weather/WeatherService.cpp
 )
 
 qt_add_executable(ClassWidgetsNext WIN32 ${CWN_SOURCES})

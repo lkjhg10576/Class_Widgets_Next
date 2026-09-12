@@ -22,6 +22,7 @@ class UpdaterBridge;
 class WidgetsModel;
 class WidgetsWindow;
 class TrayIcon;
+class WeatherService;
 class WidgetBackend;
 namespace cwn { namespace utils { class UtilsBackend; } }
 class PluginManagerStub;
@@ -37,6 +38,7 @@ class AppCentral : public QObject
     Q_PROPERTY(QObject *notification READ notification CONSTANT)
     Q_PROPERTY(QObject *scheduleEditor READ scheduleEditor NOTIFY initialized)
     Q_PROPERTY(QObject *classSwapManager READ classSwapManager NOTIFY initialized)
+    Q_PROPERTY(QObject *weather READ weather CONSTANT)
     Q_PROPERTY(QObject *scheduleManager READ scheduleManager NOTIFY updated)
     Q_PROPERTY(QObject *translator READ translator NOTIFY initialized)
     Q_PROPERTY(QObject *themeManager READ themeManager CONSTANT)
@@ -77,6 +79,7 @@ public:
     QObject *scheduleManager() const;
     QObject *translator() const;
     QObject *themeManager() const;
+    QObject *weather() const;
     bool restartRequired() const { return m_restartRequired; }
     QVariant globalConfig() const;
 
@@ -125,6 +128,7 @@ private:
     WidgetsWindow *m_widgetsWindow = nullptr;
     TrayIcon *m_trayIcon = nullptr;
     WidgetBackend *m_widgetBackend = nullptr;
+    WeatherService *m_weatherService = nullptr;
 
     // M1 占位已全部替换（M2-M4）：SupportStubs 仅剩 PluginManagerStub
     Translator *m_translator = nullptr;

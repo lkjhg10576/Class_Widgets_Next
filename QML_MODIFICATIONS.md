@@ -4,6 +4,7 @@
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
 ## 当前状态：`app/src/qml` 共 6 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写，见下）
+> 另有 2 个**新增文件**（非上游改动）：天气小组件及其设置页，见改动 5。
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
@@ -64,6 +65,18 @@ M3 窗口管理落地时，`WindowManager.openPlaza()` 实现为日志警告 + n
 （与 QTBUG-5426 同类的语言级限制）。C++ 侧 `ScheduleManager` 的入口本就是
 `exportSchedule` / `removeSchedule`（语义与上游 `export` / `delete` 完全一致）。
 同步上游时：若上游修改这两个调用点的**参数**，需手工映射到新方法名。
+
+### 5. 天气小组件（2 个新增文件，本移植新增内置组件）
+
+上游 CW2 无内置天气组件；本移植按用户要求以原生功能新增（数据源小米天气
+wtr-v3，实现移植自用户另一项目 NetSpeed-Dynamic 的 `src-tauri/src/weather.rs`，
+C++ 侧为 `src/core/weather/WeatherService.*`）。因是**新增文件**而非上游文件改动，
+上游同步不会冲突；若上游未来新增同名路径需在此复核。
+
+| # | 文件 | 性质 | 说明 |
+|---|---|---|---|
+| 5.1 | `widgets/weather.qml` | 新增 | 内置组件 `classwidgets.weather`；backend 为注入的 WeatherService（唯一非通用 backend 的内置组件） |
+| 5.2 | `widgets/settings/weather.qml` | 新增 | 城市搜索（350ms 防抖）+ 刷新间隔（全局键 `weather.poll_interval`，秒）+ 数据源标注 |
 
 ## 修改申请流程
 

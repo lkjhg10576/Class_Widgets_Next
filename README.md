@@ -10,8 +10,9 @@ C++ + Qt Quick，目标是把安装体积从 ~226 MB 压到 **40–50 MB**、常
 **≤140 MB**，同时 **100% 复用上游 21,650 行 QML**（零修改）。
 
 > 当前状态：**M1 骨架点亮** —— C++ 宿主加载未修改的 `MainInterface.qml`，
-> 6 个内置小组件经 C++ 注册表显示，托盘可退出。设置窗口/编辑器/主题切换在
-> M2–M3 陆续落地；**本版本暂不支持外部插件**（插件系统推迟到 Phase 2，见下）。
+> 7 个内置小组件（6 个上游对齐 + 天气）经 C++ 注册表显示，托盘可退出。
+> 设置窗口/编辑器/主题切换在 M2–M3 陆续落地；**本版本暂不支持外部插件**
+> （插件系统推迟到 Phase 2，见下）。
 
 ## 仓库布局
 
@@ -24,7 +25,8 @@ Class_Widgets_Next/
 │     ├─ AppPaths.*        # PathManager 等价物（纯 URI 拼接）
 │     ├─ ConfigStore.*     # Configs（configs.json 读写 + 点分 set/isKeyLocked）
 │     ├─ WidgetsModel.*    # WidgetListModel 移植（9 role + 9 slot 一字不改）
-│     ├─ BuiltinWidgets.*  # IWidgetProvider + 内置 6 个小组件注册表 + backend
+│     ├─ BuiltinWidgets.*  # IWidgetProvider + 内置 7 个小组件注册表 + backend
+│     ├─ weather/          # WeatherService：天气组件数据源（小米天气 wtr-v3）
 │     ├─ CWThemeManager.*  # 主题扫描/查询/切换信号面（M3 补拦截器）
 │     ├─ AppCentral.*      # 聚合门面 + QML 上下文注册（名字与上游逐字一致）
 │     ├─ RinUiWindowBase.* # pip RinUI 的 Python 层等价物（每窗口引擎 + release 语义）
@@ -78,8 +80,8 @@ CI：`.github/workflows/build.yml` 在 `windows-latest` 上完成 构建 → win
 - `WidgetsModel` 的 9 个 role 名（`instanceId/typeId/name/icon/qmlPath/backendObj/`
   `settings/settingsQml/widget_id`）与 9 个 slot 签名**一字不改** —— 这是将来插件
   系统把小组件注册回应用的唯一接口；
-- 小组件注册收敛在 `IWidgetProvider` 接口，当前只有内置实现（6 个小组件），
-  Phase 2 挂 QML/JS 或 Python Sidecar 实现时零重构；
+- 小组件注册收敛在 `IWidgetProvider` 接口，当前只有内置实现（6 个上游对齐组件
+  + 新增天气组件），Phase 2 挂 QML/JS 或 Python Sidecar 实现时零重构；
 - QML 上下文属性名（`Configs` / `AppCentral` / `CWThemeManager` / `WidgetsModel` /
   `PathManager` / `WindowManager` / ...）与上游逐字一致，137 个 QML 零改动；
 - `app/src/qml` 是上游同步区：**改动必须记录在 [QML_MODIFICATIONS.md](QML_MODIFICATIONS.md)**。

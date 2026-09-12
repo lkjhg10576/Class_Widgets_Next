@@ -1,6 +1,7 @@
 #include "BuiltinWidgets.h"
 
 #include "AppPaths.h"
+#include "weather/WeatherService.h"
 
 #include <QDate>
 #include <QTime>
@@ -88,6 +89,17 @@ QList<WidgetDefinition> BuiltinWidgetProvider::widgets() const
     customText.settingsQml = widgetUri(QStringLiteral("widgets/settings/Text.qml"));
     customText.defaultSettings = textDefaults;
 
+    // 天气（本移植新增内置组件，数据源小米天气 wtr-v3，上游 CW2 无对应注册项）；
+    // settings.city 为城市 JSON 字符串，契约见 WeatherService 类注释
+    WidgetDefinition weather;
+    weather.id = WeatherService::widgetTypeId();
+    weather.name = WidgetBackend::tr("Weather");
+    weather.qmlPath = widgetUri(QStringLiteral("widgets/weather.qml"));
+    weather.settingsQml = widgetUri(QStringLiteral("widgets/settings/weather.qml"));
+    QVariantMap weatherDefaults;
+    weatherDefaults.insert(QStringLiteral("city"), QString());
+    weather.defaultSettings = weatherDefaults;
+
     return { currentActivity, time, eventCountdown, upcomingActivities, dynamicNotification,
-             customText };
+             customText, weather };
 }

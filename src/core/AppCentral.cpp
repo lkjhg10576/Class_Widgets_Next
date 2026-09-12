@@ -20,6 +20,7 @@
 #include "updater/UpdaterBridge.h"
 #include "utils/Translator.h"
 #include "utils/UtilsBackend.h"
+#include "weather/WeatherService.h"
 #include "windows/AppWindowManager.h"
 #include "automations/AutomationManager.h"
 
@@ -53,12 +54,16 @@ void AppCentral::initialize(bool enableFirstRunGate)
     m_utilsBackend->setWindowManager(m_windowManager);
     m_pluginManager = new PluginManagerStub(this);
 
+    // 天气小组件数据源（须先于 registerBuiltinWidgets 就绪，以便为其定义挂专属 backend）
+    m_weatherService = new WeatherService(m_configs, this);
+
     // 内置小组件注册表（替代 cw_widgets 插件，对应 _load_theme_and_plugins 的插件加载）
     registerBuiltinWidgets();
 
     // 加载配置与主题（对应 run() 里的 _load_config 与 _load_theme_and_plugins 的主题部分）
     m_configs->load();
     m_configs->startAutoSave();
+    m_weatherService->start(); // 60s 轮询 tick；首拉由 QML 侧 request() 触发
     m_themeManager->setConfigStore(m_configs); // 启用配置锁检查/回写
 
     // M3 主题恢复链（对应 theme_recovery.py 与 windows.py 的 ThemeLoadErrorDialog）
@@ -220,7 +225,10 @@ void AppCentral::registerBuiltinWidgets()
 
     const QList<WidgetDefinition> definitions = s_provider.widgets();
     for (WidgetDefinition definition : definitions) {
-        definition.backendObj = m_widgetBackend;
+        // 天气组件挂专属数据源 backend（WeatherService），其余组件共用通用 WidgetBackend
+        definition.backendObj = (definition.id == WeatherService::widgetTypeId())
+                                    ? m_weatherService
+                                    : m_widgetBackend;
         m_widgetsModel->addWidget(definition);
         emit widgetRegistered(definition.id);
     }
@@ -258,6 +266,7 @@ QObject *AppCentral::scheduleRuntime() const { return m_scheduleRuntime; }
 QObject *AppCentral::notification() const { return m_notification; }
 QObject *AppCentral::scheduleEditor() const { return m_scheduleEditor; }
 QObject *AppCentral::classSwapManager() const { return m_classSwapManager; }
+QObject *AppCentral::weather() const { return m_weatherService; }
 QObject *AppCentral::scheduleManager() const { return m_scheduleManager; }
 QObject *AppCentral::translator() const { return m_translator; }
 QObject *AppCentral::themeManager() const { return m_themeManager; }
