@@ -26,7 +26,7 @@
 #include <windows.h>
 #endif
 
-using namespace cwn::Log;
+namespace Log = cwn::Log; // 命名空间别名：MSVC 拒绝 using cwn::Log;（C2873）
 
 namespace {
 
