@@ -7,7 +7,7 @@
 
 #include <utility>
 
-using cwn::Log;
+using namespace cwn::Log;
 
 AutomationTask::AutomationTask(AutomationContext context, QObject *parent)
     : QObject(parent)
@@ -31,7 +31,7 @@ void AutomationManager::setUpdaterBridge(UpdaterBridge *bridge)
     m_updaterBridge = bridge;
 }
 
-AutomationContext AutomationManager::context() const
+AutomationContext AutomationManager::context()
 {
     AutomationContext ctx;
     ctx.configs = m_configs;

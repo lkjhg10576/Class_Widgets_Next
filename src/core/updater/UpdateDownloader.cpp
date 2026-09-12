@@ -9,7 +9,7 @@
 #include <QNetworkRequest>
 #include <QStandardPaths>
 
-using cwn::Log;
+using namespace cwn::Log;
 
 namespace {
 

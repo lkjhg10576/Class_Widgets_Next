@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #include <utility>
 
-using cwn::Log;
+using namespace cwn::Log;
 
 namespace {
 

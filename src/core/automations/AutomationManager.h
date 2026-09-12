@@ -106,7 +106,7 @@ signals:
     void taskNotification(const QString &title, const QString &text);
 
 private:
-    AutomationContext context() const;
+    AutomationContext context();
 
     ConfigStore *m_configs = nullptr;
     UpdaterBridge *m_updaterBridge = nullptr;

@@ -16,7 +16,7 @@
 #include <windows.h>
 #endif
 
-using cwn::Log;
+using namespace cwn::Log;
 
 namespace {
 
