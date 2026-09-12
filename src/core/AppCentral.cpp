@@ -9,6 +9,11 @@
 #include "TrayIcon.h"
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
+#include "schedule/ClassSwapManager.h"
+#include "schedule/ScheduleEditor.h"
+#include "schedule/ScheduleManager.h"
+#include "schedule/ScheduleRuntime.h"
+#include "schedule/UnionTimer.h"
 
 #include <QCoreApplication>
 #include <QQmlContext>
@@ -30,14 +35,10 @@ void AppCentral::initialize()
     m_widgetsModel = new WidgetsModel(this);
     m_widgetsModel->setConfigStore(m_configs);
 
-    // 对应 _initialize_utils（stub 部分，M2-M4 逐个替换）
+    // 对应 _initialize_utils（stub 部分，M3-M4 逐个替换）
     m_translator = new TranslatorStub(m_configs, this);
     m_notification = new NotificationStub(this);
-    m_scheduleManager = new ScheduleManagerStub(m_configs, this);
-    m_scheduleRuntime = new ScheduleRuntimeStub(this);
-    m_scheduleEditor = new ScheduleEditorStub(this);
     m_windowManager = new WindowManagerStub(this);
-    m_classSwapManager = new ClassSwapManagerStub(this);
     m_utilsBackend = new UtilsBackendStub(this);
     m_pluginManager = new PluginManagerStub(this);
 
@@ -47,6 +48,23 @@ void AppCentral::initialize()
     // 加载配置与主题（对应 run() 里的 _load_config 与 _load_theme_and_plugins 的主题部分）
     m_configs->load();
     m_configs->startAutoSave();
+
+    // M2 课程表域（对应 central.py _load_schedule / _load_class_swap / _load_runtime）。
+    // 放在 configs->load() 之后：各对象构造/初始化会读取配置键。
+    m_scheduleManager = new ScheduleManager(m_configs, QString(), this);
+    m_scheduleEditor = new ScheduleEditor(m_scheduleManager, this);
+    m_classSwapManager = new ClassSwapManager(m_configs, m_scheduleManager, this);
+    m_scheduleRuntime = new ScheduleRuntime(m_configs, m_scheduleManager, this);
+
+    QString currentSchedule;
+    if (const auto current = m_configs->value(QStringLiteral("schedule.current_schedule")))
+        currentSchedule = current->toString();
+    m_scheduleManager->load(currentSchedule.isEmpty()
+                                ? QStringLiteral("New Schedule 1")
+                                : currentSchedule);
+    m_classSwapManager->loadSwapRecords();
+    m_scheduleRuntime->refreshWith(m_scheduleManager->schedule());
+    UnionTimer::instance().start(); // 对应 central.py:461 统一秒级刷新
 
     const QVariantMap preferences =
         m_configs->data().toMap().value(QStringLiteral("preferences")).toMap();
@@ -93,7 +111,7 @@ QVariant AppCentral::globalConfig() const
     return m_configs ? m_configs->data() : QVariant();
 }
 
-// 返回 QObject* 的 Q_PROPERTY 访问器：stub 类型在此处是完整类型，可安全向上转型
+// 返回 QObject* 的 Q_PROPERTY 访问器：课程表域与 stub 类型在此处是完整类型，可安全向上转型
 QObject *AppCentral::scheduleRuntime() const { return m_scheduleRuntime; }
 QObject *AppCentral::notification() const { return m_notification; }
 QObject *AppCentral::scheduleEditor() const { return m_scheduleEditor; }

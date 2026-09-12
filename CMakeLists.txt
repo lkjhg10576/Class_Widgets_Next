@@ -12,7 +12,7 @@ set(CMAKE_AUTOMOC ON)
 # M1 目标平台为 Windows（见 docs：Qt 不支持 Linux->Windows 交叉编译，
 # Windows 产物由 windows-latest runner 产出）。
 find_package(Qt6 6.9 REQUIRED COMPONENTS
-    Core Gui Widgets Qml Quick QuickControls2 Svg)
+    Core Gui Widgets Qml Quick QuickControls2 Network Svg)
 
 qt_standard_project_setup()
 
@@ -30,6 +30,15 @@ set(CWN_SOURCES
     src/core/WidgetsWindow.cpp
     src/core/TrayIcon.cpp
     src/core/SingleInstanceGuard.cpp
+    # M2 课程表域
+    src/core/schedule/UnionTimer.cpp
+    src/core/schedule/ScheduleModel.cpp
+    src/core/schedule/ScheduleParser.cpp
+    src/core/schedule/ScheduleManager.cpp
+    src/core/schedule/ScheduleIO.cpp
+    src/core/schedule/ScheduleRuntime.cpp
+    src/core/schedule/ScheduleEditor.cpp
+    src/core/schedule/ClassSwapManager.cpp
 )
 
 qt_add_executable(ClassWidgetsNext WIN32 ${CWN_SOURCES})
@@ -45,6 +54,7 @@ target_link_libraries(ClassWidgetsNext PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
+    Qt6::Network   # M4 更新器 UpdaterBridge 的 HTTP 检查
     Qt6::Svg
 )
 

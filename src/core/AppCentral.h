@@ -14,11 +14,11 @@ class TrayIcon;
 class WidgetBackend;
 class TranslatorStub;
 class NotificationStub;
-class ScheduleRuntimeStub;
-class ScheduleEditorStub;
-class ScheduleManagerStub;
+class ScheduleRuntime;
+class ScheduleEditor;
+class ScheduleManager;
+class ClassSwapManager;
 class WindowManagerStub;
-class ClassSwapManagerStub;
 class UtilsBackendStub;
 class PluginManagerStub;
 class QQmlEngine;
@@ -106,14 +106,14 @@ private:
     TrayIcon *m_trayIcon = nullptr;
     WidgetBackend *m_widgetBackend = nullptr;
 
-    // M1 占位（SupportStubs.h）
+    // M1 占位（SupportStubs.h）；课程表域四个对象已在 M2 换为真实实现（schedule/）
     TranslatorStub *m_translator = nullptr;
     NotificationStub *m_notification = nullptr;
-    ScheduleRuntimeStub *m_scheduleRuntime = nullptr;
-    ScheduleEditorStub *m_scheduleEditor = nullptr;
-    ScheduleManagerStub *m_scheduleManager = nullptr;
+    ScheduleRuntime *m_scheduleRuntime = nullptr;
+    ScheduleEditor *m_scheduleEditor = nullptr;
+    ScheduleManager *m_scheduleManager = nullptr;
+    ClassSwapManager *m_classSwapManager = nullptr;
     WindowManagerStub *m_windowManager = nullptr;
-    ClassSwapManagerStub *m_classSwapManager = nullptr;
     UtilsBackendStub *m_utilsBackend = nullptr;
     PluginManagerStub *m_pluginManager = nullptr;
 
