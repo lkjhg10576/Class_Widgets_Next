@@ -328,10 +328,10 @@ void NotificationService::dispatchStatusChange(const QString &status)
         return;
     }
     dispatchStatusChange(status,
-                         m_runtimeSource->property(QStringLiteral("currentEntry")).toMap(),
-                         m_runtimeSource->property(QStringLiteral("currentSubject")).toMap(),
-                         m_runtimeSource->property(QStringLiteral("nextEntries")).toList(),
-                         m_runtimeSource->property(QStringLiteral("subjects")).toList());
+                         m_runtimeSource->property("currentEntry").toMap(),
+                         m_runtimeSource->property("currentSubject").toMap(),
+                         m_runtimeSource->property("nextEntries").toList(),
+                         m_runtimeSource->property("subjects").toList());
 }
 
 void NotificationService::setScheduleRuntimeSource(QObject *runtimeSource)
@@ -347,8 +347,8 @@ void NotificationService::checkPreparationBell()
         return;
 
     // runtime.py:446-449：预备状态下且存在后续条目
-    const QVariantList nextEntries = m_runtimeSource->property(QStringLiteral("nextEntries")).toList();
-    const QVariantList subjects = m_runtimeSource->property(QStringLiteral("subjects")).toList();
+    const QVariantList nextEntries = m_runtimeSource->property("nextEntries").toList();
+    const QVariantList subjects = m_runtimeSource->property("subjects").toList();
     const QString status = m_runtimeSource->property(QStringLiteral("currentStatus")).toString();
     if (nextEntries.isEmpty() || status != QLatin1String("preparation"))
         return;

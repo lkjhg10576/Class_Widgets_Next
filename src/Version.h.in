@@ -1,0 +1,12 @@
+// Class Widgets Next 版本注入模板 —— 由 CMake configure_file 生成为
+// ${CMAKE_CURRENT_BINARY_DIR}/Version.h，生成产物请勿手动编辑/提交。
+// 版本来源：CMake 缓存变量 CWN_VERSION（默认 2.0.0.0）；
+// CI 发版时经 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]] 覆盖
+// （见 .github/workflows/build&release.yml 的 resolve job）。
+#pragma once
+
+#define CWN_VERSION_STRING "@CWN_VERSION@"
+#define CWN_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define CWN_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define CWN_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define CWN_VERSION_TWEAK @PROJECT_VERSION_TWEAK@

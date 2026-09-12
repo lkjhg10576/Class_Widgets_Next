@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include "SingleInstanceGuard.h"
 #include "TrayIcon.h"
+#include "Version.h" // CMake configure_file 生成的版本号（CWN_VERSION_STRING）
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
 
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
     QApplication::setQuitOnLastWindowClosed(false); // 对应 app.py:42，常驻托盘
     QApplication::setApplicationName(QStringLiteral("Class Widgets Next"));
     QApplication::setOrganizationName(QStringLiteral("ClassWidgets"));
-    QApplication::setApplicationVersion(QStringLiteral("2.0.0.0"));
+    QApplication::setApplicationVersion(QStringLiteral(CWN_VERSION_STRING));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("Class Widgets Next"));
@@ -73,7 +74,19 @@ int main(int argc, char *argv[])
         cwn::Log::warn(QStringLiteral("Failed to load icon font: %1").arg(iconFont));
 
     AppCentral central;
-    central.initialize();
+    // CI 冒烟测试禁用首跑教程门（否则全新运行目录下永远只开教程窗口，QML 就绪超时）
+    central.initialize(!smokeTest);
+
+    if (central.isWaitingForTutorial()) {
+        // 首次运行：只承载教程窗口的事件循环（对应 central.py WAITING_FOR_TUTORIAL 分支；
+        // 上游此时不建主窗口/托盘）。教程完成后 QML 写 app.tutorial_completed 并
+        // 调 AppCentral.restart() 自启新实例走正常流程。
+        cwn::Log::info(QStringLiteral("Event loop: tutorial only"));
+        const int code = app.exec();
+        central.configs()->save();
+        guard.release();
+        return code;
+    }
 
     WidgetsWindow widgetsWindow(&central);
     central.setWidgetsWindow(&widgetsWindow);

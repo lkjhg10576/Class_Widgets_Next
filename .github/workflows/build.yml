@@ -84,15 +84,18 @@ jobs:
         shell: pwsh
         run: |
           $patterns = 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:'
+          $collected = @()
           foreach ($f in @('build-output.log', 'deploy-output.log')) {
             if (-not (Test-Path $f)) { continue }
-            Select-String -Path $f -Pattern $patterns |
-              Select-Object -First 9 |
-              ForEach-Object {
-                $line = $_.Line
-                if ($line.Length -gt 700) { $line = $line.Substring(0, 700) }
-                Write-Host "::error::$f :: $line"
-              }
+            $collected += "== $f =="
+            # 连同上下文一起抓：MSVC 的 "see reference to" 行能定位 connect/模板错误源头
+            $collected += Select-String -Path $f -Pattern $patterns -Context 1,2 |
+              ForEach-Object { $_.Context.PreContext + $_.Line + $_.Context.PostContext }
+          }
+          $collected | Select-Object -First 40 | ForEach-Object {
+            $line = $_
+            if ($line -and $line.Length -gt 700) { $line = $line.Substring(0, 700) }
+            if ($line) { Write-Host "::error::$line" }
           }
 
       - name: Commit failure logs (on failure, for public readback)

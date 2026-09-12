@@ -36,7 +36,7 @@ AppCentral::AppCentral(QObject *parent)
 
 AppCentral::~AppCentral() = default;
 
-void AppCentral::initialize()
+void AppCentral::initialize(bool enableFirstRunGate)
 {
     // 对应 _initialize_cores：路径/配置/主题/小组件模型
     m_configs = new ConfigStore(AppPaths::instance().configsRoot(), this);
@@ -65,6 +65,33 @@ void AppCentral::initialize()
     m_themeRecovery = new ThemeRecovery(m_themeManager, this);
     m_themeLoadErrorDialog = new ThemeLoadErrorDialog(this);
 
+    const QVariantMap preferences =
+        m_configs->data().toMap().value(QStringLiteral("preferences")).toMap();
+    m_themeManager->load();
+    m_themeManager->applyConfiguredTheme(
+        preferences.value(QStringLiteral("current_theme")).toString());
+
+    // 退出前的窗口资源释放（对应 central.py:318 清理步骤）——教程分支也要生效
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this] {
+        if (m_windowManager)
+            m_windowManager->releaseAll();
+    });
+
+    // 首次运行教程门（对应 central.py init() 229-236：tutorial_completed=false →
+    // 只开教程窗口并中断后续初始化，教程完成后 QML 写键 + restart() 走正常流程）
+    if (enableFirstRunGate) {
+        bool tutorialCompleted = false;
+        if (const auto done = m_configs->value(QStringLiteral("app.tutorial_completed")))
+            tutorialCompleted = done->toBool(false);
+        if (!tutorialCompleted) {
+            m_waitingForTutorial = true;
+            m_windowManager->openTutorial();
+            cwn::Log::info(QStringLiteral("First run: waiting for tutorial completion"));
+            emit initialized();
+            return;
+        }
+    }
+
     // M2 课程表域（对应 central.py _load_schedule / _load_class_swap / _load_runtime）。
     // 放在 configs->load() 之后：各对象构造/初始化会读取配置键。
     m_scheduleManager = new ScheduleManager(m_configs, QString(), this);
@@ -91,19 +118,7 @@ void AppCentral::initialize()
     m_automationManager->onScheduleStatusChanged(m_scheduleRuntime->currentStatus());
     m_updaterBridge->maybeNotifyUpdateComplete(); // 对应 central.py:467-470
 
-    const QVariantMap preferences =
-        m_configs->data().toMap().value(QStringLiteral("preferences")).toMap();
-    m_themeManager->load();
-    m_themeManager->applyConfiguredTheme(
-        preferences.value(QStringLiteral("current_theme")).toString());
-
     connectServices();
-
-    // 退出前的窗口资源释放（对应 central.py:318 清理步骤）
-    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this] {
-        if (m_windowManager)
-            m_windowManager->releaseAll();
-    });
 
     emit initialized();
     cwn::Log::info(QStringLiteral("AppCentral initialization completed"));
@@ -125,8 +140,9 @@ void AppCentral::connectServices()
             m_automationManager, &AutomationManager::onScheduleStatusChanged);
 
     // ---- 更新器 ----
-    connect(m_updaterBridge, &UpdaterBridge::restartRequested,
-            this, &AppCentral::restart);
+    // 注意：restart 带默认参（const QString &reason = ...），PMF 直连会因
+    // "槽参数多于信号参数" 在编译期被 static_assert 拒绝，必须经 lambda 转发
+    connect(m_updaterBridge, &UpdaterBridge::restartRequested, this, [this] { restart(); });
 
     // ---- 主题恢复（对应 windows.py ThemeLoadErrorDialog 的请求链）----
     connect(m_themeRecovery, &ThemeRecovery::errorDialogRequested,

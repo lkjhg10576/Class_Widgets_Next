@@ -1,5 +1,7 @@
 # Class Widgets Next
 
+[![Build (Windows)](https://github.com/lkjhg10576/Class_Widgets_Next/actions/workflows/build.yml/badge.svg)](https://github.com/lkjhg10576/Class_Widgets_Next/actions/workflows/build.yml)
+
 **下一代课程表** —— Class Widgets 2 的 C++ / Qt Quick 移植分支。
 
 上游 [Class Widgets 2](https://github.com/RinLit-233-shiroko/Class-Widgets-2) 是

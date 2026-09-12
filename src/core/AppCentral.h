@@ -47,8 +47,13 @@ public:
     explicit AppCentral(QObject *parent = nullptr);
     ~AppCentral() override;
 
-    // 装配全部服务并注册内置小组件（对应 _initialize_* + 插件注册的内置替身）
-    void initialize();
+    // 装配全部服务并注册内置小组件（对应 _initialize_* + 插件注册的内置替身）。
+    // enableFirstRunGate=false 时跳过首跑教程门（CI 冒烟测试用）
+    void initialize(bool enableFirstRunGate = true);
+
+    // 首次运行教程门是否触发（对应 central.py init() 的 WAITING_FOR_TUTORIAL 分支）；
+    // 为 true 时 main.cpp 不创建主窗口/托盘，事件循环仅承载教程窗口
+    bool isWaitingForTutorial() const { return m_waitingForTutorial; }
 
     // 对应 central.py setup_qml_context：为每个引擎注册全部上下文属性，
     // 属性名与 Python 版逐字一致（137 个 QML 零改动的底线）。
@@ -135,4 +140,5 @@ private:
     AutomationManager *m_automationManager = nullptr;
 
     bool m_restartRequired = false;
+    bool m_waitingForTutorial = false;
 };

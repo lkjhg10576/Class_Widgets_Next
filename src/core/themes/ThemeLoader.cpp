@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QUrl>
 #include <QVersionNumber>
 
@@ -138,7 +139,7 @@ bool ThemeLoader::isApiCompatible(const QString &themeApiVersion)
                 return false;
             QList<int> upperSegments;
             for (int i = 0; i < required.segmentCount() - 1; ++i)
-                upperSegments.append(required.at(i));
+                upperSegments.append(required.segmentAt(i));
             upperSegments.last() += 1;
             const QVersionNumber upperBound(upperSegments);
             ok = QVersionNumber::compare(appVersion, required) >= 0

@@ -1,35 +1,32 @@
 #include "ScheduleIO.h"
 
-#include "../Logger.h"
+#include "../convertor/ConvertorBridge.h"
 #include "ScheduleManager.h"
 
+// 上游 core/convertor/slots.py 的 QML 桥。三个方法经 Q_INVOKABLE 暴露给
+// QML（AppCentral.scheduleManager.scheduleIO.*），实际逻辑委托给
+// ConvertorBridge（slots.py 实现本体）→ ScheduleConverter（converter.py）。
 ScheduleIO::ScheduleIO(ScheduleManager *manager, QObject *parent)
     : QObject(parent)
     , m_manager(manager)
+    , m_bridge(new ConvertorBridge(manager, this))
 {
 }
 
 bool ScheduleIO::exportToCSES(const QString &filename)
 {
-    // slots.py:12-32；实现待移植 core/convertor/converter.py（含 YAML）
-    Q_UNUSED(filename);
-    cwn::Log::warn(QStringLiteral("ScheduleIO::exportToCSES: converter (core/convertor/"
-                                  "converter.py) is not ported yet; export skipped."));
-    return false;
+    // slots.py:16-35
+    return m_bridge->exportToCSES(filename);
 }
 
 bool ScheduleIO::importCSES()
 {
-    // slots.py:34-69
-    cwn::Log::warn(QStringLiteral("ScheduleIO::importCSES: converter (core/convertor/"
-                                  "converter.py) is not ported yet; import skipped."));
-    return false;
+    // slots.py:37-76
+    return m_bridge->importCSES();
 }
 
 bool ScheduleIO::importCW1()
 {
-    // slots.py:71-110
-    cwn::Log::warn(QStringLiteral("ScheduleIO::importCW1: converter (core/convertor/"
-                                  "converter.py) is not ported yet; import skipped."));
-    return false;
+    // slots.py:78-115
+    return m_bridge->importCW1();
 }

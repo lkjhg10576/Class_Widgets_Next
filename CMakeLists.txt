@@ -1,9 +1,27 @@
 cmake_minimum_required(VERSION 3.21)
 
+# ---- 版本段（M5 发布流水线）----
+# project(VERSION) 无法被命令行覆盖，故经缓存变量中转：
+# 本地构建用默认值 2.0.0.0；CI 发版时传 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]]
+# 覆盖 project(VERSION) 与下方 configure_file 的 Version.h（格式校验在此完成，
+# project(VERSION) 只接受 1-4 段纯数字）。
+set(CWN_VERSION "2.0.0.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]]）")
+if(CWN_VERSION_OVERRIDE)
+    if(NOT CWN_VERSION_OVERRIDE MATCHES "^[0-9]+(\\.[0-9]+){0,3}$")
+        message(FATAL_ERROR
+            "CWN_VERSION_OVERRIDE 必须为 x[.y[.z[.w]]] 数字格式，收到: ${CWN_VERSION_OVERRIDE}")
+    endif()
+    set(CWN_VERSION "${CWN_VERSION_OVERRIDE}")
+endif()
+
 project(ClassWidgetsNext
-    VERSION 2.0.0.0
+    VERSION ${CWN_VERSION}
     DESCRIPTION "Class Widgets Next - C++/Qt Quick port"
     LANGUAGES CXX)
+
+# 生成构建目录下的 Version.h（CWN_VERSION_STRING / MAJOR / MINOR / PATCH / TWEAK），
+# 供 src/main.cpp 注入 QApplication::setApplicationVersion
+configure_file(src/Version.h.in "${CMAKE_CURRENT_BINARY_DIR}/Version.h" @ONLY)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,6 +57,9 @@ set(CWN_SOURCES
     src/core/schedule/ScheduleRuntime.cpp
     src/core/schedule/ScheduleEditor.cpp
     src/core/schedule/ClassSwapManager.cpp
+    # M5 课表格式转换（CW1/CSES ↔ CW2 内部格式）
+    src/core/convertor/ScheduleConverter.cpp
+    src/core/convertor/ConvertorBridge.cpp
     # M3 主题系统
     src/core/themes/ThemeLoader.cpp
     src/core/themes/ThemeUrlInterceptor.cpp
@@ -68,7 +89,8 @@ qt_add_executable(ClassWidgetsNext WIN32 ${CWN_SOURCES})
 
 target_include_directories(ClassWidgetsNext PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/core
+    ${CMAKE_CURRENT_BINARY_DIR})  # 生成的 Version.h
 
 target_link_libraries(ClassWidgetsNext PRIVATE
     Qt6::Core
