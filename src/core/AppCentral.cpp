@@ -225,10 +225,11 @@ void AppCentral::registerBuiltinWidgets()
 
     const QList<WidgetDefinition> definitions = s_provider.widgets();
     for (WidgetDefinition definition : definitions) {
-        // 天气组件挂专属数据源 backend（WeatherService），其余组件共用通用 WidgetBackend
+        // 天气组件挂专属数据源 backend（WeatherService），其余组件共用通用 WidgetBackend；
+        // 两类指针无继承关系，三元须先统一到 QObject* 才能推导公共类型（MSVC C2446）
         definition.backendObj = (definition.id == WeatherService::widgetTypeId())
-                                    ? m_weatherService
-                                    : m_widgetBackend;
+                                    ? static_cast<QObject *>(m_weatherService)
+                                    : static_cast<QObject *>(m_widgetBackend);
         m_widgetsModel->addWidget(definition);
         emit widgetRegistered(definition.id);
     }
