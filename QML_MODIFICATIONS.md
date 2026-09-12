@@ -3,7 +3,7 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 仅 4 处 M3 插件入口遮蔽（§0.5.8，见下）
+## 当前状态：`app/src/qml` 共 6 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写，见下）
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
@@ -52,6 +52,18 @@ M3 窗口管理落地时，`WindowManager.openPlaza()` 实现为日志警告 + n
 对应 C++ 侧行为（`src/core/windows/AppWindowManager.cpp`）：
 `openPlaza()` / `openPluginPlaza()` / `closePlaza()` 均为警告 + no-op；
 `pages/plaza/*`、`Windows/PluginPlaza.qml`、`pages/tutorial/Plugins.qml` 不参与本阶段构建。
+
+### 4. M5：`ScheduleClip.qml` 两处方法名改写（C++ 关键字限制）
+
+| # | 文件 | 位置 | 改动 |
+|---|---|---|---|
+| 4.1 | `ClassWidgets/Components/editor/ScheduleClip.qml` | 原 146 行 | `AppCentral.scheduleManager.export(filename)` → `exportSchedule(filename)` |
+| 4.2 | 同上 | 原 287 行 | `AppCentral.scheduleManager.delete(filename)` → `removeSchedule(filename)` |
+
+原因：`export` / `delete` 是 C++ 关键字，moc 无法为同名方法生成 Q_INVOKABLE 注册代码
+（与 QTBUG-5426 同类的语言级限制）。C++ 侧 `ScheduleManager` 的入口本就是
+`exportSchedule` / `removeSchedule`（语义与上游 `export` / `delete` 完全一致）。
+同步上游时：若上游修改这两个调用点的**参数**，需手工映射到新方法名。
 
 ## 修改申请流程
 

@@ -143,7 +143,7 @@ Clip {
                     MenuItem {
                         text: qsTr("Export to JSON")
                         onClicked: {
-                            if (AppCentral.scheduleManager.export(filename)) {
+                            if (AppCentral.scheduleManager.exportSchedule(filename)) {
                                 floatLayer.createInfoBar(
                                     {
                                         severity: Severity.Success,
@@ -284,7 +284,7 @@ Clip {
                 )
                 return
             }
-            if (!AppCentral.scheduleManager.delete(filename)) {
+            if (!AppCentral.scheduleManager.removeSchedule(filename)) {
                 floatLayer.createInfoBar(
                     {
                         severity: Severity.Error,
