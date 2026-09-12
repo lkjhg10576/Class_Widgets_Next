@@ -17,7 +17,7 @@ constexpr char kLanguageKey[] = "locale.language";
 
 } // namespace
 
-Translator::Translator(const ConfigStore *configs, QObject *parent)
+Translator::Translator(ConfigStore *configs, QObject *parent)
     : QObject(parent)
     , m_configs(configs)
 {

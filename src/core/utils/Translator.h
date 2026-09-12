@@ -21,7 +21,7 @@ class Translator : public QObject
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
 
 public:
-    explicit Translator(const ConfigStore *configs, QObject *parent = nullptr);
+    explicit Translator(ConfigStore *configs, QObject *parent = nullptr);
     ~Translator() override;
 
     // translator.py:21-24 getLanguage
@@ -44,6 +44,6 @@ private:
     // 翻译优先于其它目录，见 translator.py:57-58 注释）
     void swapTranslator(QTranslator *replacement);
 
-    const ConfigStore *m_configs = nullptr;
+    ConfigStore *m_configs = nullptr;
     QTranslator *m_translator = nullptr;
 };

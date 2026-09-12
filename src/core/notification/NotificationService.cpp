@@ -350,7 +350,7 @@ void NotificationService::checkPreparationBell()
     // runtime.py:446-449：预备状态下且存在后续条目
     const QVariantList nextEntries = m_runtimeSource->property("nextEntries").toList();
     const QVariantList subjects = m_runtimeSource->property("subjects").toList();
-    const QString status = m_runtimeSource->property(QStringLiteral("currentStatus")).toString();
+    const QString status = m_runtimeSource->property("currentStatus").toString();
     if (nextEntries.isEmpty() || status != QLatin1String("preparation"))
         return;
 
