@@ -3,7 +3,7 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 共 6 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写，见下）
+## 当前状态：`app/src/qml` 共 8 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除，见下）
 > 另有 2 个**新增文件**（非上游改动）：天气小组件及其设置页，见改动 5。
 
 | 目录 | 内容 | 与上游的差异 |
@@ -77,6 +77,24 @@ C++ 侧为 `src/core/weather/WeatherService.*`）。因是**新增文件**而非
 |---|---|---|---|
 | 5.1 | `widgets/weather.qml` | 新增 | 内置组件 `classwidgets.weather`；backend 为注入的 WeatherService（唯一非通用 backend 的内置组件） |
 | 5.2 | `widgets/settings/weather.qml` | 新增 | 城市搜索（350ms 防抖）+ 刷新间隔（全局键 `weather.poll_interval`，秒）+ 数据源标注 |
+
+### 6. 两个 Interactions 页移除预览图 `sourceSize`（修复引导第 4 步整进程卡死）
+
+A7 曾给 12 处大图加"按显示尺寸 × DPR"的 `sourceSize`；其中两个 Interactions 页
+（引导 `pages/tutorial/Interactions.qml`、设置 `pages/settings/General/Interactions.qml`）
+的预览图（`hide_*.png`，321×225 / 8–18KB，本属 A7 应跳过的非大图）不该加：
+
+- 图片宽度来自 `Layout.fillWidth` 布局，而布局又受图片隐式尺寸影响（SettingItem
+  内容自适应 + Expander implicitHeight 链）；`sourceSize` 绑定 `width` 后，异步解码
+  结果改变隐式尺寸 → 布局重排改变 width → sourceSize 变化击穿解码缓存再次解码，
+  形成**无限"重解码-重排"振荡**（探针实测宽度 94↔97 乒乓、每循环一次新解码），
+  GUI 线程 + 图片解码线程双满载，事件循环饿死 → 走引导到"选择小组件的交互方式"
+  一步整进程无响应。
+- 修复 = 删除该 `sourceSize` 绑定（保留 A7 注释位说明原因）。图片很小，按原生
+  分辨率解码无内存代价；对照实验（保留 fillWidth、仅去 sourceSize）页面正常。
+- 其余 `sourceSize` 用点复核过：8 处 `anchors.fill`（宽度与隐式尺寸无关，安全）；
+  `Windows/WhatsNew.qml` 一处为 fillWidth/fillHeight + maximumHeight，当前结构
+  稳定，暂不动。
 
 ## 修改申请流程
 

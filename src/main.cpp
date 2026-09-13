@@ -58,6 +58,12 @@ int main(int argc, char *argv[])
         QStringLiteral("smoke-test"),
         QStringLiteral("CI mode: load QML, verify readiness, exit with status"));
     parser.addOption(smokeTestOption);
+    // AppCentral.restart("--update-done") 完成引导/更新后自启的新实例会携带该参数；
+    // 不注册的话 parser.process 会因未知选项直接退出，表现为"完成引导后应用消失"。
+    QCommandLineOption updateDoneOption(
+        QStringLiteral("update-done"),
+        QStringLiteral("Internal: restart after tutorial/update completion"));
+    parser.addOption(updateDoneOption);
     parser.process(app);
     const bool smokeTest = parser.isSet(smokeTestOption);
 

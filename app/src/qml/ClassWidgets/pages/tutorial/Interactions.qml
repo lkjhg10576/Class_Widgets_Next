@@ -73,8 +73,11 @@ TutorialComponents.TutorialPage {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 72
                                 source: root.hidePreviewSource(modelData.preview)
-                                // A7：按显示尺寸解码，避免整图分辨率纹理
-                                sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
+                                // 不加 sourceSize：本图（321×225，非大图）宽度来自
+                                // fillWidth 布局，而布局又受图片隐式尺寸影响；若
+                                // sourceSize 绑定 width，解码结果改变隐式尺寸会反过来
+                                // 改变 width，触发无限"重解码-重排"振荡（事件循环饿死，
+                                // 整个引导流程卡死）。A7 跳过规则（非大图）同样适用。
                                 fillMode: Image.PreserveAspectFit
                                 asynchronous: true
                             }
