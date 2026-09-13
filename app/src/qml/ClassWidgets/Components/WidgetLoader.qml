@@ -74,19 +74,20 @@ Loader {
     Connections {
         target: CWThemeManager
         // 感谢gemini的超强research，要不然我一辈子都solve不了
+        // B3 缓存纪律修订（2026-09-13）：不再给 URL 叠加 ?t=Date.now()。
+        // 时间戳使每次主题切换的 widget URL 都成为新地址，击穿类型缓存与
+        // QML 磁盘缓存（键 = 拦截后 URL），等于每次切主题全量重编译。
+        // 主题组件的更新本就由 ThemeUrlInterceptor 按"主题目录 + 文件指纹"
+        // 改写 URL 完成；widget 文件自身 URL 保持稳定，缓存得以复用。
+        // 强制重建 item 的动作保留：source 置空 → 下一拍恢复，Loader 销毁并重建。
         function onThemeReadyToReload() {
-            // reload()
             if (reloading) return
 
             reloading = true
-            var oldSource = widgetSource.toString()
             source = ""
 
             Qt.callLater(function() {
-                // 关键：添加时间戳参数强制引擎重新扫描 importPathList
-                // 即使是本地文件，QML 也会因为 URL 变化而重新加载解析上下文
-                var cacheBuster = (oldSource.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now()
-                source = oldSource + cacheBuster
+                source = widgetSource
             })
         }
     }

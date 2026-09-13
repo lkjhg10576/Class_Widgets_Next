@@ -25,6 +25,10 @@ public:
 
     bool isQmlReady() const { return m_qmlReady; }
 
+    // B3 缓存纪律：辅助窗口关闭 → 主引擎延迟低频 trim（5 分钟一次脏检查）。
+    // 连续开关多个窗口只合并为一次 trim；trim 后无新脏即停表，不空转（A6 纪律）。
+    void notifyAuxiliaryWindowReleased();
+
 signals:
     void themeLoadFailed(const QString &themeId);
 
@@ -34,17 +38,21 @@ private slots:
 
 private:
     static constexpr int kMousePollIntervalMs = 100; // A6：原 33ms
+    static constexpr int kTrimIntervalMs = 5 * 60 * 1000; // B3：低频 trim 节拍
 
     void onQmlReady(QObject *obj, const QUrl &objUrl);
     void onThemeChanged();
     void updateMask();
     void applyEmptyMask();
     void updateMouseState();
+    void onTrimTick();
 
     AppCentral *m_central = nullptr;
     QUrl m_mainQmlUrl;
     QRegion m_interactiveRect;
     QTimer m_mouseTimer;
+    QTimer m_trimTimer;
+    bool m_trimDirty = false;
     bool m_maskUpdatePending = false;
     bool m_qmlReady = false;
     bool m_themeReloading = false;

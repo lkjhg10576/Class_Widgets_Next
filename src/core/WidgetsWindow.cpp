@@ -57,6 +57,39 @@ void WidgetsWindow::run()
     connect(&m_mouseTimer, &QTimer::timeout, this, &WidgetsWindow::updateMouseState);
     if (m_hoverFade)
         m_mouseTimer.start(kMousePollIntervalMs);
+
+    // B3：低频 trim 定时器 —— 平时停表，仅在辅助窗口关闭置脏后运行，
+    // trim 后发现仍无脏即自动停表（A6 定时器治理纪律：不空转）
+    m_trimTimer.setInterval(kTrimIntervalMs);
+    connect(&m_trimTimer, &QTimer::timeout, this, &WidgetsWindow::onTrimTick);
+}
+
+void WidgetsWindow::notifyAuxiliaryWindowReleased()
+{
+    m_trimDirty = true;
+    if (!m_trimTimer.isActive())
+        m_trimTimer.start();
+}
+
+void WidgetsWindow::onTrimTick()
+{
+    if (!m_trimDirty) {
+        m_trimTimer.stop(); // 无新脏 → 停表等待下一次关闭事件
+        return;
+    }
+    m_trimDirty = false;
+    if (!m_engine || m_released)
+        return;
+
+    // B3：辅助窗口的引擎已随自身销毁，其组件早已不可达；但主引擎的类型缓存中
+    // 可能残留被它们"预热"过的组件壳。trimComponentCache() 只逐出**不可达**组件
+    // （区别于 clearComponentCache() 的全量清空，主界面常驻组件不受影响），
+    // 再触发一次 JS GC 回收碎片。5 分钟节拍下这属低频、可预算的主线程开销。
+    m_engine->trimComponentCache();
+    m_engine->collectGarbage();
+    cwn::Log::info(QStringLiteral(
+        "B3 main-engine trim: component cache trimmed + JS GC after auxiliary "
+        "window release"));
 }
 
 void WidgetsWindow::onQmlReady(QObject *obj, const QUrl &objUrl)

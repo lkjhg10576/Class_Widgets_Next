@@ -286,6 +286,8 @@ void AppWindowManager::releaseWindow(WindowId id)
                 managed->release();
                 // 释放引擎后销毁窗口对象本身（关闭即销毁，重开时重建）
                 managed->deleteLater();
+                // B3：引擎此刻已销毁，通知主窗口安排低频 trim
+                emit auxiliaryWindowReleased();
                 return;
             }
         }

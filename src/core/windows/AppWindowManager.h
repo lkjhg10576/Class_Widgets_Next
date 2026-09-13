@@ -38,6 +38,12 @@ public:
     // "auxiliary window release" 清理步骤（主控在退出流程调用）
     void releaseAll();
 
+signals:
+    // B3 缓存纪律：辅助窗口完成 release（引擎已销毁）后发出。
+    // AppCentral 把它接到主窗口 WidgetsWindow::notifyAuxiliaryWindowReleased，
+    // 触发主引擎的低频 trim（脏合并，5 分钟节拍）。
+    void auxiliaryWindowReleased();
+
 public slots:
     // ── QML 槽面：与 manager.py:43-107 的 @Slot 一一对应（方法名逐字一致）──
     Q_INVOKABLE void openSettings();                // manager.py:43

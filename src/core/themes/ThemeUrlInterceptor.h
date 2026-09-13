@@ -31,8 +31,14 @@ public:
     QUrl intercept(const QUrl &url, DataType type) override;
 
 private:
-    QString makeNonce() const;
-    QUrl makeNonceUrl(const QString &localFile) const;
+    QString makeNonce() const; // 进程级时间戳 nonce（setThemePath 时刷新；stat 失败回退用）
+
+    // B3 缓存纪律：cacheBuster 从"进程级时间戳"改为"按解析后文件的 mtime+size 指纹"。
+    // 语义变化：同一文件只要内容未变，其改写后的 URL 恒定 —— QML 类型缓存与
+    // QML 磁盘缓存可跨主题切换复用；内容变化（同路径被改写）仍会击穿。
+    // fallback 由调用方在持锁状态传入（文件 stat 失败时使用），避免二次加锁。
+    QUrl makeNonceUrl(const QString &localFile, const QString &fallback) const;
+    static QString fileFingerprint(const QString &localFile, const QString &fallback);
 
     QMutex m_mutex;
     QString m_currentThemePath; // 已统一 '/' 分隔；空 = 未启用拦截

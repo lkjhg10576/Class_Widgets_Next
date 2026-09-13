@@ -21,11 +21,33 @@ QString ThemeUrlInterceptor::makeNonce() const
     return QString::number(QDateTime::currentMSecsSinceEpoch());
 }
 
-QUrl ThemeUrlInterceptor::makeNonceUrl(const QString &localFile) const
+QUrl ThemeUrlInterceptor::makeNonceUrl(const QString &localFile, const QString &fallback) const
 {
+    // B3 缓存纪律：cacheBuster 由"进程级时间戳"改为"解析后文件的 mtime+size 指纹"。
+    //
+    // 动机：时间戳让每次主题切换/重载把全部命中拦截的 URL 变成全新地址 ——
+    // QQmlTypeLoader 的内存缓存与 QML 磁盘缓存（Qt 默认启用，键为拦截后的 URL）
+    // 一律失效，等于"切一次主题 = 全量重编译"。
+    //
+    // 指纹语义：同一目标文件内容不变 → URL 恒定 → 缓存命中；内容变化（同路径被改写）
+    // → mtime/size 变 → 仍然击穿。不同主题覆盖同一组件时目标路径本就不同，
+    // 依旧满足 interceptor.py "新旧主题 URL 缓存互不污染" 的原意。
+    //
+    // stat 失败（文件不存在等）→ 退回调用方传入的进程级 nonce（保守：宁可多 bust 不可漏 bust）。
     QUrl result = QUrl::fromLocalFile(localFile);
-    result.setQuery(QStringLiteral("t=") + m_nonce);
+    result.setQuery(QStringLiteral("t=") + fileFingerprint(localFile, fallback));
     return result;
+}
+
+QString ThemeUrlInterceptor::fileFingerprint(const QString &localFile, const QString &fallback)
+{
+    const QFileInfo info(localFile);
+    if (!info.exists())
+        return fallback;
+    // '<mtime_ms>-<bytes>'：单调、稳定、无需哈希（成本 = 一次 stat）
+    return QStringLiteral("%1-%2")
+        .arg(info.lastModified().toMSecsSinceEpoch())
+        .arg(info.size());
 }
 
 void ThemeUrlInterceptor::setThemePath(const QString &themePath)
@@ -86,6 +108,9 @@ QUrl ThemeUrlInterceptor::intercept(const QUrl &url, DataType type)
         return url;
     }
 
+    // B3：m_nonce 仅作 stat 失败时的保守回退（持锁读取，避免指纹函数二次加锁）
+    const QString fallback = m_nonce;
+
     // interceptor.py:71-82：防循环重定向——源路径已位于当前主题目录下
     if (lowerSource.startsWith(m_currentThemePath.toLower())) {
         if (QFileInfo::exists(source))
@@ -93,7 +118,7 @@ QUrl ThemeUrlInterceptor::intercept(const QUrl &url, DataType type)
         const QString defaultFile =
             AppPaths::instance().qmlRoot() + QLatin1Char('/') + relativePart;
         if (QFileInfo::exists(defaultFile))
-            return makeNonceUrl(defaultFile);
+            return makeNonceUrl(defaultFile, fallback);
         return url;
     }
 
@@ -101,12 +126,12 @@ QUrl ThemeUrlInterceptor::intercept(const QUrl &url, DataType type)
         // interceptor.py:84-98：先找主题内文件，其次回退默认主题（src/qml）
         const QString targetFile = m_currentThemePath + QLatin1Char('/') + relativePart;
         if (QFileInfo::exists(targetFile))
-            return makeNonceUrl(targetFile);
+            return makeNonceUrl(targetFile, fallback);
 
         const QString defaultFile =
             AppPaths::instance().qmlRoot() + QLatin1Char('/') + relativePart;
         if (QFileInfo::exists(defaultFile))
-            return makeNonceUrl(defaultFile);
+            return makeNonceUrl(defaultFile, fallback);
     } catch (const std::exception &e) {
         // interceptor.py:100-101：拦截异常只记录，不中断加载
         cwn::Log::error(QStringLiteral("Error intercepting URL %1: %2")

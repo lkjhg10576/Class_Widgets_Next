@@ -179,6 +179,11 @@ void AppCentral::setWidgetsWindow(WidgetsWindow *window)
         connect(window, &WidgetsWindow::themeLoadFailed,
                 m_themeRecovery, &ThemeRecovery::handleFailure);
     }
+    if (window && m_windowManager) {
+        // B3 缓存纪律：辅助窗口销毁引擎后，安排主引擎低频 trim（脏合并）
+        connect(m_windowManager, &AppWindowManager::auxiliaryWindowReleased,
+                window, &WidgetsWindow::notifyAuxiliaryWindowReleased);
+    }
 }
 
 void AppCentral::setTrayIcon(TrayIcon *icon)
