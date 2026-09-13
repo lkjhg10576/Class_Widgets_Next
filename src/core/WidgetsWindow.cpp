@@ -71,6 +71,18 @@ void WidgetsWindow::run()
     // C1 起：辅助窗口与主窗口共享引擎，trim 直接作用于共享缓存。
     m_trimTimer.setInterval(kTrimIntervalMs);
     connect(&m_trimTimer, &QTimer::timeout, this, &WidgetsWindow::onTrimTick);
+
+    // C1 后续（用户采纳）：启动期的一次性 init 页（主题加载/字体预热/配置装载
+    // 等摸过一次就不再碰的）也会常驻工作集 —— 启动 2 分钟稳态后置脏一次，走
+    // 与"辅助窗口关闭后"完全相同的 trim + 工作集收缩路径，把常驻基线压到热集
+    // 水平（真机实测：70–80 → 35–40MB）。此后无辅助窗口活动即不再触发。
+    QTimer::singleShot(kStartupTrimDelayMs, this, [this] {
+        if (!m_released && m_engine) {
+            m_trimDirty = true;
+            if (!m_trimTimer.isActive())
+                m_trimTimer.start();
+        }
+    });
 }
 
 void WidgetsWindow::notifyAuxiliaryWindowReleased()
