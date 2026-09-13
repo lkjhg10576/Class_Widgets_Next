@@ -291,21 +291,36 @@ QObject *AppCentral::themeManager() const { return m_themeManager; }
 
 void AppCentral::quit()
 {
-    QCoreApplication::quit();
+    // Qt 6.8+ 的 quit() 会先向所有可见窗口发送关闭请求，任一窗口在 onClosing 里
+    // 拒绝关闭（教程/设置等受管窗口均 accepted=false）就会放弃整个退出请求。
+    // exit() 无条件停止事件循环，不经过窗口关闭协商。
+    QCoreApplication::exit(0);
+}
+
+void AppCentral::relaunchIfNeeded()
+{
+    if (!m_relaunchRequested)
+        return;
+    m_relaunchRequested = false;
+    QProcess::startDetached(QCoreApplication::applicationFilePath(), m_relaunchArgs,
+                            QCoreApplication::applicationDirPath());
 }
 
 void AppCentral::restart(const QString &reason)
 {
-    // central.py restart 用 QProcess.startDetached 重启自身（可带 --update-done 等原因）；
-    // M4 先落地"延迟 2 秒自启 + 退出"，与更新器安装脚本的时序兼容，M5 再串联安装包。
+    // central.py restart 用 QProcess.startDetached 重启自身（可带 --update-done 等原因）。
+    // 注意两点（完成引导卡死问题的修复）：
+    // 1. 用 exit() 而非 quit()：quit() 会请求窗口关闭，教程窗口 onClosing 拒绝后
+    //    退出被放弃，转而弹出"关闭引导"确认框且反复出现；
+    // 2. 这里只登记重启意图，新实例由 main() 在单实例锁释放后经 relaunchIfNeeded()
+    //    拉起 —— 否则新进程抢不到锁（QGuiApplication 尚未退出）自退，应用直接消失。
     cwn::Log::info(QStringLiteral("AppCentral.restart requested (reason=%1)")
                        .arg(reason.isEmpty() ? QStringLiteral("user") : reason));
-    const QString appPath = QCoreApplication::applicationFilePath();
-    const QStringList args = reason.isEmpty()
+    m_relaunchRequested = true;
+    m_relaunchArgs = reason.isEmpty()
         ? QStringList{}
         : QStringList{ reason };
-    QProcess::startDetached(appPath, args, QCoreApplication::applicationDirPath());
-    QCoreApplication::quit();
+    QCoreApplication::exit(0);
 }
 
 void AppCentral::init()

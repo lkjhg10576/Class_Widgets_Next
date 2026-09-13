@@ -122,7 +122,10 @@ ApplicationWindow {
 
         standardButtons: Dialog.Cancel | Dialog.Ok
 
-        onAccepted: Qt.quit()
+        // 不用 Qt.quit()：Qt 6.8+ 的 quit() 会请求窗口关闭，而本窗口 onClosing 一律
+        // 拒绝关闭，退出请求会被放弃并再次弹出本对话框（死循环）。AppCentral.quit()
+        // 走 QCoreApplication::exit()，不经过窗口关闭协商。
+        onAccepted: AppCentral.quit()
     }
     readonly property var pageUrls: [
         Qt.resolvedUrl("../pages/tutorial/Welcome.qml"),

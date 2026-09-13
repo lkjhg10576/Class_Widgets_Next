@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
         const int code = app.exec();
         central.configs()->save();
         guard.release();
+        central.relaunchIfNeeded(); // 锁已释放，此刻拉起新实例才能抢到锁
         return code;
     }
 
@@ -138,5 +139,6 @@ int main(int argc, char *argv[])
     central.configs()->save();
     trayIcon.cleanup();
     guard.release();
+    central.relaunchIfNeeded(); // 锁已释放，此刻拉起新实例才能抢到锁
     return code;
 }

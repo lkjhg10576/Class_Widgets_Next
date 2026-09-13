@@ -3,6 +3,7 @@
 #include <QFont>
 #include <QObject>
 #include <QPoint>
+#include <QStringList>
 #include <QVariant>
 
 class AppPaths;
@@ -56,6 +57,12 @@ public:
     // 首次运行教程门是否触发（对应 central.py init() 的 WAITING_FOR_TUTORIAL 分支）；
     // 为 true 时 main.cpp 不创建主窗口/托盘，事件循环仅承载教程窗口
     bool isWaitingForTutorial() const { return m_waitingForTutorial; }
+
+    // restart() 只登记重启意图并退出事件循环；main.cpp 在单实例锁释放后调用本方法
+    // 拉起新实例（若在 restart() 里 startDetached，新进程会因锁未释放而自退，
+    // 表现为"重启/完成引导后应用消失"）
+    bool isRelaunchRequested() const { return m_relaunchRequested; }
+    void relaunchIfNeeded();
 
     // 对应 central.py setup_qml_context：为每个引擎注册全部上下文属性，
     // 属性名与 Python 版逐字一致（137 个 QML 零改动的底线）。
@@ -147,4 +154,6 @@ private:
 
     bool m_restartRequired = false;
     bool m_waitingForTutorial = false;
+    bool m_relaunchRequested = false;
+    QStringList m_relaunchArgs;
 };
