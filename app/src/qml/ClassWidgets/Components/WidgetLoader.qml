@@ -33,6 +33,11 @@ Loader {
             // a widget/plugin URL, so the source path cannot identify this
             // as a theme failure.
             AppCentral.reportThemeLoadFailure(widgetSource)
+            // 失败必须复位 reloading：回滚默认主题 / 用户改选其他主题都会再发
+            // themeReadyToReload，若停留在 true，本 Loader 会被
+            // onThemeReadyToReload 的 guard 永久跳过 —— 小组件从此消失，
+            // 直到重启进程（material 失败连累 vista 的就是这个）。
+            reloading = false
         }
     }
 

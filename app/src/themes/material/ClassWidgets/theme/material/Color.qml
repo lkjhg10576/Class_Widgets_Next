@@ -19,8 +19,10 @@ QtObject { // 直接使用 QtObject，不要用 Item
 
     // A6（内存/唤醒优化）：200ms 常驻轮询 → 信号驱动。
     // Theme.setThemeColor() 的全部路径最终都写 Utils.primaryColor（RinUI 单例），
-    // 其变更信号即主题色变更的精确通知，无需定时轮询比对
-    Connections {
+    // 其变更信号即主题色变更的精确通知，无需定时轮询比对。
+    // 注意：QtObject 没有默认 data 属性，不能直接声明子对象（会导致
+    // "无法分配给不存在的默认属性" 且整个单例不可用）；必须经 property 声明挂载。
+    property Connections _utilsWatcher: Connections {
         target: Utils
         function onPrimaryColorChanged() {
             root.seedColor = Theme.getThemeColor()

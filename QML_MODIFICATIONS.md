@@ -5,11 +5,13 @@
 
 ## 当前状态：`app/src/qml` 共 8 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除，见下）
 > 另有 2 个**新增文件**（非上游改动）：天气小组件及其设置页，见改动 5。
+> `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
+> 与改动 8（WidgetLoader.qml 失败恢复，属 `app/src/qml`）已偏离上游。
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
 | `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **4 处（均为插件入口遮蔽，见改动 3）** |
-| `app/src/themes/` | 上游内置主题定义 | **无（逐字复制）** |
+| `app/src/themes/` | 上游内置主题定义 | **1 处（material Color.qml，改动 7；上游原样保留在文件外注释）** |
 | `app/assets/` | 上游资产 | **无（逐字复制）** |
 | `app/themes/` | 上游外部主题扫描目录 | **无（逐字复制）** |
 | `app/examples/` | 上游示例课表 | **无（逐字复制）** |
@@ -95,6 +97,28 @@ A7 曾给 12 处大图加"按显示尺寸 × DPR"的 `sourceSize`；其中两个
 - 其余 `sourceSize` 用点复核过：8 处 `anchors.fill`（宽度与隐式尺寸无关，安全）；
   `Windows/WhatsNew.qml` 一处为 fillWidth/fillHeight + maximumHeight，当前结构
   稳定，暂不动。
+
+### 7. material 主题 `Color.qml`：信号监听经 property 声明挂载（material/vista 主题失效修复）
+
+A6 把上游 200ms 轮询 Timer 改写为 `Connections { target: Utils ... }` 时，把它当成了
+`QtObject` 根的**子对象**声明。`QtObject` 没有 `data` 默认属性，子对象声明在引擎
+实例化时直接报"无法分配给不存在的默认属性"——`MaterialColor` 单例整个不可用，
+进而 `ClassWidgets.Theme.Material` 的所有使用方（Text/Icon/Widget…）类型不可用，
+Material You 主题下所有小组件 Loader.Error、整主题回退默认。
+
+修复（本版）：改为 `property Connections _utilsWatcher: Connections { ... }`，
+经属性声明挂载（QtObject 允许属性、不允许子对象），保留 A6 的信号驱动语义。
+连带修复：该失败曾触发 WidgetLoader.qml 的 reloading 卡死（见改动 8），使同会话内
+先选 material 失败后、再选 vista（或任何其他主题）小组件永久消失——即用户报告的
+"Material You 与 Vista 都完全不可用"。
+
+### 8. `WidgetLoader.qml`：Loader.Error 时复位 `reloading`
+
+`onThemeReadyToReload` 用 `if (reloading) return` 防重入，但 `reloading` 只在
+`Loader.Ready` 分支复位——一旦某次主题重载以 Error 告终（如改动 7 的 material），
+该 Loader 对后续所有 `themeReadyToReload`（含失败回滚默认主题）永久跳过，
+小组件从此消失直到重启进程。修复：Error 分支同样 `reloading = false`，保证
+回滚/改选其他主题时必然重试。
 
 ## 修改申请流程
 
