@@ -20,6 +20,8 @@ class RinUiWindowBase;
 //     （QML onClosing 调用栈内不得同步拆 QML 对象树/引擎；manager.py:206-236
 //     用 QTimer.singleShot(0, _finish_release) 处理同样的问题）——
 //     即「关闭即销毁，重开时重建」，而不是长期 hide 驻留。
+//     C1 起默认共享主窗口引擎：销毁指 root 对象树，引擎与类型缓存保留
+//     （关闭后 30s 由 WidgetsWindow 的 trim 逐出不可达组件）。
 //   - 所有窗口对象以管理器为 QObject 父，管理器析构时兜底清理遗留窗口。
 //
 // 窗口 QML 源与尺寸/标志（frameless、透明全屏遮罩、FluentWindow 等）
@@ -39,9 +41,9 @@ public:
     void releaseAll();
 
 signals:
-    // B3 缓存纪律：辅助窗口完成 release（引擎已销毁）后发出。
-    // AppCentral 把它接到主窗口 WidgetsWindow::notifyAuxiliaryWindowReleased，
-    // 触发主引擎的低频 trim（脏合并，5 分钟节拍）。
+    // C1 缓存纪律：辅助窗口完成 release（root 树已销毁；共享引擎模式下引擎
+    // 保留）后发出。AppCentral 把它接到主窗口 WidgetsWindow::notifyAuxiliaryWindowReleased，
+    // 触发共享引擎的低频 trim（脏合并，30s 节拍）。
     void auxiliaryWindowReleased();
 
 public slots:
@@ -95,6 +97,9 @@ private:
     void open(WindowId id);                         // manager.py:183-196 open
     void releaseWindow(WindowId id);                // manager.py:206-236 release
     RinUiWindowBase *createWindow(WindowId id);     // manager.py:247-297 _create_*
+    // C1 共享引擎开关：环境变量 CW2_SHARED_ENGINE 优先（"0"=关闭），其次配置键
+    // app.shared_engine（缺省开）——计划 §9.5 的灰度回退要求
+    bool sharedEngineEnabled() const;
 
     // manager.py 的窗口键名（用作 m_windows 的键与日志名）
     static QString windowName(WindowId id);

@@ -19,7 +19,7 @@ WidgetsWindow::WidgetsWindow(AppCentral *central, QObject *parent)
                                        + QStringLiteral("/MainInterface.qml"));
 
     // 对应 core.py:36 的 QueuedConnection
-    connect(m_engine.get(), &QQmlApplicationEngine::objectCreated,
+    connect(m_engine.data(), &QQmlApplicationEngine::objectCreated,
             this, &WidgetsWindow::onQmlReady, Qt::QueuedConnection);
 }
 
@@ -59,7 +59,8 @@ void WidgetsWindow::run()
         m_mouseTimer.start(kMousePollIntervalMs);
 
     // B3：低频 trim 定时器 —— 平时停表，仅在辅助窗口关闭置脏后运行，
-    // trim 后发现仍无脏即自动停表（A6 定时器治理纪律：不空转）
+    // trim 后发现仍无脏即自动停表（A6 定时器治理纪律：不空转）。
+    // C1 起：辅助窗口与主窗口共享引擎，trim 直接作用于共享缓存。
     m_trimTimer.setInterval(kTrimIntervalMs);
     connect(&m_trimTimer, &QTimer::timeout, this, &WidgetsWindow::onTrimTick);
 }
@@ -81,10 +82,11 @@ void WidgetsWindow::onTrimTick()
     if (!m_engine || m_released)
         return;
 
-    // B3：辅助窗口的引擎已随自身销毁，其组件早已不可达；但主引擎的类型缓存中
-    // 可能残留被它们"预热"过的组件壳。trimComponentCache() 只逐出**不可达**组件
-    // （区别于 clearComponentCache() 的全量清空，主界面常驻组件不受影响），
-    // 再触发一次 JS GC 回收碎片。5 分钟节拍下这属低频、可预算的主线程开销。
+    // C1：辅助窗口与主窗口共享引擎，关闭释放的组件类型留在共享类型缓存中。
+    // trimComponentCache() 只逐出**不可达**组件（区别于 clearComponentCache()
+    // 的全量清空，主界面常驻组件有引用、不受影响），再触发一次 JS GC 回收
+    // 碎片，使关闭辅助窗口后的内存回到打开前水平。节拍取 30s：兼顾"用户关掉
+    // 窗口后马上看任务管理器"的回落观感与 30s 内重开走缓存的快速路径。
     m_engine->trimComponentCache();
     m_engine->collectGarbage();
     cwn::Log::info(QStringLiteral(

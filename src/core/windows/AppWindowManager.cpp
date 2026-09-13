@@ -1,13 +1,18 @@
 #include "AppWindowManager.h"
 
 // 允许清单内的 include（只读使用）：
-// - AppCentral.h：setupQmlContext / classSwapManager 访问；头文件里仅前置声明，
-//   无循环依赖（AppCentral.h 不包含本头文件）。
-// - AppPaths.h / Logger.h / RinUiWindowBase.h：路径、日志与每窗口独立 QML 引擎基座。
+// - AppCentral.h：setupQmlContext / widgetsWindow / configs 访问；头文件里仅前置
+//   声明，无循环依赖（AppCentral.h 不包含本头文件）。
+// - AppPaths.h / Logger.h / RinUiWindowBase.h：路径、日志与 QML 引擎基座。
+// - WidgetsWindow.h：C1 共享引擎取主窗口引擎句柄（engine() 为基类方法，
+//   派生指针调用需完整类型）。
+// - ConfigStore.h：sharedEngineEnabled 读 app.shared_engine 配置键。
 #include "AppCentral.h"
 #include "AppPaths.h"
+#include "ConfigStore.h"
 #include "Logger.h"
 #include "RinUiWindowBase.h"
+#include "WidgetsWindow.h"
 
 #include <QMetaObject>
 #include <QPointer>
@@ -215,17 +220,30 @@ RinUiWindowBase *AppWindowManager::ensure(WindowId id)
 
 RinUiWindowBase *AppWindowManager::createWindow(WindowId id)
 {
-    // 对应 windows.py:13-34 ReleasableWindow.__init__：辅助窗口各自持有独立引擎
-    //（RinUiWindowBase 即 shared_engine=False 语义）；central.setup_qml_context(self)
-    //（windows.py:19）→ AppCentral::setupQmlContext 为该引擎注册全部上下文属性
-    //（其中 WindowManager 即本管理器，QML 内 WindowManager.xxx 可用）。
-    auto *window = new RinUiWindowBase(this); // QObject 父子：管理器析构时兜底清理
+    // C1 共享引擎（CWNext-内存优化计划.md §6）：辅助窗口默认复用主窗口的
+    // QQmlApplicationEngine —— 类型缓存与 JS 堆跨开/关复用，消除旧"每窗独立
+    // 引擎"模式下的 RinUI 全量重编译（开窗稳态提交 +40MB、瞬时峰值 +138MB）
+    // 与关闭销毁引擎的堆碎片残余（+31MB 不回落，Step 0 C2 实测）。
+    // 主窗口不存在（首跑教程门、极早的主题错误弹窗）或开关关闭时回退独立引擎。
     if (!m_central) {
         cwn::Log::error(QStringLiteral("AppWindowManager: no AppCentral wired"));
-        delete window;
         return nullptr;
     }
-    m_central->setupQmlContext(window->engine());
+
+    QQmlApplicationEngine *sharedEngine = nullptr;
+    if (sharedEngineEnabled()) {
+        if (WidgetsWindow *mainWindow = m_central->widgetsWindow())
+            sharedEngine = mainWindow->engine();
+    }
+
+    RinUiWindowBase *window = sharedEngine
+        ? new RinUiWindowBase(sharedEngine, this) // QObject 父子：管理器析构时兜底清理
+        : new RinUiWindowBase(this);
+
+    // 上下文注册只做一次：共享引擎已在 WidgetsWindow::run 里注册过全部上下文
+    // 属性与 URL 拦截器；重复 addUrlInterceptor 会让同一 URL 被拦截两次
+    if (!sharedEngine)
+        m_central->setupQmlContext(window->engine());
 
     // windows.py:20 把 central.retranslate 连到 engine.retranslate（PySide 专属
     // API）；Qt 6 的 C++ QQmlEngine 无公开 retranslate()，翻译重载随 M4 翻译器
@@ -250,8 +268,24 @@ RinUiWindowBase *AppWindowManager::createWindow(WindowId id)
         return nullptr;
     }
 
-    cwn::Log::info(QStringLiteral("Window '%1' created (%2)").arg(windowName(id), path));
+    cwn::Log::info(QStringLiteral("Window '%1' created (%2, engine=%3)")
+                       .arg(windowName(id), path,
+                            sharedEngine ? QStringLiteral("shared")
+                                         : QStringLiteral("owned")));
     return window;
+}
+
+bool AppWindowManager::sharedEngineEnabled() const
+{
+    // C1 灰度回退开关（计划 §9.5）：环境变量优先（便于不改配置的应急回退），
+    // 其次配置键，缺省开启
+    if (const QString env = qEnvironmentVariable("CW2_SHARED_ENGINE"); !env.isEmpty())
+        return env != QLatin1String("0");
+    if (m_central && m_central->configs()) {
+        if (const auto value = m_central->configs()->value(QStringLiteral("app.shared_engine")))
+            return value->toBool(true);
+    }
+    return true;
 }
 
 void AppWindowManager::releaseWindow(WindowId id)
@@ -282,11 +316,12 @@ void AppWindowManager::releaseWindow(WindowId id)
                 m_pendingReleases.removeAt(i);
                 auto *managed = static_cast<RinUiWindowBase *>(guard.data());
                 // window.release()（windows.py:44-77）：hide → releaseResources →
-                // 清组件缓存 → 销毁引擎（RinUiWindowBase::release 内部实现，幂等）
+                // 销毁 root 树（RinUiWindowBase::release 内部实现，幂等；C1 共享
+                // 模式下引擎与类型缓存保留，自有模式才销毁引擎）
                 managed->release();
-                // 释放引擎后销毁窗口对象本身（关闭即销毁，重开时重建）
+                // 销毁窗口对象本身（关闭即销毁，重开时重建）
                 managed->deleteLater();
-                // B3：引擎此刻已销毁，通知主窗口安排低频 trim
+                // B3：通知主窗口安排共享引擎的低频 trim（逐出本窗口的不可达组件）
                 emit auxiliaryWindowReleased();
                 return;
             }

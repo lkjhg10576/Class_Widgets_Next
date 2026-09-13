@@ -25,8 +25,9 @@ public:
 
     bool isQmlReady() const { return m_qmlReady; }
 
-    // B3 缓存纪律：辅助窗口关闭 → 主引擎延迟低频 trim（5 分钟一次脏检查）。
-    // 连续开关多个窗口只合并为一次 trim；trim 后无新脏即停表，不空转（A6 纪律）。
+    // C1 缓存纪律：辅助窗口关闭 → 主引擎（共享引擎）延迟 trim（脏检查节拍，
+    // C1 起为 30s）。连续开关多个窗口只合并为一次 trim；trim 后无新脏即停表，
+    // 不空转（A6 纪律）。
     void notifyAuxiliaryWindowReleased();
 
 signals:
@@ -38,7 +39,7 @@ private slots:
 
 private:
     static constexpr int kMousePollIntervalMs = 100; // A6：原 33ms
-    static constexpr int kTrimIntervalMs = 5 * 60 * 1000; // B3：低频 trim 节拍
+    static constexpr int kTrimIntervalMs = 30 * 1000; // C1：脏驱动回落节拍（原 B3 5min）
 
     void onQmlReady(QObject *obj, const QUrl &objUrl);
     void onThemeChanged();
