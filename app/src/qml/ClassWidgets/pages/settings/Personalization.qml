@@ -80,6 +80,8 @@ FluentPage {
                         id: themeImage
                         anchors.fill: parent
                         source: modelData.preview || ""
+                        // A7：按显示尺寸解码，避免整图分辨率纹理
+                        sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         cache: true

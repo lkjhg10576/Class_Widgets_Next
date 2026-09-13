@@ -69,6 +69,8 @@ TutorialComponents.TutorialPage {
                                 Layout.preferredWidth: parent.width
                                 Layout.preferredHeight: 72
                                 source: PathManager.images("tutorial/" + modelData.preview)
+                                // A7：按显示尺寸解码，避免整图分辨率纹理
+                                sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                                 fillMode: Image.PreserveAspectFit
                                 asynchronous: true
                             }

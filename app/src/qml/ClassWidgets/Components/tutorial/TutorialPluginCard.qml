@@ -106,6 +106,8 @@ Clip {
                 id: pluginIcon
                 anchors.fill: parent
                 source: root.iconSource()
+                // A7：按显示尺寸解码，避免整图分辨率纹理
+                sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 cache: true

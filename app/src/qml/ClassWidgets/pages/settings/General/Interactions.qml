@@ -73,6 +73,8 @@ FluentPage {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 128
                                 source: root.hidePreviewSource(modelData.preview)
+                                // A7：按显示尺寸解码，避免整图分辨率纹理
+                                sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                                 fillMode: Image.PreserveAspectFit
                                 asynchronous: true
                             }

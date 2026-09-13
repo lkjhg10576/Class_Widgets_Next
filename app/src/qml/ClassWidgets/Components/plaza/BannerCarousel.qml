@@ -231,6 +231,8 @@ ColumnLayout {
                                         Image {
                                             anchors.fill: parent
                                             source: pluginData && pluginData.icon ? pluginData.icon : ""
+                                            // A7：按显示尺寸解码，避免整图分辨率纹理
+                                            sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                                             fillMode: Image.PreserveAspectFit
                                             visible: pluginData && pluginData.icon
 
@@ -290,6 +292,8 @@ ColumnLayout {
                         Image {
                             anchors.fill: parent
                             source: slideData.banner && slideData.banner.image ? slideData.banner.image : ""
+                            // A7：按显示尺寸解码，避免整图分辨率纹理
+                            sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                             fillMode: Image.PreserveAspectCrop
                         }
 
