@@ -41,6 +41,13 @@ QQW.Window {
     property bool initialized: false
     property alias editMode: widgetsLoader.editMode
     property bool mouseHovered: false
+    // 主窗口蒙版（WidgetsWindow::updateMask 只暴露小组件矩形）会把渲染在窗口 overlay
+    // 屏幕中央的 RinUI Dialog（QQC2 Popup，无独立原生窗口）整块裁掉——弹窗其实开着，
+    // 用户却看到"无弹窗 + 小组件被模态遮罩压暗"的假死。弹窗可见期间将本属性置真，
+    // C++ 侧据此摘掉蒙版（与 menuVisible/editMode 同一处理路径）；visible 在开启动画
+    // 起始即置位、退场动画结束后才复位，蒙版切换正好包住弹窗动画。
+    property bool dialogOpen: rescheduleDayDialog.visible || switchScheduleDialog.visible
+    onDialogOpenChanged: widgetsLoader.geometryChanged()
     property bool isFloatingMode: Configs.data.interactions.hide.state
         && (Configs.data.interactions.tapped_action === "floating_widget"
             || Configs.data.interactions.hide.action === "floating_widget")
@@ -102,10 +109,16 @@ QQW.Window {
         // 渲染在所属窗口 overlay 内——挂 TrayPanel 下时面板一隐藏弹窗就没了）。
         // 托盘菜单"调休"与托盘面板宫格两条路径在此汇合。
         function onTrayShortcutRequested(shortcutId) {
-            if (shortcutId === "com.classwidgets.reschedule-day")
+            if (shortcutId === "com.classwidgets.reschedule-day") {
+                // 从托盘菜单触发时主窗口不在前台，先激活拿到键盘焦点（Esc/Enter 可用）
+                root.raise()
+                root.requestActivate()
                 rescheduleDayDialog.open()
+            }
         }
         function onTraySwitchScheduleRequested() {
+            root.raise()
+            root.requestActivate()
             switchScheduleDialog.open()
         }
     }

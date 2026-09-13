@@ -194,7 +194,12 @@ void WidgetsWindow::updateMask()
 
     const bool menuShow = widgetsLoader->property("menuVisible").toBool();
     const bool editMode = widgetsLoader->property("editMode").toBool();
-    if (menuShow || editMode) {
+    // B4：MainInterface 常驻弹窗（调休/切换课程表，RinUI Dialog = QQC2 Popup）渲染在
+    // 本窗口 overlay 的屏幕中央，位于小组件蒙版之外 —— 不摘蒙版弹窗会被整块裁掉，
+    // 用户看到"无弹窗 + 小组件被模态遮罩压暗"的假死。dialogOpen 由 QML 在弹窗
+    // visible 变化时经 geometryChanged() 触发本函数（见 MainInterface.qml）。
+    const bool dialogOpen = root->property("dialogOpen").toBool();
+    if (menuShow || editMode || dialogOpen) {
         m_interactiveRect = QRegion();
         root->setMask(QRegion());
         return;
