@@ -263,6 +263,10 @@ Item {
     Loader {
         id: floatingLoader
         objectName: "floatingWidgetLoader"
+        // A5（内存优化）：浮窗内容（4×AnimatedDigits + FastBlur 光晕 + ProgressRing
+        // Canvas）原先无条件常驻加载；改为仅浮窗模式按需创建，退出动画播完再卸载，
+        // 避免内容在淡出过程中瞬间消失
+        active: root.floatingMode || exitAnimation.running
         source: PathManager.qml("Theme/components/FloatingWidget.qml")
         asynchronous: true
         width: root.contentWidth

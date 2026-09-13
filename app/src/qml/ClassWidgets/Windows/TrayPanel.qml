@@ -174,6 +174,28 @@ Window {
         }
     }
 
+    // A5（内存优化）：面板改由 MainInterface 的 Loader 首开按需创建。
+    // 定位/显示逻辑提为公开函数：首次打开时本次 togglePanel 信号已错过
+    // 内部 Connections，由 MainInterface 补调 openAt。
+    function openAt(pos) {
+        const offsetY = 30
+        let x = pos.x - panel.width / 2
+        let y = pos.y + offsetY
+
+        if (y + panel.height > panel.Screen.height) {
+            y = pos.y - panel.height - offsetY
+        }
+        if (y < 0) {
+            y = 0
+        }
+
+        panel.x = x
+        panel.y = y
+        panel.visible = true
+        panel.raise()
+        panel.requestActivate()
+    }
+
     Connections {
         target: AppCentral
 
@@ -184,22 +206,7 @@ Window {
         }
 
         function onTogglePanel(pos) {
-            const offsetY = 30
-            let x = pos.x - panel.width / 2
-            let y = pos.y + offsetY
-
-            if (y + panel.height > panel.Screen.height) {
-                y = pos.y - panel.height - offsetY
-            }
-            if (y < 0) {
-                y = 0
-            }
-
-            panel.x = x
-            panel.y = y
-            panel.visible = true
-            panel.raise()
-            panel.requestActivate()
+            panel.openAt(pos)
         }
     }
 }

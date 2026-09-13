@@ -31,6 +31,11 @@ Dialog {
         }
     }
 
+    // A5（内存优化）：关闭即卸载已加载的设置页（原先页面常驻存活）
+    onClosed: {
+        settingsLoader.source = ""
+    }
+
     function setSource(source, params) {
         settingsLoader.setSource(source, params)
     }

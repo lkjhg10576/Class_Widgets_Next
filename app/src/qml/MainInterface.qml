@@ -83,10 +83,20 @@ QQW.Window {
         }
     }
 
+    // A5（内存优化）：TrayPanel（含 ListView/ScheduleClip/RescheduleDayDialog
+    // 整棵对象树）原先启动即常驻实例化；改为首次打开托盘面板才创建，之后保持
     Connections {
         target: AppCentral
         function onTogglePanel(pos) {
-            trayPanel.raise()
+            if (!trayPanelLoader.active) {
+                // 同步创建（Loader 默认非异步）；创建晚于本次信号，需补调 openAt
+                trayPanelLoader.active = true
+                if (trayPanelLoader.item && trayPanelLoader.item.openAt)
+                    trayPanelLoader.item.openAt(pos)
+                return
+            }
+            if (trayPanelLoader.item)
+                trayPanelLoader.item.raise()
         }
     }
 
@@ -150,8 +160,12 @@ QQW.Window {
         }
     }
 
-    TrayPanel {
-        id: trayPanel
+    Loader {
+        id: trayPanelLoader
+        active: false
+        sourceComponent: Component {
+            TrayPanel {}
+        }
     }
 
     Component.onCompleted: {
