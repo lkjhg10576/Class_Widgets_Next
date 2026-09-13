@@ -114,3 +114,5 @@ endif()
 # 安装后布局：ClassWidgetsNext.exe + src/qml + assets + RinUI + themes + configs
 install(TARGETS ClassWidgetsNext RUNTIME DESTINATION .)
 install(DIRECTORY app/ DESTINATION .)
+# UtilsBackend::loadLicense 读 ROOT_PATH/LICENSE（上游 backend.py:227-239），随包提供
+install(FILES LICENSE DESTINATION .)

@@ -24,3 +24,6 @@ CMakeLists.txt.user
 Thumbs.db
 .DS_Store
 build-errors.txt
+
+# 本地诊断日志
+_analysis_*.log
