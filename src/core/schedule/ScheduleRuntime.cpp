@@ -279,6 +279,13 @@ QJsonValue configValue(const ConfigStore *configs, const QString &key)
     return value ? *value : QJsonValue(QJsonValue::Undefined);
 }
 
+// currentTime 属性按 HH:mm:ss 对外：毫秒差异不算属性变化（A2 差分口径）
+bool sameSecond(const QDateTime &a, const QDateTime &b)
+{
+    return a.date() == b.date() && a.time().hour() == b.time().hour()
+        && a.time().minute() == b.time().minute() && a.time().second() == b.time().second();
+}
+
 } // namespace
 
 ScheduleRuntime::ScheduleRuntime(ConfigStore *configs, ScheduleManager *manager,
@@ -320,57 +327,6 @@ QVariantMap ScheduleRuntime::currentDate() const
              { QStringLiteral("day"), date.day() } };
 }
 
-QVariantList ScheduleRuntime::subjects() const
-{
-    // runtime.py:162-166
-    if (m_schedule.isEmpty()) {
-        return {};
-    }
-    QVariantList result;
-    const QJsonArray list = ScheduleModel::subjects(m_schedule);
-    result.reserve(list.size());
-    for (const QJsonValue &v : list) {
-        result.append(v.toObject().toVariantMap());
-    }
-    return result;
-}
-
-QVariantMap ScheduleRuntime::scheduleMeta() const
-{
-    // runtime.py:168-172
-    if (m_schedule.isEmpty()) {
-        return {};
-    }
-    return meta(m_schedule).toVariantMap();
-}
-
-QVariantList ScheduleRuntime::currentDayEntries() const
-{
-    // runtime.py:174-178：当前日程（全部条目）
-    if (m_currentDay.isEmpty()) {
-        return {};
-    }
-    QVariantList result;
-    const QJsonArray entries = m_currentDay.value(QLatin1String("entries")).toArray();
-    result.reserve(entries.size());
-    for (const QJsonValue &v : entries) {
-        result.append(v.toObject().toVariantMap());
-    }
-    return result;
-}
-
-QVariantMap ScheduleRuntime::currentEntry() const
-{
-    // runtime.py:180-182
-    return m_currentEntry.toVariantMap();
-}
-
-QVariantList ScheduleRuntime::nextEntries() const
-{
-    // runtime.py:184-188
-    return m_nextEntries;
-}
-
 QVariantMap ScheduleRuntime::remainingTime() const
 {
     // runtime.py:194-205
@@ -390,29 +346,32 @@ QString ScheduleRuntime::currentStatus() const
     return m_currentStatus;
 }
 
-QVariantMap ScheduleRuntime::currentSubject() const
-{
-    // runtime.py:220-222
-    return m_currentSubject.toVariantMap();
-}
-
 void ScheduleRuntime::refresh()
 {
-    // runtime.py:228-237（schedule=None 分支）
+    // runtime.py:228-237（schedule=None 分支）：每秒 tick 路径，课表内容不变
     if (m_schedule.isEmpty()) {
         return;
     }
-    refreshWith(m_schedule);
+    recompute(m_schedule, false);
 }
 
 void ScheduleRuntime::refreshWith(const QJsonObject &schedule)
 {
-    // runtime.py:228-237 refresh(schedule)
+    // runtime.py:228-237 refresh(schedule)：课表推送/首次装配路径
+    recompute(schedule, true);
+}
+
+void ScheduleRuntime::recompute(const QJsonObject &schedule, bool scheduleChanged)
+{
     m_refreshTimer.stop();
-    updateSchedule(schedule);
+    updateSchedule(schedule, scheduleChanged);
     updateTime();
     updateNotify();
-    emit updated();
+    // A2：updated 退化为聚合信号 —— 任一属性实际变化才发出（原先每秒必发）
+    if (m_anyPropertyChanged) {
+        m_anyPropertyChanged = false;
+        emit updated();
+    }
 }
 
 void ScheduleRuntime::scheduleRefresh(const QJsonObject &schedule)
@@ -422,55 +381,126 @@ void ScheduleRuntime::scheduleRefresh(const QJsonObject &schedule)
     m_refreshTimer.start();
 }
 
-void ScheduleRuntime::updateSchedule(const QJsonObject &schedule)
+void ScheduleRuntime::updateSchedule(const QJsonObject &schedule, bool scheduleChanged)
 {
-    // runtime.py:250-283 _update_schedule
-    if (!schedule.isEmpty()) {
+    // runtime.py:250-283 _update_schedule。A2：逐属性差分 NOTIFY，仅值变化的
+    // 属性发信号；JSON→QVariant 转换仅在源数据变化时执行一次。
+    // 课表深比较只发生在推送路径（scheduleChanged=true，低频）；每秒 tick 路径
+    // 跳过比较（tick 传的就是 m_schedule 自身）。
+    if (!schedule.isEmpty() && scheduleChanged && schedule != m_schedule) {
         m_schedule = schedule;
+        m_subjectsValue.clear();
+        const QJsonArray list = ScheduleModel::subjects(m_schedule);
+        m_subjectsValue.reserve(list.size());
+        for (const QJsonValue &v : list) {
+            m_subjectsValue.append(v.toObject().toVariantMap());
+        }
+        m_scheduleMetaValue = meta(m_schedule).toVariantMap();
+        m_anyPropertyChanged = true;
+        emit subjectsChanged();
+        emit scheduleMetaChanged();
     }
 
-    m_timeOffset = configValue(m_configs, QStringLiteral("schedule.time_offset")).toInt(0);
-    m_currentTime = QDateTime::currentDateTime();
-    m_currentOffsetTime = m_currentTime.addSecs(m_timeOffset); // 内部计算时间
+    const int newOffset =
+        configValue(m_configs, QStringLiteral("schedule.time_offset")).toInt(0);
+    assignProperty(m_timeOffset, newOffset, &ScheduleRuntime::timeOffsetChanged);
+
+    const QDateTime now = QDateTime::currentDateTime();
+    m_currentOffsetTime = now.addSecs(newOffset); // 内部计算时间
+    const bool dateChanged = now.date() != m_currentTime.date();
+    if (!sameSecond(now, m_currentTime)) {
+        m_currentTime = now;
+        m_anyPropertyChanged = true;
+        emit currentTimeChanged();
+    }
+    if (dateChanged) {
+        m_anyPropertyChanged = true;
+        emit currentDateChanged();
+    }
 
     const QJsonObject rescheduleMap =
         configValue(m_configs, QStringLiteral("schedule.reschedule_day")).toObject();
     const QJsonObject classSwap =
         configValue(m_configs, QStringLiteral("schedule.class_swap")).toObject();
 
-    m_currentDay = getDayEntries(m_schedule, m_currentOffsetTime, rescheduleMap, classSwap);
+    const QJsonObject day =
+        getDayEntries(m_schedule, m_currentOffsetTime, rescheduleMap, classSwap);
+    if (day != m_currentDay) {
+        m_currentDay = day;
+        // runtime.py:174-178：当前日程（全部条目），转换结果缓存供 getter 复用
+        m_currentDayEntriesValue.clear();
+        const QJsonArray dayEntries = day.value(QLatin1String("entries")).toArray();
+        m_currentDayEntriesValue.reserve(dayEntries.size());
+        for (const QJsonValue &v : dayEntries) {
+            m_currentDayEntriesValue.append(v.toObject().toVariantMap());
+        }
+        m_anyPropertyChanged = true;
+        emit currentDayEntriesChanged();
+    }
 
     if (!m_currentDay.isEmpty()) {
-        m_currentEntry = getCurrentEntry(m_currentDay, m_currentOffsetTime);
-        const QJsonArray next = getNextEntries(m_currentDay, m_currentOffsetTime);
-        m_nextEntries.clear();
-        m_nextEntries.reserve(next.size());
-        for (const QJsonValue &v : next) {
-            m_nextEntries.append(v.toObject().toVariantMap());
+        const QJsonObject entry = getCurrentEntry(m_currentDay, m_currentOffsetTime);
+        if (entry != m_currentEntry) {
+            m_currentEntry = entry;
+            m_currentEntryValue = entry.toVariantMap();
+            m_anyPropertyChanged = true;
+            emit currentEntryChanged();
         }
-        m_remainingSeconds = getRemainingSeconds(m_currentDay, m_currentOffsetTime);
+
+        const QJsonArray next = getNextEntries(m_currentDay, m_currentOffsetTime);
+        QVariantList nextList;
+        nextList.reserve(next.size());
+        for (const QJsonValue &v : next) {
+            nextList.append(v.toObject().toVariantMap());
+        }
+        assignProperty(m_nextEntries, nextList, &ScheduleRuntime::nextEntriesChanged);
+
+        assignProperty(m_remainingSeconds,
+                       getRemainingSeconds(m_currentDay, m_currentOffsetTime),
+                       &ScheduleRuntime::remainingTimeChanged);
 
         // runtime.py:268：preparation_time（getattr(...) or 2 → 0/负值视为 2）
         int prepMin = configValue(m_configs, QStringLiteral("schedule.preparation_time")).toInt(2);
         if (prepMin <= 0) {
             prepMin = 2;
         }
-        m_currentStatus = getCurrentStatus(m_currentDay, m_currentOffsetTime, prepMin);
+        assignProperty(m_currentStatus,
+                       getCurrentStatus(m_currentDay, m_currentOffsetTime, prepMin),
+                       &ScheduleRuntime::currentStatusChanged);
 
         const QJsonArray subjectList = ScheduleModel::subjects(m_schedule);
-        m_currentSubject = getCurrentSubject(m_currentDay, subjectList, m_currentOffsetTime);
-        m_currentTitle = entryTitle(m_currentEntry); // runtime.py:271 getattr(title, None)
+        const QJsonObject subject =
+            getCurrentSubject(m_currentDay, subjectList, m_currentOffsetTime);
+        if (subject != m_currentSubject) {
+            m_currentSubject = subject;
+            m_currentSubjectValue = subject.toVariantMap();
+            m_anyPropertyChanged = true;
+            emit currentSubjectChanged();
+        }
+        assignProperty(m_currentTitle, entryTitle(m_currentEntry),
+                       &ScheduleRuntime::currentTitleChanged); // runtime.py:271 getattr(title, None)
     } else {
         // runtime.py:272-279
-        m_currentEntry = QJsonObject();
-        m_nextEntries.clear();
-        m_remainingSeconds = -1;
-        m_currentStatus = QString::fromLatin1(kTypeFree);
-        m_currentSubject = QJsonObject();
-        m_currentTitle.clear();
+        if (!m_currentEntry.isEmpty()) {
+            m_currentEntry = QJsonObject();
+            m_currentEntryValue.clear();
+            m_anyPropertyChanged = true;
+            emit currentEntryChanged();
+        }
+        assignProperty(m_nextEntries, QVariantList(), &ScheduleRuntime::nextEntriesChanged);
+        assignProperty(m_remainingSeconds, qint64(-1), &ScheduleRuntime::remainingTimeChanged);
+        assignProperty(m_currentStatus, QString::fromLatin1(kTypeFree),
+                       &ScheduleRuntime::currentStatusChanged);
+        if (!m_currentSubject.isEmpty()) {
+            m_currentSubject = QJsonObject();
+            m_currentSubjectValue.clear();
+            m_anyPropertyChanged = true;
+            emit currentSubjectChanged();
+        }
+        assignProperty(m_currentTitle, QString(), &ScheduleRuntime::currentTitleChanged);
     }
 
-    m_progress = progressPercent();
+    assignProperty(m_progress, progressPercent(), &ScheduleRuntime::progressChanged);
     if (m_previousEntry != m_currentEntry) {
         emit currentsChanged(m_currentStatus); // runtime.py:282-283
     }
@@ -482,10 +512,14 @@ void ScheduleRuntime::updateTime()
     if (m_schedule.isEmpty()) {
         return;
     }
-    m_currentDayOfWeek = m_currentOffsetTime.date().dayOfWeek();
-    m_currentWeek = weekNumber(startDate(m_schedule), m_currentOffsetTime.date());
-    m_currentWeekOfCycle =
-        cycleWeek(m_currentWeek, maxWeekCycle(m_schedule));
+    assignProperty(m_currentDayOfWeek, m_currentOffsetTime.date().dayOfWeek(),
+                   &ScheduleRuntime::currentDayOfWeekChanged);
+    assignProperty(m_currentWeek,
+                   weekNumber(startDate(m_schedule), m_currentOffsetTime.date()),
+                   &ScheduleRuntime::currentWeekChanged);
+    assignProperty(m_currentWeekOfCycle,
+                   cycleWeek(m_currentWeek, maxWeekCycle(m_schedule)),
+                   &ScheduleRuntime::currentWeekOfCycleChanged);
 }
 
 double ScheduleRuntime::progressPercent() const
