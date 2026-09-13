@@ -13,6 +13,8 @@
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QFontDatabase>
+#include <QQuickWindow>
+#include <QSGRendererInterface>
 #include <QTimer>
 
 #ifdef Q_OS_WIN
@@ -35,6 +37,14 @@ void setWindowsAppUserModelId() {}
 
 int main(int argc, char *argv[])
 {
+    // B1（内存优化）图形栈钉死：Step-0 同口径矩阵实测选定 D3D11 + basic 渲染循环
+    // （数据见 CWNext-内存优化计划.md §5）。setGraphicsApi 必须先于任何窗口创建；
+    // Qt 6 对 render loop 只认 QSG_RENDER_LOOP 环境变量（无公开 setter），仅在用户
+    // 未显式设置时注入以保留外部覆盖能力。
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Direct3D11);
+    if (!qEnvironmentVariableIsSet("QSG_RENDER_LOOP"))
+        qputenv("QSG_RENDER_LOOP", "basic");
+
     QApplication app(argc, argv);
     QApplication::setQuitOnLastWindowClosed(false); // 对应 app.py:42，常驻托盘
     QApplication::setApplicationName(QStringLiteral("Class Widgets Next"));
