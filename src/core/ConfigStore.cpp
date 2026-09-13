@@ -797,6 +797,7 @@ void ConfigStore::load()
     sanitize();                 // 轻量替代 Pydantic 模型校验
     cleanUselessConfigs();      // manager.py:117
     save();                     // manager.py:122：load 后无条件 save
+    invalidateDataCache();      // load 及其修正函数直写 m_json，统一失效缓存
 }
 
 void ConfigStore::save(bool silent)
@@ -822,8 +823,14 @@ void ConfigStore::startAutoSave()
 
 QVariant ConfigStore::data() const
 {
-    // manager.py:160-162 data 属性：整树转 dict/QVariant
-    return m_json.toVariantMap();
+    // manager.py:160-162 data 属性：整树转 dict/QVariant。
+    // A1：命中缓存时零拷贝返回（QVariantMap 隐式共享），仅 m_json 变更后
+    // 的首次读取重建一次
+    if (!m_dataCacheValid) {
+        m_dataCache = m_json.toVariantMap();
+        m_dataCacheValid = true;
+    }
+    return m_dataCache;
 }
 
 bool ConfigStore::isKeyLocked(const QString &key) const
@@ -877,6 +884,7 @@ void ConfigStore::setInternal(const QString &dottedKey, const QJsonValue &value)
 {
     // 内部写入：不检查锁定（schedule/ 域回写已过锁定检查的路径）
     jsonSetAt(m_json, dottedKey, value);
+    invalidateDataCache();
     emit dataChanged();
 }
 

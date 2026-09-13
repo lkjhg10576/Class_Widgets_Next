@@ -85,7 +85,16 @@ private:
 
     QString m_configsDir;
     QJsonObject m_json;
+    // A1（内存优化）：data 属性缓存。QML 有 126 处 Configs.data.* 读取，此前每次
+    // 读取都整树 toVariantMap()（深拷贝全部节点），且每秒信号风暴后全量重读，
+    // 是堆碎片的最大单一来源。缓存与 m_json 同步失效（见 invalidateDataCache）。
+    mutable QVariantMap m_dataCache;
+    mutable bool m_dataCacheValid = false;
     QSet<QString> m_lockedKeys;
     QTimer m_saveTimer;
     bool m_dirty = false;
+
+    // m_json 的所有写入必须让缓存失效：运行期唯一写入点是 setInternal()；
+    // load() 及其内部的修正函数（sanitize/ensureDefaults 等）结束时统一失效。
+    void invalidateDataCache() { m_dataCacheValid = false; }
 };
