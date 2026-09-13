@@ -12,7 +12,11 @@ Rectangle {
     property string oldValue: ""
     property double progress: 1  // 0-1
     property int duration: 700
+    // 保留属性（第三方主题可能引用）；A3 后不再参与 layer 纹理尺寸计算
     property real scaleFactor: Configs.data.preferences.scale_factor || 1.0
+    // A3（内存优化）：layer 纹理仅在动画进行期间存在（原先常驻，且被
+    // textureSize 放大 4 倍 → Time 挂件 6 数字 = 12 张 4x 超采样纹理）
+    property bool animating: false
 
     property alias font: oldDigit.font
     implicitWidth: Math.max(oldDigit.width, newDigit.width)
@@ -23,10 +27,8 @@ Rectangle {
         text: root.oldValue
         anchors.centerIn: parent
         opacity: 0
-        layer.enabled: true
+        layer.enabled: root.animating
         layer.effect: null
-        layer.textureSize: Qt.size(width * scaleFactor * 4,
-                               height * scaleFactor * 4)
     }
 
     LinearGradient  {
@@ -50,10 +52,8 @@ Rectangle {
         anchors.centerIn: parent
         opacity: 0
         font: oldDigit.font
-        layer.enabled: true
+        layer.enabled: root.animating
         layer.effect: null
-        layer.textureSize: Qt.size(width * scaleFactor * 4, 
-                               height * scaleFactor * 4)
     }
 
     LinearGradient  {
@@ -73,6 +73,7 @@ Rectangle {
 
     onValueChanged: {
         newDigitGradient.visible = true
+        root.animating = true
         progressAnimation.start()
     }
 
@@ -91,6 +92,7 @@ Rectangle {
             script: {
                 root.oldValue = root.value
                 newDigitGradient.visible = false
+                root.animating = false
             }
         }
     }
