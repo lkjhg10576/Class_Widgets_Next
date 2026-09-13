@@ -201,9 +201,18 @@ void AppCentral::setTrayIcon(TrayIcon *icon)
             m_windowManager, &AppWindowManager::openClassSwap);
     connect(icon, &TrayIcon::openTutorialRequested,
             m_windowManager, &AppWindowManager::openTutorial);
-    // 关于页是设置窗口的一页；托盘"关于"按上游语义打开设置（M3 简化，无页内跳转）
-    connect(icon, &TrayIcon::openAboutRequested,
-            m_windowManager, &AppWindowManager::openSettings);
+    // B4 托盘菜单扩展（用户反馈）：调休 / 切换课程表 / 重启；"关于"已砍（设置
+    // 窗口首页即关于页，入口冗余）
+    // 调休：复用内置快捷方式信号路径（与托盘面板宫格同 ID），QML 端 MainInterface 弹
+    // RescheduleDayDialog
+    connect(icon, &TrayIcon::rescheduleDayRequested, this, [this] {
+        emit trayShortcutRequested(QStringLiteral("com.classwidgets.reschedule-day"));
+    });
+    // 切换课程表：MainInterface 弹 SwitchScheduleDialog（scheduleManager.load 完成切换）
+    connect(icon, &TrayIcon::switchScheduleRequested,
+            this, &AppCentral::traySwitchScheduleRequested);
+    // 重启：AppCentral::restart 自启新实例后退出
+    connect(icon, &TrayIcon::restartRequested, this, [this] { restart(); });
     // 迷你模式切换（tray.py toggle_mini_mode：写 preferences.mini_mode）
     connect(icon, &TrayIcon::miniModeRequested, this, [this] {
         bool current = false;

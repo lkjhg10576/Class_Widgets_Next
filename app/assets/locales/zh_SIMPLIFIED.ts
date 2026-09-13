@@ -4311,6 +4311,18 @@ Class Widgets has restored the default theme.</source>
         <source>Quit</source>
         <translation>退出</translation>
     </message>
+    <message>
+        <source>Reschedule Day</source>
+        <translation>调休</translation>
+    </message>
+    <message>
+        <source>Switch Schedule</source>
+        <translation>切换课程表</translation>
+    </message>
+    <message>
+        <source>Restart</source>
+        <translation>重启</translation>
+    </message>
 </context>
 <context>
     <name>TrayPanel</name>

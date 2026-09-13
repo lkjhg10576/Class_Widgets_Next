@@ -113,6 +113,8 @@ signals:
     void widgetRegistered(const QString &widgetId);
     void retranslate();
     void trayShortcutRequested(const QString &shortcutId);
+    // B4 托盘菜单："切换课程表"（QML 端 MainInterface 弹 SwitchScheduleDialog）
+    void traySwitchScheduleRequested();
     void restartRequiredChanged(bool required);
 
 private:

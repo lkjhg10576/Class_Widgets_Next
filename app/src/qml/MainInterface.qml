@@ -83,8 +83,8 @@ QQW.Window {
         }
     }
 
-    // A5（内存优化）：TrayPanel（含 ListView/ScheduleClip/RescheduleDayDialog
-    // 整棵对象树）原先启动即常驻实例化；改为首次打开托盘面板才创建，之后保持
+    // A5（内存优化）：TrayPanel（含 ListView/ScheduleClip 整棵对象树）原先启动即
+    // 常驻实例化；改为首次打开托盘面板才创建，之后保持
     Connections {
         target: AppCentral
         function onTogglePanel(pos) {
@@ -98,6 +98,34 @@ QQW.Window {
             if (trayPanelLoader.item)
                 trayPanelLoader.item.raise()
         }
+        // B4（托盘菜单扩展）：调休弹窗常驻主窗口（RinUI Dialog 是 QQC2 Popup，
+        // 渲染在所属窗口 overlay 内——挂 TrayPanel 下时面板一隐藏弹窗就没了）。
+        // 托盘菜单"调休"与托盘面板宫格两条路径在此汇合。
+        function onTrayShortcutRequested(shortcutId) {
+            if (shortcutId === "com.classwidgets.reschedule-day")
+                rescheduleDayDialog.open()
+        }
+        function onTraySwitchScheduleRequested() {
+            switchScheduleDialog.open()
+        }
+    }
+
+    // 托盘菜单/托盘面板宫格共用的"调休"弹窗（原 TrayPanel 内，B4 移入主窗口）
+    RescheduleDayDialog {
+        id: rescheduleDayDialog
+        title: qsTr("Reschedule Day")
+        width: Math.min(420, root.width * 0.9)
+
+        ButtonGroup {
+            id: buttonGroup
+            exclusive: true
+        }
+    }
+
+    // 托盘菜单"切换课程表"的弹出界面
+    SwitchScheduleDialog {
+        id: switchScheduleDialog
+        width: Math.min(360, root.width * 0.9)
     }
 
     Watermark {

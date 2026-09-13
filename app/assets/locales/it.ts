@@ -4172,6 +4172,18 @@ Class Widgets has restored the default theme.</source>
         <source>Quit</source>
         <translation>Esci</translation>
     </message>
+    <message>
+        <source>Reschedule Day</source>
+        <translation>Ripianifica il giorno</translation>
+    </message>
+    <message>
+        <source>Switch Schedule</source>
+        <translation>Cambia orario</translation>
+    </message>
+    <message>
+        <source>Restart</source>
+        <translation>Riavvia</translation>
+    </message>
 </context>
 <context>
     <name>TrayPanel</name>

@@ -61,7 +61,6 @@ TrayIcon::TrayIcon(QObject *parent)
     m_bmpSettings = menuIconBitmap(iconRoot + QStringLiteral("cw2_settings.png"));
     m_bmpEditor = menuIconBitmap(iconRoot + QStringLiteral("cw2_editor.png"));
     m_bmpTutorial = menuIconBitmap(iconRoot + QStringLiteral("smart_teach.svg"));
-    m_bmpAbout = menuIconBitmap(iconRoot + QStringLiteral("cw2_info.png"));
 
     // explorer 重启时广播 TaskbarCreated，需重新添加图标
     m_taskbarCreatedMsg = RegisterWindowMessageW(L"TaskbarCreated");
@@ -140,7 +139,7 @@ void TrayIcon::cleanup()
         Shell_NotifyIconW(NIM_DELETE, &nid);
         m_added = false;
     }
-    for (HBITMAP *bmp : { &m_bmpSettings, &m_bmpEditor, &m_bmpTutorial, &m_bmpAbout }) {
+    for (HBITMAP *bmp : { &m_bmpSettings, &m_bmpEditor, &m_bmpTutorial }) {
         if (*bmp) {
             DeleteObject(*bmp);
             *bmp = nullptr;
@@ -243,18 +242,24 @@ void TrayIcon::showContextMenu()
         InsertMenuItemW(menu, GetMenuItemCount(menu), TRUE, &mi);
     };
 
+    // B4 托盘菜单结构（用户反馈）：调休在换课上方、切换课程表独立弹出界面、
+    // 退出上方加重启、砍"关于"（设置窗口首页即关于）
     addItem(CmdOpenSettings, QCoreApplication::translate("TrayIcon", "Open Settings"),
             m_bmpSettings);
     addItem(CmdOpenEditor, QCoreApplication::translate("TrayIcon", "Schedule Editor"),
             m_bmpEditor);
+    addItem(CmdRescheduleDay, QCoreApplication::translate("TrayIcon", "Reschedule Day"),
+            nullptr);
     addItem(CmdOpenClassSwap, QCoreApplication::translate("TrayIcon", "Class Swap"), nullptr);
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    addItem(CmdSwitchSchedule, QCoreApplication::translate("TrayIcon", "Switch Schedule"),
+            nullptr);
     addItem(CmdMiniMode, QCoreApplication::translate("TrayIcon", "Mini Mode"), nullptr);
     addItem(CmdEditMode, QCoreApplication::translate("TrayIcon", "Toggle Edit Mode"), nullptr);
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     addItem(CmdTutorial, QCoreApplication::translate("TrayIcon", "Tutorial"), m_bmpTutorial);
-    addItem(CmdAbout, QCoreApplication::translate("TrayIcon", "About"), m_bmpAbout);
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    addItem(CmdRestart, QCoreApplication::translate("TrayIcon", "Restart"), nullptr);
     addItem(CmdQuit, QCoreApplication::translate("TrayIcon", "Quit"), nullptr);
 
     POINT pt = {};
@@ -273,8 +278,14 @@ void TrayIcon::showContextMenu()
     case CmdOpenEditor:
         emit openEditorRequested();
         break;
+    case CmdRescheduleDay:
+        emit rescheduleDayRequested();
+        break;
     case CmdOpenClassSwap:
         emit openClassSwapRequested();
+        break;
+    case CmdSwitchSchedule:
+        emit switchScheduleRequested();
         break;
     case CmdMiniMode:
         emit miniModeRequested();
@@ -285,8 +296,8 @@ void TrayIcon::showContextMenu()
     case CmdTutorial:
         emit openTutorialRequested();
         break;
-    case CmdAbout:
-        emit openAboutRequested();
+    case CmdRestart:
+        emit restartRequested();
         break;
     case CmdQuit:
         cwn::Log::info(QStringLiteral("Quit requested from tray"));

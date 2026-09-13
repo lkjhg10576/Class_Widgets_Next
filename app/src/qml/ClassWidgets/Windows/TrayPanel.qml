@@ -163,16 +163,10 @@ Window {
         }
     }
 
-    RescheduleDayDialog {
-        id: rescheduleDayDialog
-        title: qsTr("Reschedule Day")
-        width: panel.width * 0.8
-
-        ButtonGroup {
-            id: buttonGroup
-            exclusive: true
-        }
-    }
+    // B4（托盘菜单扩展）：RescheduleDayDialog 移入 MainInterface 常驻主窗口——
+    // RinUI Dialog 是 QQC2 Popup，渲染在所属窗口 overlay 内；原先挂在 TrayPanel
+    // 下，宫格触发"调休"后 onShortcutTriggered 会 hide() 面板，弹窗随面板一起
+    // 消失。移到主窗口后托盘菜单与宫格两条路径都稳定可用（见 MainInterface）。
 
     // A5（内存优化）：面板改由 MainInterface 的 Loader 首开按需创建。
     // 定位/显示逻辑提为公开函数：首次打开时本次 togglePanel 信号已错过
@@ -198,12 +192,6 @@ Window {
 
     Connections {
         target: AppCentral
-
-        function onTrayShortcutRequested(shortcutId) {
-            if (shortcutId === "com.classwidgets.reschedule-day") {
-                rescheduleDayDialog.open()
-            }
-        }
 
         function onTogglePanel(pos) {
             panel.openAt(pos)

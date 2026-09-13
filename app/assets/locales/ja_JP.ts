@@ -4487,6 +4487,18 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
         <source>Quit</source>
         <translation>終了</translation>
     </message>
+    <message>
+        <source>Reschedule Day</source>
+        <translation>振替日</translation>
+    </message>
+    <message>
+        <source>Switch Schedule</source>
+        <translation>スケジュールの切り替え</translation>
+    </message>
+    <message>
+        <source>Restart</source>
+        <translation>再起動</translation>
+    </message>
 </context>
 <context>
     <name>TrayPanel</name>

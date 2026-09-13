@@ -45,13 +45,16 @@ signals:
     // ── 既有信号（main.cpp:84-86 / AppCentral 的连接不能破坏）──
     void togglePanel(const QPoint &pos);
     void editModeRequested();
-    // ── M4 新增：菜单动作信号 ──
+    // ── M4：菜单动作信号 ──
     void openSettingsRequested();     // 打开设置（对应 window_manager.open_settings）
     void openEditorRequested();       // 课表编辑器（open_editor）
     void openClassSwapRequested();    // 换课（open_class_swap）
     void miniModeRequested();         // 迷你模式切换（model.py:100 MINI_MODE）
     void openTutorialRequested();     // 新手教程（open_tutorial）
-    void openAboutRequested();        // 关于（settings/pages/About.qml）
+    // ── B4 托盘菜单扩展（用户反馈：调休/切换课程表/重启入口，砍"关于"）──
+    void rescheduleDayRequested();    // 调休（com.classwidgets.reschedule-day 同路径）
+    void switchScheduleRequested();   // 切换课程表（MainInterface 弹 SwitchScheduleDialog）
+    void restartRequested();          // 重启（AppCentral::restart 自启新实例）
 
 private:
     // 菜单命令 ID（TrackPopupMenu(TPM_RETURNCMD) 返回值 → 信号映射）
@@ -59,11 +62,13 @@ private:
     {
         CmdOpenSettings = 1,
         CmdOpenEditor,
+        CmdRescheduleDay,
         CmdOpenClassSwap,
+        CmdSwitchSchedule,
         CmdMiniMode,
         CmdEditMode,
         CmdTutorial,
-        CmdAbout,
+        CmdRestart,
         CmdQuit,
     };
 
@@ -81,9 +86,8 @@ private:
     UINT m_taskbarCreatedMsg = 0;
     bool m_added = false;
 
-    // 菜单项图标（构造时栅格化一次，cleanup 时销毁；顺序对应 MenuCommand）
+    // 菜单项图标（构造时栅格化一次，cleanup 时销毁；PNG/SVG 经 QIcon 引擎）
     HBITMAP m_bmpSettings = nullptr;
     HBITMAP m_bmpEditor = nullptr;
     HBITMAP m_bmpTutorial = nullptr;
-    HBITMAP m_bmpAbout = nullptr;
 };
