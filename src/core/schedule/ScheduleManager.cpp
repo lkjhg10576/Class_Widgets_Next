@@ -3,6 +3,7 @@
 #include "../AppPaths.h"
 #include "../ConfigStore.h"
 #include "../Logger.h"
+#include "../NativeFileDialog.h" // B4：原生文件对话框替代 QFileDialog（去 Qt6::Widgets）
 #include "ScheduleIO.h"
 #include "ScheduleModel.h"
 #include "ScheduleParser.h"
@@ -11,7 +12,6 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QUrl>
@@ -269,8 +269,7 @@ bool ScheduleManager::rename(const QString &oldName, const QString &newName)
 bool ScheduleManager::importSchedule()
 {
     // manager.py:232-270 importSchedule
-    const QString filePath = QFileDialog::getOpenFileName(
-        nullptr,
+    const QString filePath = NativeFileDialog::getOpenFileName(
         QCoreApplication::translate("ImportScheduleDialog", "Import Schedule"),
         m_schedulesDir,
         QCoreApplication::translate("ImportScheduleDialog",
@@ -316,8 +315,7 @@ bool ScheduleManager::exportSchedule(const QString &filename)
         return false;
     }
 
-    const QString filePath = QFileDialog::getSaveFileName(
-        nullptr,
+    const QString filePath = NativeFileDialog::getSaveFileName(
         QCoreApplication::translate("ExportScheduleDialog", "Export Schedule"),
         filename + QStringLiteral(".json"),
         QCoreApplication::translate("ExportScheduleDialog",

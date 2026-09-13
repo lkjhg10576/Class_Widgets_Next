@@ -26,7 +26,7 @@ class AppPaths : public QObject
 public:
     static AppPaths &instance();
 
-    // 必须在 QApplication 创建之后、任何路径使用之前调用一次
+    // 必须在 QGuiApplication 创建之后、任何路径使用之前调用一次
     void initialize();
 
     QString root() const { return m_root; }

@@ -6,10 +6,10 @@
 #include "themes/ThemeImporter.h"
 #include "themes/ThemeLoader.h"
 #include "themes/ThemeUrlInterceptor.h"
+#include "NativeFileDialog.h" // B4：原生文件对话框替代 QFileDialog（去 Qt6::Widgets）
 
 #include <QDesktopServices>
 #include <QDir>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QQmlAbstractUrlInterceptor>
 #include <QUrl>
@@ -264,8 +264,8 @@ QVariantList CWThemeManager::importTheme()
 {
     // manager.py:212-245
     cwn::Log::info(QStringLiteral("Starting theme import process..."));
-    const QString zipPath = QFileDialog::getOpenFileName(
-        nullptr, QStringLiteral("Import Theme"), QString(),
+    const QString zipPath = NativeFileDialog::getOpenFileName(
+        QStringLiteral("Import Theme"), QString(),
         QStringLiteral("Class Widgets Theme (*.cwtheme);;Theme ZIP (*.zip)"));
     if (zipPath.isEmpty()) {
         cwn::Log::info(QStringLiteral("Theme import cancelled by user"));

@@ -1,118 +1,298 @@
 #include "TrayIcon.h"
 
+// B4：win32 原生托盘（Shell_NotifyIcon + HMENU 弹出菜单），详见头文件说明。
+#include <QtCore/qt_windows.h> // 自带 NOMINMAX，防 min/max 宏污染 Qt 头
+#include <shellapi.h>
+
 #include "AppPaths.h"
 #include "Logger.h"
 
-#include <QAction>
 #include <QCoreApplication>
 #include <QCursor>
 #include <QIcon>
-#include <QMenu>
-#include <utility> // std::as_const
+#include <QImage>
+
+namespace {
+
+constexpr UINT kTrayCallbackMsg = WM_APP + 1;
+constexpr UINT kTrayId = 1;
+const wchar_t kWindowClassName[] = L"ClassWidgetsNext_TrayHost";
+
+const wchar_t *asWStr(const QString &s)
+{
+    return reinterpret_cast<const wchar_t *>(s.utf16());
+}
+
+// 按目标缓冲区容量拷贝并截断（气泡标题 64 字符 / 正文 256 字符上限为系统约束）
+void copyTrayString(wchar_t *dst, size_t cap, const QString &src)
+{
+    wcsncpy_s(dst, cap, asWStr(src), _TRUNCATE);
+}
+
+} // namespace
 
 TrayIcon::TrayIcon(QObject *parent)
     : QObject(parent)
 {
-    const QString iconPath = AppPaths::instance().assetsRoot()
-        + QStringLiteral("/images/tray_icon.png");
-    const QIcon icon(iconPath);
-    if (icon.isNull()) {
-        cwn::Log::error(QStringLiteral("Tray icon not found: %1").arg(iconPath));
+    if (!registerWindowClass()) {
+        cwn::Log::error(QStringLiteral("Tray: failed to register window class"));
         return;
     }
 
-    auto *menu = new QMenu();
-    m_menu = menu;
+    m_hwnd = CreateWindowExW(0, kWindowClassName, L"", WS_OVERLAPPED, 0, 0, 0, 0,
+                             nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+    if (!m_hwnd) {
+        cwn::Log::error(QStringLiteral("Tray: failed to create host window"));
+        return;
+    }
+    SetWindowLongPtrW(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
-    // 菜单项（M4 补全；对照任务要求与 central.py 窗口管理入口语义）。
-    // tray.py 本体仅承载图标与点击 togglePanel（tray.py:42-47），菜单为 M1
-    // 简化版的扩展落地，文本全部走 "TrayIcon" 翻译上下文。
-    addMenuAction("Open Settings", assetIcon(QStringLiteral("cw2_settings.png")),
-                  &TrayIcon::openSettingsRequested);
-    addMenuAction("Schedule Editor", assetIcon(QStringLiteral("cw2_editor.png")),
-                  &TrayIcon::openEditorRequested);
-    addMenuAction("Class Swap", QIcon(), &TrayIcon::openClassSwapRequested);
+    m_icon = loadTrayHIcon();
+    if (!m_icon) {
+        cwn::Log::error(QStringLiteral("Tray icon not found: %1")
+                            .arg(AppPaths::instance().assetsRoot()
+                                 + QStringLiteral("/images/tray_icon.png")));
+        return;
+    }
 
-    menu->addSeparator();
+    // 菜单项图标栅格化为小图标尺寸的 32bpp 位图（原生菜单 hbmpItem）
+    const QString iconRoot = AppPaths::instance().assetsRoot()
+        + QStringLiteral("/images/icons/");
+    m_bmpSettings = menuIconBitmap(iconRoot + QStringLiteral("cw2_settings.png"));
+    m_bmpEditor = menuIconBitmap(iconRoot + QStringLiteral("cw2_editor.png"));
+    m_bmpTutorial = menuIconBitmap(iconRoot + QStringLiteral("smart_teach.svg"));
+    m_bmpAbout = menuIconBitmap(iconRoot + QStringLiteral("cw2_info.png"));
 
-    addMenuAction("Mini Mode", QIcon(), &TrayIcon::miniModeRequested);
-    addMenuAction("Toggle Edit Mode", QIcon(), &TrayIcon::editModeRequested);
+    // explorer 重启时广播 TaskbarCreated，需重新添加图标
+    m_taskbarCreatedMsg = RegisterWindowMessageW(L"TaskbarCreated");
 
-    menu->addSeparator();
+    if (addIcon()) {
+        cwn::Log::info(QStringLiteral("Tray icon initialized"));
+    } else {
+        cwn::Log::error(QStringLiteral("Tray: Shell_NotifyIcon(NIM_ADD) failed"));
+    }
+}
 
-    addMenuAction("Tutorial", assetIcon(QStringLiteral("smart_teach.svg")),
-                  &TrayIcon::openTutorialRequested);
-    addMenuAction("About", assetIcon(QStringLiteral("cw2_info.png")),
-                  &TrayIcon::openAboutRequested);
+TrayIcon::~TrayIcon()
+{
+    cleanup();
+}
 
-    menu->addSeparator();
+bool TrayIcon::registerWindowClass()
+{
+    WNDCLASSEXW wc = {};
+    if (GetClassInfoExW(GetModuleHandleW(nullptr), kWindowClassName, &wc))
+        return true; // 已注册（单实例应用，仅 TrayIcon 使用）
+    wc.cbSize = sizeof(wc);
+    wc.lpfnWndProc = &TrayIcon::trayWndProc;
+    wc.hInstance = GetModuleHandleW(nullptr);
+    wc.lpszClassName = kWindowClassName;
+    return RegisterClassExW(&wc) != 0;
+}
 
-    // 退出（保持 M1 行为：直接退出常驻应用）
-    auto *quitAction = new QAction(QCoreApplication::translate("TrayIcon", "Quit"), menu);
-    connect(quitAction, &QAction::triggered, this, [] {
-        cwn::Log::info(QStringLiteral("Quit requested from tray"));
-        QCoreApplication::quit();
-    });
-    menu->addAction(quitAction);
-    m_menuEntries.append({ quitAction, "Quit" });
+HICON TrayIcon::loadTrayHIcon()
+{
+    const QString iconPath = AppPaths::instance().assetsRoot()
+        + QStringLiteral("/images/tray_icon.png");
+    QImage img(iconPath);
+    if (img.isNull())
+        return nullptr;
+    const int cx = GetSystemMetrics(SM_CXICON);
+    const int cy = GetSystemMetrics(SM_CYICON);
+    if (img.width() != cx || img.height() != cy)
+        img = img.scaled(cx, cy, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    return img.toHICON();
+}
 
-    m_tray = new QSystemTrayIcon(icon, this);
-    m_tray->setToolTip(QStringLiteral("Class Widgets Next"));
-    m_tray->setContextMenu(menu);
-    connect(m_tray, &QSystemTrayIcon::activated, this,
-            [this](QSystemTrayIcon::ActivationReason reason) {
-                // 对应 tray.py on_click：任意激活方式都发 togglePanel
-                Q_UNUSED(reason);
-                emit togglePanel(QCursor::pos());
-            });
-    m_tray->show();
-    cwn::Log::info(QStringLiteral("Tray icon initialized"));
+HBITMAP TrayIcon::menuIconBitmap(const QString &assetPath)
+{
+    const int cx = GetSystemMetrics(SM_CXSMICON);
+    const int cy = GetSystemMetrics(SM_CYSMICON);
+    QImage img = QIcon(assetPath).pixmap(cx, cy).toImage(); // png/svg 统一经 QIcon 引擎
+    if (img.isNull())
+        return nullptr;
+    if (img.width() != cx || img.height() != cy)
+        img = img.scaled(cx, cy, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    return img.convertToFormat(QImage::Format_ARGB32_Premultiplied).toHBITMAP();
+}
+
+bool TrayIcon::addIcon()
+{
+    NOTIFYICONDATAW nid = {};
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = m_hwnd;
+    nid.uID = kTrayId;
+    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+    nid.uCallbackMessage = kTrayCallbackMsg;
+    nid.hIcon = m_icon;
+    copyTrayString(nid.szTip, _countof(nid.szTip), QStringLiteral("Class Widgets Next"));
+    m_added = Shell_NotifyIconW(NIM_ADD, &nid) != FALSE;
+    return m_added;
 }
 
 void TrayIcon::cleanup()
 {
-    m_menuEntries.clear();
-    if (m_menu) {
-        m_menu->deleteLater();
-        m_menu = nullptr;
+    if (m_added) {
+        NOTIFYICONDATAW nid = {};
+        nid.cbSize = sizeof(nid);
+        nid.hWnd = m_hwnd;
+        nid.uID = kTrayId;
+        Shell_NotifyIconW(NIM_DELETE, &nid);
+        m_added = false;
     }
-    if (!m_tray)
-        return;
-    m_tray->hide();
-    m_tray->deleteLater();
-    m_tray = nullptr;
+    for (HBITMAP *bmp : { &m_bmpSettings, &m_bmpEditor, &m_bmpTutorial, &m_bmpAbout }) {
+        if (*bmp) {
+            DeleteObject(*bmp);
+            *bmp = nullptr;
+        }
+    }
+    if (m_icon) {
+        DestroyIcon(m_icon);
+        m_icon = nullptr;
+    }
+    if (m_hwnd) {
+        DestroyWindow(m_hwnd);
+        m_hwnd = nullptr;
+    }
 }
 
 void TrayIcon::showEditNotification(const QString &title, const QString &text)
 {
-    if (m_tray)
-        m_tray->showMessage(title, text, QSystemTrayIcon::Information, 5000);
+    if (!m_added)
+        return;
+    NOTIFYICONDATAW nid = {};
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = m_hwnd;
+    nid.uID = kTrayId;
+    nid.uFlags = NIF_INFO;
+    nid.dwInfoFlags = NIIF_INFO; // 旧 QSystemTrayIcon::Information 语义
+    copyTrayString(nid.szInfoTitle, _countof(nid.szInfoTitle), title);
+    copyTrayString(nid.szInfo, _countof(nid.szInfo), text);
+    Shell_NotifyIconW(NIM_MODIFY, &nid);
 }
 
 void TrayIcon::retranslate()
 {
-    // 语言切换后原地刷新菜单文本（对应 central.py retranslate 链路）
-    for (const MenuEntry &entry : std::as_const(m_menuEntries)) {
-        entry.action->setText(QCoreApplication::translate("TrayIcon", entry.sourceText));
+    // 菜单每次打开时按当前语言重建，无需原地刷新
+}
+
+LRESULT CALLBACK TrayIcon::trayWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    auto *self = reinterpret_cast<TrayIcon *>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (!self)
+        return DefWindowProcW(hwnd, msg, wParam, lParam);
+    return self->handleMessage(msg, wParam, lParam);
+}
+
+LRESULT TrayIcon::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    Q_UNUSED(wParam);
+    if (msg == m_taskbarCreatedMsg) {
+        // explorer 重启：重挂图标（先 DELETE 清理可能残留的旧条目）
+        NOTIFYICONDATAW nid = {};
+        nid.cbSize = sizeof(nid);
+        nid.hWnd = m_hwnd;
+        nid.uID = kTrayId;
+        Shell_NotifyIconW(NIM_DELETE, &nid);
+        addIcon();
+        return 0;
     }
+    if (msg != kTrayCallbackMsg)
+        return DefWindowProcW(m_hwnd, msg, wParam, lParam);
+
+    // 旧实现：activated 任意 reason 都发 togglePanel(QCursor::pos())。
+    // 用户反馈（B4 实测）：右键若先唤起 QML TrayPanel 再弹原生菜单，面板会被
+    // 菜单抢焦点立即收回，产生"闪一下大窗口"的观感——右键改为只弹菜单；
+    // 左键/中键/双击保持 togglePanel 语义。
+    switch (lParam) {
+    case WM_LBUTTONUP:
+    case WM_LBUTTONDBLCLK:
+    case WM_MBUTTONUP:
+        emit togglePanel(QCursor::pos());
+        break;
+    case WM_RBUTTONUP:
+    case WM_RBUTTONDBLCLK:
+        showContextMenu();
+        break;
+    default:
+        break;
+    }
+    return 0;
 }
 
-QIcon TrayIcon::assetIcon(const QString &fileName) const
+void TrayIcon::showContextMenu()
 {
-    // assets/images/icons/<fileName>（cw2_*.png 与 smart_teach.svg 均在仓库内；
-    // 文件缺失时 QIcon 为空，菜单项自动隐藏图标）
-    return QIcon(AppPaths::instance().assetsRoot()
-                 + QStringLiteral("/images/icons/") + fileName);
-}
+    if (!m_hwnd)
+        return;
 
-void TrayIcon::addMenuAction(const char *sourceText, const QIcon &icon,
-                             void (TrayIcon::*signalPtr)())
-{
-    auto *action = new QAction(QCoreApplication::translate("TrayIcon", sourceText), m_menu);
-    if (!icon.isNull())
-        action->setIcon(icon);
-    // 信号 → 信号转发：菜单动作交由主控连接对应处理器（main.cpp / AppCentral）
-    connect(action, &QAction::triggered, this, signalPtr);
-    m_menu->addAction(action);
-    m_menuEntries.append({ action, sourceText });
+    HMENU menu = CreatePopupMenu();
+    if (!menu)
+        return;
+
+    const auto addItem = [menu](UINT id, const QString &text, HBITMAP bitmap) {
+        MENUITEMINFOW mi = {};
+        mi.cbSize = sizeof(mi);
+        mi.fMask = MIIM_ID | MIIM_STRING | MIIM_STATE;
+        mi.wID = id;
+        mi.dwTypeData = const_cast<LPWSTR>(asWStr(text)); // InsertMenuItem 会拷贝字符串
+        mi.fState = MFS_ENABLED;
+        if (bitmap) {
+            mi.fMask |= MIIM_BITMAP;
+            mi.hbmpItem = bitmap;
+        }
+        InsertMenuItemW(menu, GetMenuItemCount(menu), TRUE, &mi);
+    };
+
+    addItem(CmdOpenSettings, QCoreApplication::translate("TrayIcon", "Open Settings"),
+            m_bmpSettings);
+    addItem(CmdOpenEditor, QCoreApplication::translate("TrayIcon", "Schedule Editor"),
+            m_bmpEditor);
+    addItem(CmdOpenClassSwap, QCoreApplication::translate("TrayIcon", "Class Swap"), nullptr);
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    addItem(CmdMiniMode, QCoreApplication::translate("TrayIcon", "Mini Mode"), nullptr);
+    addItem(CmdEditMode, QCoreApplication::translate("TrayIcon", "Toggle Edit Mode"), nullptr);
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    addItem(CmdTutorial, QCoreApplication::translate("TrayIcon", "Tutorial"), m_bmpTutorial);
+    addItem(CmdAbout, QCoreApplication::translate("TrayIcon", "About"), m_bmpAbout);
+    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    addItem(CmdQuit, QCoreApplication::translate("TrayIcon", "Quit"), nullptr);
+
+    POINT pt = {};
+    GetCursorPos(&pt);
+    // KB135788：弹出前置前台 + 弹出后补 WM_NULL，保证点击菜单外能正常收起
+    SetForegroundWindow(m_hwnd);
+    const int cmd = TrackPopupMenuEx(menu, TPM_RETURNCMD | TPM_RIGHTBUTTON | TPM_NONOTIFY,
+                                     pt.x, pt.y, m_hwnd, nullptr);
+    DestroyMenu(menu);
+    PostMessageW(m_hwnd, WM_NULL, 0, 0);
+
+    switch (cmd) {
+    case CmdOpenSettings:
+        emit openSettingsRequested();
+        break;
+    case CmdOpenEditor:
+        emit openEditorRequested();
+        break;
+    case CmdOpenClassSwap:
+        emit openClassSwapRequested();
+        break;
+    case CmdMiniMode:
+        emit miniModeRequested();
+        break;
+    case CmdEditMode:
+        emit editModeRequested();
+        break;
+    case CmdTutorial:
+        emit openTutorialRequested();
+        break;
+    case CmdAbout:
+        emit openAboutRequested();
+        break;
+    case CmdQuit:
+        cwn::Log::info(QStringLiteral("Quit requested from tray"));
+        QCoreApplication::quit();
+        break;
+    default:
+        break; // 用户取消
+    }
 }

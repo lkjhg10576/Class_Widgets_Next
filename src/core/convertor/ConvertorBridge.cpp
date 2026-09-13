@@ -3,10 +3,10 @@
 #include "../AppPaths.h"
 #include "../Logger.h"
 #include "../schedule/ScheduleManager.h"
+#include "../NativeFileDialog.h" // B4：原生文件对话框替代 QFileDialog（去 Qt6::Widgets）
 #include "ScheduleConverter.h"
 
 #include <QCoreApplication>
-#include <QFileDialog>
 #include <QFileInfo>
 
 namespace {
@@ -44,8 +44,7 @@ bool ConvertorBridge::exportToCSES(const QString &filename)
     const QString defaultName =
         QFileInfo(sourcePath).completeBaseName() + QStringLiteral(".yaml");   // slots.py:21 path.stem
 
-    const QString outputPath = QFileDialog::getSaveFileName(
-        nullptr,
+    const QString outputPath = NativeFileDialog::getSaveFileName(
         QCoreApplication::translate("ExportScheduleDialog", "Export Schedule"),
         defaultName,
         QCoreApplication::translate("ExportScheduleDialog", "CSES Format (*.yaml *.yml)"));
@@ -92,7 +91,7 @@ bool ConvertorBridge::importAndApply(const QString &sourceFormat, const QString 
     const QString schedulesDir = schedulesDirOf(m_manager);
 
     const QString filePath =
-        QFileDialog::getOpenFileName(nullptr, dialogTitle, schedulesDir, filter);
+        NativeFileDialog::getOpenFileName(dialogTitle, schedulesDir, filter);
     if (filePath.isEmpty()) {
         cwn::Log::info(QStringLiteral("User cancelled import.")); // slots.py:47 / 88
         return false;

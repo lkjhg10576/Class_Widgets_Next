@@ -4278,6 +4278,41 @@ Class Widgets has restored the default theme.</source>
     </message>
 </context>
 <context>
+    <name>TrayIcon</name>
+    <message>
+        <source>Open Settings</source>
+        <translation>打开设置</translation>
+    </message>
+    <message>
+        <source>Schedule Editor</source>
+        <translation>课程表编辑器</translation>
+    </message>
+    <message>
+        <source>Class Swap</source>
+        <translation>换课</translation>
+    </message>
+    <message>
+        <source>Mini Mode</source>
+        <translation>迷你模式</translation>
+    </message>
+    <message>
+        <source>Toggle Edit Mode</source>
+        <translation>切换编辑模式</translation>
+    </message>
+    <message>
+        <source>Tutorial</source>
+        <translation>使用引导</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>关于</translation>
+    </message>
+    <message>
+        <source>Quit</source>
+        <translation>退出</translation>
+    </message>
+</context>
+<context>
     <name>TrayPanel</name>
     <message>
         <source>Settings</source>

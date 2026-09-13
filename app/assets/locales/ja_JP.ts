@@ -4454,6 +4454,41 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
     </message>
 </context>
 <context>
+    <name>TrayIcon</name>
+    <message>
+        <source>Open Settings</source>
+        <translation>設定を開く</translation>
+    </message>
+    <message>
+        <source>Schedule Editor</source>
+        <translation>時間割エディター</translation>
+    </message>
+    <message>
+        <source>Class Swap</source>
+        <translation>授業の振替</translation>
+    </message>
+    <message>
+        <source>Mini Mode</source>
+        <translation>ミニモード</translation>
+    </message>
+    <message>
+        <source>Toggle Edit Mode</source>
+        <translation>編集モードの切り替え</translation>
+    </message>
+    <message>
+        <source>Tutorial</source>
+        <translation>チュートリアル</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>情報</translation>
+    </message>
+    <message>
+        <source>Quit</source>
+        <translation>終了</translation>
+    </message>
+</context>
+<context>
     <name>TrayPanel</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="67"/>

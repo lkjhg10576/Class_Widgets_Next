@@ -4139,6 +4139,41 @@ Class Widgets has restored the default theme.</source>
     </message>
 </context>
 <context>
+    <name>TrayIcon</name>
+    <message>
+        <source>Open Settings</source>
+        <translation>Apri impostazioni</translation>
+    </message>
+    <message>
+        <source>Schedule Editor</source>
+        <translation>Editor dell&apos;orario</translation>
+    </message>
+    <message>
+        <source>Class Swap</source>
+        <translation>Cambio orario</translation>
+    </message>
+    <message>
+        <source>Mini Mode</source>
+        <translation>Modalità mini</translation>
+    </message>
+    <message>
+        <source>Toggle Edit Mode</source>
+        <translation>Attiva/disattiva modalità di modifica</translation>
+    </message>
+    <message>
+        <source>Tutorial</source>
+        <translation>Esercitazione</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>Informazioni</translation>
+    </message>
+    <message>
+        <source>Quit</source>
+        <translation>Esci</translation>
+    </message>
+</context>
+<context>
     <name>TrayPanel</name>
     <message>
         <source>Settings</source>

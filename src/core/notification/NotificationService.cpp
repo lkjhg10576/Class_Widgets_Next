@@ -5,12 +5,12 @@
 #include "../AppPaths.h"
 #include "../ConfigStore.h"
 #include "../Logger.h"
+#include "../NativeFileDialog.h" // B4：原生文件对话框替代 QFileDialog（去 Qt6::Widgets）
 
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QJsonValue>
 #include <QTimer>
@@ -658,8 +658,8 @@ bool NotificationService::selectNotificationSound(int level)
 {
     // service.py:205-235 selectNotificationSound：选文件 → 复制进 assets/audio →
     // 以相对文件名保存为该级别音效
-    const QString path = QFileDialog::getOpenFileName(
-        nullptr, QStringLiteral("Select Notification Sound"), QString(),
+    const QString path = NativeFileDialog::getOpenFileName(
+        QStringLiteral("Select Notification Sound"), QString(),
         QStringLiteral("Audio Files (*.wav *.mp3 *.ogg)"));
     if (path.isEmpty())
         return false;

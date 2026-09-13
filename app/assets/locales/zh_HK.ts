@@ -4379,6 +4379,41 @@ Class Widgets has restored the default theme.</source>
     </message>
 </context>
 <context>
+    <name>TrayIcon</name>
+    <message>
+        <source>Open Settings</source>
+        <translation>開啟設定</translation>
+    </message>
+    <message>
+        <source>Schedule Editor</source>
+        <translation>課程表編輯器</translation>
+    </message>
+    <message>
+        <source>Class Swap</source>
+        <translation>換課</translation>
+    </message>
+    <message>
+        <source>Mini Mode</source>
+        <translation>迷你模式</translation>
+    </message>
+    <message>
+        <source>Toggle Edit Mode</source>
+        <translation>切換編輯模式</translation>
+    </message>
+    <message>
+        <source>Tutorial</source>
+        <translation>使用引導</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>關於</translation>
+    </message>
+    <message>
+        <source>Quit</source>
+        <translation>退出</translation>
+    </message>
+</context>
+<context>
     <name>TrayPanel</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="67"/>

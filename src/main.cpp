@@ -9,10 +9,10 @@
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
 
-#include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QFontDatabase>
+#include <QGuiApplication> // B4：QApplication 仅为 QSystemTrayIcon 存在，托盘已原生化的改 QGuiApplication
 #include <QQuickWindow>
 #include <QSGRendererInterface>
 #include <QTimer>
@@ -45,11 +45,11 @@ int main(int argc, char *argv[])
     if (!qEnvironmentVariableIsSet("QSG_RENDER_LOOP"))
         qputenv("QSG_RENDER_LOOP", "basic");
 
-    QApplication app(argc, argv);
-    QApplication::setQuitOnLastWindowClosed(false); // 对应 app.py:42，常驻托盘
-    QApplication::setApplicationName(QStringLiteral("Class Widgets Next"));
-    QApplication::setOrganizationName(QStringLiteral("ClassWidgets"));
-    QApplication::setApplicationVersion(QStringLiteral(CWN_VERSION_STRING));
+    QGuiApplication app(argc, argv);
+    QGuiApplication::setQuitOnLastWindowClosed(false); // 对应 app.py:42，常驻托盘
+    QGuiApplication::setApplicationName(QStringLiteral("Class Widgets Next"));
+    QGuiApplication::setOrganizationName(QStringLiteral("ClassWidgets"));
+    QGuiApplication::setApplicationVersion(QStringLiteral(CWN_VERSION_STRING));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("Class Widgets Next"));
