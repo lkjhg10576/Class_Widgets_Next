@@ -12,32 +12,29 @@ Rectangle {
     property string oldValue: ""
     property double progress: 1  // 0-1
     property int duration: 700
-    // 保留属性（第三方主题可能引用）；A3 后不再参与 layer 纹理尺寸计算
     property real scaleFactor: Configs.data.preferences.scale_factor || 1.0
-    // A3（内存优化）：layer 纹理仅在动画进行期间存在（原先常驻，且被
-    // textureSize 放大 4 倍 → Time 挂件 6 数字 = 12 张 4x 超采样纹理）。
-    // 注意：两只 Text 均 opacity 0，数字画面完全来自 LinearGradient 取样；
-    // 静止时必须让 newDigit 直接渲染（opacity 1）并隐藏渐变，否则无任何可见内容
-    property bool animating: false
 
     property alias font: oldDigit.font
     implicitWidth: Math.max(oldDigit.width, newDigit.width)
     implicitHeight: Math.max(oldDigit.height, newDigit.height)
 
+    // A3（内存优化）：仅移除 layer.textureSize 的 4x 超采样（纹理缩小 16 倍，
+    // Time 挂件 6 数字 12 张纹理 3.6MB → ~0.2MB）。
+    // 注意：两只 Text 均 opacity 0，数字画面完全来自 LinearGradient 取样 layer
+    // 纹理，且擦除动画依赖纹理常驻连续更新 —— layer.enabled 必须保持常开，
+    // 按动画开关会造成每秒纹理重建、数字闪烁（2026-09-13 实测回归，勿改）。
     Title {
         id: oldDigit
         text: root.oldValue
         anchors.centerIn: parent
         opacity: 0
-        visible: root.animating
-        layer.enabled: root.animating
+        layer.enabled: true
         layer.effect: null
     }
 
     LinearGradient  {
         id: oldDigitGradient
         anchors.fill: oldDigit
-        visible: root.animating
         source: oldDigit
         gradient: Gradient {
             GradientStop { position: 0; color: oldDigit.color }
@@ -54,17 +51,15 @@ Rectangle {
         id: newDigit
         text: root.value
         anchors.centerIn: parent
-        // 静止：直接渲染实体数字（无任何纹理）；动画期间交给渐变取样显示
-        opacity: root.animating ? 0 : 1
+        opacity: 0
         font: oldDigit.font
-        layer.enabled: root.animating
+        layer.enabled: true
         layer.effect: null
     }
 
     LinearGradient  {
         id: newDigitGradient
         anchors.fill: newDigit
-        visible: root.animating
         opacity: progress * 3
         source: newDigit
         gradient: Gradient {
@@ -78,7 +73,7 @@ Rectangle {
     }
 
     onValueChanged: {
-        root.animating = true
+        newDigitGradient.visible = true
         progressAnimation.start()
     }
 
@@ -96,7 +91,7 @@ Rectangle {
         ScriptAction {
             script: {
                 root.oldValue = root.value
-                root.animating = false
+                newDigitGradient.visible = false
             }
         }
     }
