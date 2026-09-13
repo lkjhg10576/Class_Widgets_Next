@@ -15,7 +15,9 @@ Rectangle {
     // 保留属性（第三方主题可能引用）；A3 后不再参与 layer 纹理尺寸计算
     property real scaleFactor: Configs.data.preferences.scale_factor || 1.0
     // A3（内存优化）：layer 纹理仅在动画进行期间存在（原先常驻，且被
-    // textureSize 放大 4 倍 → Time 挂件 6 数字 = 12 张 4x 超采样纹理）
+    // textureSize 放大 4 倍 → Time 挂件 6 数字 = 12 张 4x 超采样纹理）。
+    // 注意：两只 Text 均 opacity 0，数字画面完全来自 LinearGradient 取样；
+    // 静止时必须让 newDigit 直接渲染（opacity 1）并隐藏渐变，否则无任何可见内容
     property bool animating: false
 
     property alias font: oldDigit.font
@@ -27,6 +29,7 @@ Rectangle {
         text: root.oldValue
         anchors.centerIn: parent
         opacity: 0
+        visible: root.animating
         layer.enabled: root.animating
         layer.effect: null
     }
@@ -34,6 +37,7 @@ Rectangle {
     LinearGradient  {
         id: oldDigitGradient
         anchors.fill: oldDigit
+        visible: root.animating
         source: oldDigit
         gradient: Gradient {
             GradientStop { position: 0; color: oldDigit.color }
@@ -50,7 +54,8 @@ Rectangle {
         id: newDigit
         text: root.value
         anchors.centerIn: parent
-        opacity: 0
+        // 静止：直接渲染实体数字（无任何纹理）；动画期间交给渐变取样显示
+        opacity: root.animating ? 0 : 1
         font: oldDigit.font
         layer.enabled: root.animating
         layer.effect: null
@@ -59,6 +64,7 @@ Rectangle {
     LinearGradient  {
         id: newDigitGradient
         anchors.fill: newDigit
+        visible: root.animating
         opacity: progress * 3
         source: newDigit
         gradient: Gradient {
@@ -72,7 +78,6 @@ Rectangle {
     }
 
     onValueChanged: {
-        newDigitGradient.visible = true
         root.animating = true
         progressAnimation.start()
     }
@@ -91,7 +96,6 @@ Rectangle {
         ScriptAction {
             script: {
                 root.oldValue = root.value
-                newDigitGradient.visible = false
                 root.animating = false
             }
         }
