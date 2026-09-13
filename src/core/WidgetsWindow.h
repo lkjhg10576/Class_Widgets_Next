@@ -12,7 +12,8 @@ class AppCentral;
 // 两个隐藏依赖必须照搬（M1 拆分文档 §1.3）：
 // ① update_mask()：把全屏透明窗口的 mask 收缩到小组件实际矩形，
 //    mask 为空时必须兜底 QRegion(0,0,1,1) —— 否则鼠标穿透/整屏遮挡；
-// ② 33ms 轮询 update_mouse_state()（M3 再改事件驱动）。
+// ② 鼠标悬停轮询 update_mouse_state()（A6 起 hover_fade 关闭即停，间隔 100ms；
+//    M3 注释的"33ms 改事件驱动"中期方向保留）。
 class WidgetsWindow : public RinUiWindowBase
 {
     Q_OBJECT
@@ -32,6 +33,8 @@ private slots:
     void scheduleMaskUpdate();
 
 private:
+    static constexpr int kMousePollIntervalMs = 100; // A6：原 33ms
+
     void onQmlReady(QObject *obj, const QUrl &objUrl);
     void onThemeChanged();
     void updateMask();

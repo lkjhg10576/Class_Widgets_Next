@@ -17,22 +17,16 @@ QtObject { // 直接使用 QtObject，不要用 Item
         _rebuild()
     }
 
-    property Timer _utilsWatcher: Timer {
-        id: refreshTimer
-        interval: 200 // 0.2秒检查一次
-        running: true
-        repeat: true
-        onTriggered: {
-            if (typeof Utils !== "undefined") {
-                var latestColor = Theme.getThemeColor();
-                if (latestColor !== root.seedColor) {
-                    // console.log("Timer detected color change:", root.seedColor, "->", latestColor);
-                    root.seedColor = latestColor;
-                    // seedColor 改变会自动触发下面的 onSeedColorChanged -> _rebuild
-                }
-            }
+    // A6（内存/唤醒优化）：200ms 常驻轮询 → 信号驱动。
+    // Theme.setThemeColor() 的全部路径最终都写 Utils.primaryColor（RinUI 单例），
+    // 其变更信号即主题色变更的精确通知，无需定时轮询比对
+    Connections {
+        target: Utils
+        function onPrimaryColorChanged() {
+            root.seedColor = Theme.getThemeColor()
         }
     }
+
     onIsDarkChanged: _rebuild()
     // Component.onCompleted: {
     //     console.log("I am:", Qt.resolvedUrl("."), this)

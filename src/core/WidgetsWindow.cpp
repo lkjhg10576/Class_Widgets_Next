@@ -29,7 +29,8 @@ void WidgetsWindow::run()
     m_central->setupQmlContext(engine());
     m_central->widgetsModel()->loadConfig();
 
-    // hover_fade 缓存：33ms 轮询里不能每帧重建整棵配置 QVariantMap
+    // hover_fade 缓存：轮询回调里不能每帧重建整棵配置 QVariantMap。
+    // A1 缓存化后 data() 本身零拷贝；A6 起 hover_fade 关闭时轮询定时器直接停止
     const QVariantMap interactions =
         m_central->configs()->data().toMap().value(QStringLiteral("interactions")).toMap();
     m_hoverFade = interactions.value(QStringLiteral("hover_fade")).toBool();
@@ -37,6 +38,11 @@ void WidgetsWindow::run()
         const QVariantMap interactions =
             m_central->configs()->data().toMap().value(QStringLiteral("interactions")).toMap();
         m_hoverFade = interactions.value(QStringLiteral("hover_fade")).toBool();
+        // A6：hover_fade 关闭 → 停止轮询（原先进程生命周期永不停，空转 30 次/秒）
+        if (m_hoverFade)
+            m_mouseTimer.start(kMousePollIntervalMs);
+        else
+            m_mouseTimer.stop();
     });
 
     // 连接要先于首次加载：无效启动主题在失败处理选择默认主题后可立即替换
@@ -45,9 +51,12 @@ void WidgetsWindow::run()
 
     load(m_mainQmlUrl);
 
-    // 33ms 轮询（core.py:39-42；M3 改事件驱动）
+    // A6：鼠标悬停检测轮询仅在 hover_fade 开启时运行，间隔 33ms → 100ms
+    // （core.py:39-42 的 33ms 常驻轮询是 CPU/唤醒浪费；M3 注释的"事件驱动"
+    // 中期方向不变，此处先止血）
     connect(&m_mouseTimer, &QTimer::timeout, this, &WidgetsWindow::updateMouseState);
-    m_mouseTimer.start(33);
+    if (m_hoverFade)
+        m_mouseTimer.start(kMousePollIntervalMs);
 }
 
 void WidgetsWindow::onQmlReady(QObject *obj, const QUrl &objUrl)

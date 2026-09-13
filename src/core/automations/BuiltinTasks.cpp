@@ -3,6 +3,7 @@
 #include "../ConfigStore.h"
 #include "../Logger.h"
 
+#include <QDateTime>
 #include <QStringList>
 #include <utility>
 
@@ -191,6 +192,14 @@ bool AutoHideTask::configBool(const char *key) const
 void AutoHideTask::update()
 {
 #ifdef Q_OS_WIN
+    // A6：窗口扫描节流（原每秒 EnumWindows 全表重建；现 3s 一次）。
+    // 配置项未开启时（下方的常规早退）不消耗节流窗口，开启瞬间即扫描
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (m_lastScanMs != 0 && nowMs - m_lastScanMs < kScanIntervalMs) {
+        return;
+    }
+    m_lastScanMs = nowMs;
+
     // builtin_tasks.py:77-122 update() 主循环
     const bool hideMaximized = configBool("interactions.hide.maximized");
     const bool hideFullscreen = configBool("interactions.hide.fullscreen");

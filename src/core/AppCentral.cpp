@@ -252,6 +252,9 @@ void AppCentral::setupQmlContext(QQmlEngine *engine)
     context->setContextProperty(QStringLiteral("UpdaterBridge"), m_updaterBridge);
     context->setContextProperty(QStringLiteral("ThemeLoadErrorDialog"),
                                 m_themeLoadErrorDialog);
+    // A6：暴露全局秒级心跳，QML 侧（如 Time 挂件）订阅 tick 替代自开 QTimer
+    // （与整秒对齐，消除 0.5s 偏移唤醒；见 UnionTimer.h 的"禁止再开秒级 QTimer"）
+    context->setContextProperty(QStringLiteral("UnionTimer"), &UnionTimer::instance());
     // 主题 URL 拦截器（对应 core.py:34 window.engine 挂拦截器）；
     // 顺序敏感：import path 在 RinUiWindowBase 里已按 src/qml 优先设置
     engine->addUrlInterceptor(m_themeManager->urlInterceptor());

@@ -18,7 +18,8 @@ class AutoHideTask : public AutomationTask
 public:
     explicit AutoHideTask(AutomationContext context, QObject *parent = nullptr);
 
-    // builtin_tasks.py:77-122 update()：主循环（每秒由 AutomationManager 调度）
+    // builtin_tasks.py:77-122 update()：主循环（原每秒由 AutomationManager 调度；
+    // A6 起窗口扫描节流至 kScanIntervalMs，EnumWindows 全表重建不再每秒发生）
     void update() override;
     // base.py:21-23
     QString name() const override { return QStringLiteral("AutoHideTask"); }
@@ -32,6 +33,10 @@ private slots:
     void onScheduleChanged(const QString &currentType);
 
 private:
+    // A6：窗口扫描节流间隔（计划 A6 备选"降频至 2–5s"的 3s 档；
+    // 上课隐藏路径走 onScheduleChanged 信号，不受节流影响）
+    static constexpr qint64 kScanIntervalMs = 3000;
+
     // builtin_tasks.py:67-75 _hide：按 interactions.hide.action 写入对应配置字段
     void hide(bool state);
 
@@ -41,4 +46,5 @@ private:
     QHash<quint64, bool> m_windowMaximized; // builtin_tasks.py:56 _window_states
     quint64 m_fullscreenWindow = 0;         // builtin_tasks.py:58 _fullscreen_window
     bool m_previousState = false;           // builtin_tasks.py:57 previous_state
+    qint64 m_lastScanMs = 0;                // A6：上次窗口扫描时刻（0 = 尚未扫描）
 };

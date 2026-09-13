@@ -63,11 +63,11 @@ Widget {
             value: dateTime.second || "00"
         }
 
-        Timer {
-            interval: 500
-            running: true
-            repeat: true
-            onTriggered: {
+        // A6（内存/唤醒优化）：500ms 无条件 Timer → 订阅 C++ UnionTimer 秒信号
+        // （与整秒对齐，消除 0.5s 偏移的半频唤醒）
+        Connections {
+            target: UnionTimer
+            function onTick() {
                 dateTime = backend.getDateTime()
             }
         }
