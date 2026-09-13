@@ -11,6 +11,14 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 
+#ifdef Q_OS_WIN
+// kernel32（kernel32.lib 默认链接）：工作集收缩。与 main.cpp 的 extern 声明风格一致，
+// 不引入 <windows.h> 以避免与 Qt 头的宏冲突。
+extern "C" __declspec(dllimport) int __stdcall SetProcessWorkingSetSize(
+    void *hProcess, std::size_t dwMinimumWorkingSetSize, std::size_t dwMaximumWorkingSetSize);
+extern "C" __declspec(dllimport) void *__stdcall GetCurrentProcess();
+#endif
+
 WidgetsWindow::WidgetsWindow(AppCentral *central, QObject *parent)
     : RinUiWindowBase(parent)
     , m_central(central)
@@ -89,6 +97,19 @@ void WidgetsWindow::onTrimTick()
     // 窗口后马上看任务管理器"的回落观感与 30s 内重开走缓存的快速路径。
     m_engine->trimComponentCache();
     m_engine->collectGarbage();
+
+#ifdef Q_OS_WIN
+    // trim/GC 只是把内存变成"空闲"，Windows 不会把 free 掉的页自动移出工作集
+    // （任务管理器"内存"=专用工作集不会自己降）——共享引擎释放的是堆内小块
+    // （旧架构引擎整体销毁是 VirtualFree 大块，会立刻去提交）。低频地把工作集
+    // 收缩一次，空闲页真正归还系统；再被用到时按需软故障调回，30s 节拍可接受。
+    const int trimmed = SetProcessWorkingSetSize(GetCurrentProcess(),
+                                                 static_cast<std::size_t>(-1),
+                                                 static_cast<std::size_t>(-1));
+    cwn::Log::info(QStringLiteral("Working set trimmed after auxiliary window "
+                                  "release (SetProcessWorkingSetSize=%1)")
+                       .arg(trimmed ? QStringLiteral("ok") : QStringLiteral("failed")));
+#endif
     cwn::Log::info(QStringLiteral(
         "B3 main-engine trim: component cache trimmed + JS GC after auxiliary "
         "window release"));
