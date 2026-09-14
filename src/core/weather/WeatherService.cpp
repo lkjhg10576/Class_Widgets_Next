@@ -411,11 +411,13 @@ void WeatherService::applySnapshot(const CityInfo &city, const QJsonObject &body
             today.insert(QStringLiteral("dayCode"), dayCode);
             today.insert(QStringLiteral("nightCode"), nightCode);
             today.insert(QStringLiteral("precipProb"), precipProb);
-            // 日出/日落取前 5 字符得 "HH:MM"
+            // 日出/日落：接口返回完整 ISO 时间（"2026-09-15T05:55:00+08:00"），
+            // 取第 11-15 字符得 "HH:MM"（原 left(5) 会得到 "2026-"；格式不符时
+            // mid 返回空串，由下方 isEmpty 判断丢弃该字段）
             const QString sunrise =
-                sunVals.at(0).toObject().value(QLatin1String("from")).toString().left(5);
+                sunVals.at(0).toObject().value(QLatin1String("from")).toString().mid(11, 5);
             const QString sunset =
-                sunVals.at(0).toObject().value(QLatin1String("to")).toString().left(5);
+                sunVals.at(0).toObject().value(QLatin1String("to")).toString().mid(11, 5);
             if (!sunrise.isEmpty())
                 today.insert(QStringLiteral("sunrise"), sunrise);
             if (!sunset.isEmpty())

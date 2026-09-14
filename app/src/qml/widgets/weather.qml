@@ -58,12 +58,16 @@ Widget {
         return map[code] || "未知"
     }
 
+    // 注意：以下两处判断必须直接读 cityJson，不能用派生属性 cityConfigured。
+    // QML 在 cityJsonChanged 处理器执行期间，依赖 cityJson 的绑定（cityConfigured）
+    // 尚未失效重算，读到的仍是旧值 false —— 会导致 request() 永不发出、
+    // 组件永远停在 "Loading…"（m_activeCities 空 → 60s 轮询也不会补拉）。
     function reload() {
-        weatherInfo = (backend && cityConfigured) ? backend.weatherData(cityJson) : null
+        weatherInfo = (backend && cityJson.length > 0) ? backend.weatherData(cityJson) : null
     }
 
     onCityJsonChanged: {
-        if (backend && cityConfigured)
+        if (backend && cityJson.length > 0)
             backend.request(cityJson) // 缺数据或已过期才真正发起拉取
         reload()
     }
