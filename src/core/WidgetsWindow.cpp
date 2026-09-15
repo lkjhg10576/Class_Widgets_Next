@@ -73,9 +73,10 @@ void WidgetsWindow::run()
     connect(&m_trimTimer, &QTimer::timeout, this, &WidgetsWindow::onTrimTick);
 
     // C1 后续（用户采纳）：启动期的一次性 init 页（主题加载/字体预热/配置装载
-    // 等摸过一次就不再碰的）也会常驻工作集 —— 启动 2 分钟稳态后置脏一次，走
-    // 与"辅助窗口关闭后"完全相同的 trim + 工作集收缩路径，把常驻基线压到热集
-    // 水平（真机实测：70–80 → 35–40MB）。此后无辅助窗口活动即不再触发。
+    // 等摸过一次就不再碰的）也会常驻工作集 —— 启动 15s 后置脏一次，走与
+    // "辅助窗口关闭后"完全相同的 trim + 工作集收缩路径（实际收缩落在其后
+    // ≤30s 的脏检查节拍上，即启动 ~15–45s 完成），把常驻基线压到热集水平
+    // （真机实测：70–80 → 35–40MB）。此后无辅助窗口活动即不再触发。
     QTimer::singleShot(kStartupTrimDelayMs, this, [this] {
         if (!m_released && m_engine) {
             m_trimDirty = true;

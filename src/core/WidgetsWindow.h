@@ -40,7 +40,7 @@ private slots:
 private:
     static constexpr int kMousePollIntervalMs = 100; // A6：原 33ms
     static constexpr int kTrimIntervalMs = 30 * 1000; // C1：脏驱动回落节拍（原 B3 5min）
-    static constexpr int kStartupTrimDelayMs = 2 * 60 * 1000; // C1 后续：启动期一次性收缩的稳态延时
+    static constexpr int kStartupTrimDelayMs = 15 * 1000; // C1 后续：启动期一次性收缩的置脏延时（原 2min；实际 trim 落在其后 ≤30s 的脏检查节拍上）
 
     void onQmlReady(QObject *obj, const QUrl &objUrl);
     void onThemeChanged();
