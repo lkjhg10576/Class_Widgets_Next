@@ -7,9 +7,24 @@ import ClassWidgets.Components
 import QtQuick.Effects  // shadow
 
 FluentPage {
+    id: home
     title: qsTr("Home")
 
     property string _pendingScheduleName: ""
+    // schedules() 是普通函数调用，绑定不会随目录变化重算；
+    // 改为显式模型 + schedulesChanged 信号驱动刷新。
+    property var scheduleModel: []
+
+    function refreshSchedules() {
+        home.scheduleModel = AppCentral.scheduleManager.schedules()
+    }
+
+    Component.onCompleted: refreshSchedules()
+
+    Connections {
+        target: AppCentral.scheduleManager
+        function onSchedulesChanged() { home.refreshSchedules() }
+    }
 
     Introduction {
         source:PathManager.images(
@@ -126,7 +141,7 @@ FluentPage {
             columnSpacing: 8
 
             Repeater {
-                model: AppCentral.scheduleManager.schedules()
+                model: home.scheduleModel
                 delegate: ScheduleClip {
                     filename: modelData.name
                     selected: AppCentral.scheduleManager.currentScheduleName === modelData.name

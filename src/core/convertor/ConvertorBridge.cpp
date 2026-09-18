@@ -123,6 +123,8 @@ bool ConvertorBridge::importAndApply(const QString &sourceFormat, const QString 
                             .arg(destPath));
         return false;
     }
+    // 转换导入向课表目录新写入了一个文件，通知 QML 侧课表列表刷新。
+    m_manager->notifySchedulesChanged();
     cwn::Log::info(QStringLiteral("Imported %1 schedule from %2")
                        .arg(sourceFormat == QLatin1String("cw1") ? QStringLiteral("CW1")
                                                                  : QStringLiteral("CSES"),

@@ -93,7 +93,15 @@ Window {
                 Layout.preferredHeight: 72
                 spacing: 8
                 orientation: ListView.Horizontal
-                model: AppCentral.scheduleManager.schedules()
+                // schedules() 无 NOTIFY，绑定不会自动重算；显式模型 + 信号刷新。
+                property var scheduleModel: []
+                model: scheduleModel
+
+                Component.onCompleted: scheduleModel = AppCentral.scheduleManager.schedules()
+                Connections {
+                    target: AppCentral.scheduleManager
+                    function onSchedulesChanged() { scheduleList.scheduleModel = AppCentral.scheduleManager.schedules() }
+                }
 
                 delegate: ScheduleClip {
                     width: 200

@@ -188,6 +188,7 @@ bool ScheduleManager::add(const QString &name)
     }
     if (writeJsonFile(path, makeEmptySchedule())) {
         cwn::Log::info(QStringLiteral("New schedule created: %1").arg(name));
+        emit schedulesChanged();
         return true;
     }
     return false;
@@ -207,6 +208,7 @@ bool ScheduleManager::removeSchedule(const QString &name)
             return false;
         }
         cwn::Log::info(QStringLiteral("Schedule deleted: %1").arg(name));
+        emit schedulesChanged();
     }
     return true;
 }
@@ -226,6 +228,7 @@ bool ScheduleManager::duplicate(const QString &srcName, const QString &destName)
         return false;
     }
     cwn::Log::info(QStringLiteral("Schedule copied: %1 -> %2").arg(srcName, destName));
+    emit schedulesChanged();
     return true;
 }
 
@@ -252,6 +255,7 @@ bool ScheduleManager::rename(const QString &oldName, const QString &newName)
         return false;
     }
     cwn::Log::info(QStringLiteral("Schedule renamed: %1 -> %2").arg(oldName, newName));
+    emit schedulesChanged();
 
     // manager.py:219-225：当前课表被重命名时同步运行时记录
     if (m_currentScheduleName == oldName) {
@@ -298,6 +302,7 @@ bool ScheduleManager::importSchedule()
 
     emit scheduleSwitched(m_schedule);
     emit scheduleModified(m_schedule);
+    emit schedulesChanged();
     cwn::Log::info(QStringLiteral("Schedule imported from %1").arg(QFileInfo(filePath).fileName()));
     return true;
 }

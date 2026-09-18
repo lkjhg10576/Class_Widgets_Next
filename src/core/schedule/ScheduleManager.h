@@ -35,6 +35,9 @@ public:
     ScheduleIO *scheduleIO() const { return m_scheduleIO; }
     // manager.py:137-139 currentScheduleName（current_schedule_name or ""）
     QString currentScheduleName() const { return m_currentScheduleName; }
+    // 供 ConvertorBridge 等协作方在直接写盘课表文件后通知 QML 列表刷新
+    // （schedulesChanged 是其自身信号，无法从外部 emit）。
+    void notifySchedulesChanged() { emit schedulesChanged(); }
     bool readonly() const { return m_readonly; }
     void setReadonly(bool readonly); // manager.py:319-322 set_readonly
 
@@ -80,6 +83,9 @@ public:
 
 signals:
     void initialized(); // manager.py:34
+    // 课表目录内容发生变化（新建/删除/复制/重命名/导入）——
+    // QML 侧 schedules() 是普通函数调用，无此信号时列表不会自动刷新。
+    void schedulesChanged();
     void scheduleSwitched(const QJsonObject &schedule); // manager.py:35
     void scheduleModified(const QJsonObject &schedule); // manager.py:36
 
