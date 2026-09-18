@@ -5207,6 +5207,11 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../../../src/core/BuiltinWidgets.cpp" line="110"/>
+        <source>Days Countdown</source>
+        <translation>倒数日</translation>
+    </message>
 </context>
 <context>
     <name>WidgetsContainer</name>
@@ -5348,6 +5353,59 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <location filename="../../src/qml/widgets/upcomingActivities.qml" line="34"/>
         <source>Unset</source>
         <translation>滚木</translation>
+    </message>
+</context>
+<context>
+    <name>countdownDays</name>
+    <message>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="43"/>
+        <source>Until %1</source>
+        <translation>距离 %1 还有</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="44"/>
+        <source>Days Countdown</source>
+        <translation>倒数日</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="63"/>
+        <source>%1 days</source>
+        <translation>%1 天</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="71"/>
+        <source>Right-click to set a date</source>
+        <translation>右键点击以设置目标日期</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="29"/>
+        <source>Event Title</source>
+        <translation>事件标题</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="30"/>
+        <source>Shown as the widget header title</source>
+        <translation>显示为小组件顶部的标题</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="35"/>
+        <source>e.g. Final Exam</source>
+        <translation>例如：期末考试</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="49"/>
+        <source>Target Date</source>
+        <translation>目标日期</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="51"/>
+        <source>Counting down to %1</source>
+        <translation>正在倒数至 %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="52"/>
+        <source>Pick the day to count down to</source>
+        <translation>选择要倒数的日期</translation>
     </message>
 </context>
 </TS>

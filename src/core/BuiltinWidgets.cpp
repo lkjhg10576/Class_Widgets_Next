@@ -3,6 +3,7 @@
 #include "AppPaths.h"
 #include "weather/WeatherService.h"
 
+#include <QCoreApplication>
 #include <QDate>
 #include <QTime>
 #include <QUrl>
@@ -100,6 +101,20 @@ QList<WidgetDefinition> BuiltinWidgetProvider::widgets() const
     weatherDefaults.insert(QStringLiteral("city"), QString());
     weather.defaultSettings = weatherDefaults;
 
+    // 倒数日（本移植新增内置组件，同天气先例为"新增文件"而非上游改动）；
+    // settings.title 为事件名，settings.target_date 为 "yyyy-MM-dd" 目标日字符串。
+    // 名称翻译走显式 "Widgets" 上下文（.ts 中内置组件名即归于此，同
+    // ScheduleManager 的 QCoreApplication::translate 用法）
+    WidgetDefinition countdownDays;
+    countdownDays.id = QStringLiteral("classwidgets.countdownDays");
+    countdownDays.name = QCoreApplication::translate("Widgets", "Days Countdown");
+    countdownDays.qmlPath = widgetUri(QStringLiteral("widgets/countdownDays.qml"));
+    countdownDays.settingsQml = widgetUri(QStringLiteral("widgets/settings/countdownDays.qml"));
+    QVariantMap countdownDaysDefaults;
+    countdownDaysDefaults.insert(QStringLiteral("title"), QString());
+    countdownDaysDefaults.insert(QStringLiteral("target_date"), QString());
+    countdownDays.defaultSettings = countdownDaysDefaults;
+
     return { currentActivity, time, eventCountdown, upcomingActivities, dynamicNotification,
-             customText, weather };
+             customText, weather, countdownDays };
 }

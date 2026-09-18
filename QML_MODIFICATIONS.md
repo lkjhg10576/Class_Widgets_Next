@@ -4,7 +4,8 @@
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
 ## 当前状态：`app/src/qml` 共 8 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除，见下）
-> 另有 2 个**新增文件**（非上游改动）：天气小组件及其设置页，见改动 5。
+> 另有 4 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
+> 倒数日小组件及其设置页（改动 9）。
 > `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
 > 与改动 8（WidgetLoader.qml 失败恢复，属 `app/src/qml`）已偏离上游。
 
@@ -119,6 +120,22 @@ Material You 主题下所有小组件 Loader.Error、整主题回退默认。
 该 Loader 对后续所有 `themeReadyToReload`（含失败回滚默认主题）永久跳过，
 小组件从此消失直到重启进程。修复：Error 分支同样 `reloading = false`，保证
 回滚/改选其他主题时必然重试。
+
+### 9. 倒数日小组件（2 个新增文件，本移植新增内置组件）
+
+上游 CW2 无倒数日组件；按用户要求以原生功能新增（注册于
+`src/core/BuiltinWidgets.cpp`，id `classwidgets.countdownDays`）。与改动 5 同纪律：
+因是**新增文件**而非上游文件改动，上游同步不会冲突；若上游未来新增同名路径需在此复核。
+
+| # | 文件 | 性质 | 说明 |
+|---|---|---|---|
+| 9.1 | `widgets/countdownDays.qml` | 新增 | 上方 header 显示 `距离（标题）还有`，下方 `N 天`；settings 契约 `title` + `target_date`（"yyyy-MM-dd"）；天数按目标日 0 点 − 今日 0 点计算，订阅 UnionTimer 秒心跳实现跨零点自动重算（A6 纪律，不自开 QTimer）；backend 用通用 WidgetBackend |
+| 9.2 | `widgets/settings/countdownDays.qml` | 新增 | 事件标题（TextField，命令式初始化对齐 settings/Text.qml 先例）+ 目标日期（RinUI `CalendarDatePicker`，选择后写回 `target_date`）；沿用 settings 整体重赋契约（Ok 时由 WidgetSettingsDialog 调 `WidgetsModel.updateSettings` 持久化） |
+
+配套改动：`src/core/BuiltinWidgets.cpp` 注册项（名称翻译走显式 `"Widgets"` 上下文，
+同 ScheduleManager 的 `QCoreApplication::translate` 用法）；`app/assets/locales/` 的
+`zh_CN` / `zh_SIMPLIFIED` / `zh_HK` 三个 `.ts` 补 `Widgets` 词条与 `countdownDays`
+context，`.qm` 已用 lrelease 重新生成（其余语言无中文词条，显示英文源文，与天气组件同状态）。
 
 ## 修改申请流程
 
