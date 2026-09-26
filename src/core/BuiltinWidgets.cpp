@@ -59,10 +59,12 @@ QList<WidgetDefinition> BuiltinWidgetProvider::widgets() const
     eventCountdown.name = WidgetBackend::tr("Event Countdown");
     eventCountdown.qmlPath = widgetUri(QStringLiteral("widgets/eventCountdown.qml"));
 
+    // 即将上课默认显示缩写、默认最多 7 节；full_name=false 即"显示缩写"
+    //（键名沿用上游存量契约，语义与 UI 相反）；marquee 已废弃，永不滚动，
+    // 存量配置里残留的 marquee 键会被忽略，不做迁移清理。
     QVariantMap upcomingDefaults;
-    upcomingDefaults.insert(QStringLiteral("marquee"), true);
-    upcomingDefaults.insert(QStringLiteral("max_activities"), 5);
-    upcomingDefaults.insert(QStringLiteral("full_name"), true);
+    upcomingDefaults.insert(QStringLiteral("max_activities"), 7);
+    upcomingDefaults.insert(QStringLiteral("full_name"), false);
 
     WidgetDefinition upcomingActivities;
     upcomingActivities.id = QStringLiteral("classwidgets.upcomingActivities");

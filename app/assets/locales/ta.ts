@@ -5237,51 +5237,46 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
     <name>upcomingActivities</name>
     <message>
         <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="12"/>
-        <source>Marquee Title</source>
-        <translation>மார்க்யூ தலைப்பு</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
-        <source>If enabled, the upcoming activities will scroll from left to right.</source>
-        <translation>இயக்கப்பட்டால், வரவிருக்கும் செயல்பாடுகள் இடமிருந்து வலமாக உருட்டும்.</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="29"/>
         <source>Max number of activities</source>
         <translation>செயல்பாடுகளின் அதிகபட்ச எண்ணிக்கை</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="30"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
         <source>Set the maximum number of activities to display in the upcoming activities view</source>
         <translation>வரவிருக்கும் செயல்பாடுகளின் பார்வையில் காட்டப்படும் அதிகபட்ச செயல்பாடுகளின் எண்ணிக்கையை அமைக்கவும்</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="46"/>
-        <source>Show full name of the activities</source>
-        <translation>செயல்பாடுகளின் முழுப் பெயரைக் காட்டு</translation>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="32"/>
+        <source>Show abbreviation</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="12"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="33"/>
+        <source>Use the abbreviation set for each subject, or its first character when unset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="13"/>
         <source>Upcoming</source>
         <translation>வரவிருக்கிறது</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="32"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="64"/>
         <source>Class</source>
         <translation>வகுப்பு</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="33"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="65"/>
         <source>Activity</source>
         <translation>செய்கைப்பாடு</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="38"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="43"/>
         <source>Nothing ahead</source>
         <translation>முன்னால் எதுவும் இல்லை</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="34"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="66"/>
         <source>Unset</source>
         <translation>அமைக்கப்படவில்லை</translation>
     </message>

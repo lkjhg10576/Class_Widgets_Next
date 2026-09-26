@@ -5376,41 +5376,36 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
     <name>upcomingActivities</name>
     <message>
         <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="12"/>
-        <source>Marquee Title</source>
-        <translation type="unfinished">跑馬燈標題</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
-        <source>If enabled, the upcoming activities will scroll from left to right.</source>
-        <translation type="unfinished">如啟用，即將到來的活動將從左到右滾動。</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="29"/>
         <source>Max number of activities</source>
         <translation type="unfinished">最大活動數量</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="30"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
         <source>Set the maximum number of activities to display in the upcoming activities view</source>
         <translation type="unfinished">設定在即將到來活動視圖中顯示的最大活動數量</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="46"/>
-        <source>Show full name of the activities</source>
-        <translation type="unfinished">顯示活動全名</translation>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="32"/>
+        <source>Show abbreviation</source>
+        <translation>顯示縮寫</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="12"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="33"/>
+        <source>Use the abbreviation set for each subject, or its first character when unset</source>
+        <translation>優先使用課程設定的縮寫；未設定時取課程全稱的第一個字</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="13"/>
         <source>Upcoming</source>
         <translation type="unfinished">即將到來</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="32"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="64"/>
         <source>Class</source>
         <translation type="unfinished">班級</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="33"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="65"/>
         <source>Activity</source>
         <translation type="unfinished">活動</translation>
     </message>
@@ -5419,12 +5414,12 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <translation type="obsolete">未知</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="38"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="43"/>
         <source>Nothing ahead</source>
         <translation type="unfinished">沒有即將到來的事物</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="34"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="66"/>
         <source>Unset</source>
         <translation type="unfinished">未設定</translation>
     </message>

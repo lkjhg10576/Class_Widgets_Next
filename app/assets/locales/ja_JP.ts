@@ -5480,41 +5480,36 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
     <name>upcomingActivities</name>
     <message>
         <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="12"/>
-        <source>Marquee Title</source>
-        <translation>スロットンタイトル</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
-        <source>If enabled, the upcoming activities will scroll from left to right.</source>
-        <translation>有効の場合、今後の活動は左から右へとスクロール表示されます。</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="29"/>
         <source>Max number of activities</source>
         <translation>最大の活動数</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="30"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
         <source>Set the maximum number of activities to display in the upcoming activities view</source>
         <translation>今後の活動ビューで表示する最大の活動数を設定します</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="46"/>
-        <source>Show full name of the activities</source>
-        <translation>活動のフルネームを表示</translation>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="32"/>
+        <source>Show abbreviation</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="12"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="33"/>
+        <source>Use the abbreviation set for each subject, or its first character when unset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="13"/>
         <source>Upcoming</source>
         <translation>今後の</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="32"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="64"/>
         <source>Class</source>
         <translation type="unfinished">Class</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="33"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="65"/>
         <source>Activity</source>
         <translation type="unfinished">活動</translation>
     </message>
@@ -5523,12 +5518,12 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <translation type="vanished">不明</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="38"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="43"/>
         <source>Nothing ahead</source>
         <translation>前方にない</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="34"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="66"/>
         <source>Unset</source>
         <translation>Unset</translation>
     </message>

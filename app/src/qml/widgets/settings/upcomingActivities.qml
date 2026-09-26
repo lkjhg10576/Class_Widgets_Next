@@ -8,34 +8,20 @@ SettingsLayout {
     SettingCard {
         Layout.fillWidth: true
 
-        icon.name: "ic_fluent_subtitles_20_regular"
-        title: qsTr("Marquee Title")
-        description: qsTr("If enabled, the upcoming activities will scroll from left to right.")
-
-        Switch {
-            id: marqueeSwitch
-            onCheckedChanged: {
-                settings.marquee = marqueeSwitch.checked
-            }
-            Component.onCompleted: {
-                marqueeSwitch.checked = settings.marquee
-            }
-        }
-    }
-    SettingCard {
-        Layout.fillWidth: true
-
         icon.name: "ic_fluent_broad_activity_feed_20_regular"
         title: qsTr("Max number of activities")
         description: qsTr("Set the maximum number of activities to display in the upcoming activities view")
 
         SpinBox {
             id: maxActivitiesSpinBox
+            from: 1
+            to: 7
             onValueChanged: {
                 settings.max_activities = maxActivitiesSpinBox.value
             }
             Component.onCompleted: {
-                maxActivitiesSpinBox.value = settings.max_activities
+                const saved = settings.max_activities
+                maxActivitiesSpinBox.value = (saved >= 1 && saved <= 7) ? saved : 7
             }
         }
     }
@@ -43,15 +29,17 @@ SettingsLayout {
         Layout.fillWidth: true
 
         icon.name: "ic_fluent_text_case_title_20_regular"
-        title: qsTr("Show full name of the activities")
+        title: qsTr("Show abbreviation")
+        description: qsTr("Use the abbreviation set for each subject, or its first character when unset")
 
         Switch {
-            id: showFullNameSwitch
+            id: showAbbreviationSwitch
             onCheckedChanged: {
-                settings.full_name = showFullNameSwitch.checked
+                // 存量键 full_name 语义与开关相反：true = 显示全称 = 不缩写
+                settings.full_name = !showAbbreviationSwitch.checked
             }
             Component.onCompleted: {
-                showFullNameSwitch.checked = settings.full_name
+                showAbbreviationSwitch.checked = !(settings.full_name === true)
             }
         }
     }

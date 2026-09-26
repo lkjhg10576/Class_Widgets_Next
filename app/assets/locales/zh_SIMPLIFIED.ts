@@ -5306,51 +5306,46 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
     <name>upcomingActivities</name>
     <message>
         <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="12"/>
-        <source>Marquee Title</source>
-        <translation>马拉松样式</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
-        <source>If enabled, the upcoming activities will scroll from left to right.</source>
-        <translation>滚滚滚滚滚～</translation>
-    </message>
-    <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="29"/>
         <source>Max number of activities</source>
         <translation>马克思数量来自于运行</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="30"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="13"/>
         <source>Set the maximum number of activities to display in the upcoming activities view</source>
         <translation>最多运行多少个？</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="46"/>
-        <source>Show full name of the activities</source>
-        <translation>全拼</translation>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="32"/>
+        <source>Show abbreviation</source>
+        <translation>显示缩写</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="12"/>
+        <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="33"/>
+        <source>Use the abbreviation set for each subject, or its first character when unset</source>
+        <translation>优先使用课程设置的缩写；未设置时取课程全称的第一个字</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="13"/>
         <source>Upcoming</source>
         <translation>死到临头</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="32"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="64"/>
         <source>Class</source>
         <translation>门牌号</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="33"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="65"/>
         <source>Activity</source>
         <translation>运行</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="38"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="43"/>
         <source>Nothing ahead</source>
         <translation>没事了，吃点溜溜梅吗？</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="34"/>
+        <location filename="../../src/qml/widgets/upcomingActivities.qml" line="66"/>
         <source>Unset</source>
         <translation>滚木</translation>
     </message>

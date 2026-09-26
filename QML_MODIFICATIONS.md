@@ -3,7 +3,7 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 共 8 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除，见下）
+## 当前状态：`app/src/qml` 共 10 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件，见下）
 > 另有 4 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
 > 倒数日小组件及其设置页（改动 9）。
 > `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
@@ -11,7 +11,7 @@
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
-| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **4 处（均为插件入口遮蔽，见改动 3）** |
+| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10）** |
 | `app/src/themes/` | 上游内置主题定义 | **1 处（material Color.qml，改动 7；上游原样保留在文件外注释）** |
 | `app/assets/` | 上游资产 | **无（逐字复制）** |
 | `app/themes/` | 上游外部主题扫描目录 | **无（逐字复制）** |
@@ -136,6 +136,20 @@ Material You 主题下所有小组件 Loader.Error、整主题回退默认。
 同 ScheduleManager 的 `QCoreApplication::translate` 用法）；`app/assets/locales/` 的
 `zh_CN` / `zh_SIMPLIFIED` / `zh_HK` 三个 `.ts` 补 `Widgets` 词条与 `countdownDays`
 context，`.qm` 已用 lrelease 重新生成（其余语言无中文词条，显示英文源文，与天气组件同状态）。
+
+### 10. 「即将上课」组件：显示缩写开关 + 宽度自适应（2026-09-26）
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 10.1 | `widgets/upcomingActivities.qml` | 移除 `MarqueeTitle`（滚动），改为每节课一个 `Title` 排进 `Row`，宽度随内容自适应；新增缩写解析（`simplifiedName` → 全称首字）、最多 7 节、超出屏幕宽度时从末尾裁剪（保底首条 `ElideRight`）。新增 `import QtQuick.Window`（取 `Screen.width` 算宽度上限） |
+| 10.2 | `widgets/settings/upcomingActivities.qml` | 删除「滚动标题」卡片；「最多活动数」限定 1–7（RinUI SpinBox 可手动键入）；「显示活动全称」改为「显示缩写」，与存量键 `full_name` 取反绑定 |
+
+配套 C++ 侧（不在上游同步区）：`src/core/BuiltinWidgets.cpp` 默认值改为
+`max_activities=7`、`full_name=false`、删除 `marquee`。
+配套翻译：`app/assets/locales/*.ts` 的 `upcomingActivities` 上下文删除 3 条废弃文案
+（Marquee Title / 滚动描述 / 显示全称）、新增 2 条（Show abbreviation 及其说明），
+三个 zh 语种已译，其余语种暂回退英文原文。
+同步上游时：本条与上游对这两个文件的差异需手工三方合并（上游仍保留 `marquee` 分支）。
 
 ## 修改申请流程
 
