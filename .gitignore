@@ -3,6 +3,7 @@ build/
 build-*/
 dist/
 out/
+output/
 cmake-build-*/
 
 # 运行时生成

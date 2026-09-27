@@ -67,15 +67,49 @@ jobs:
           Write-Host "Smoke test exit code: $($p.ExitCode)"
           exit $p.ExitCode
 
+      - name: Restore pristine default configs
+        # ConfigStore::load() 会无条件 save()（见 src/core/ConfigStore.cpp），冒烟测试
+        # 运行会把 dist/configs/configs.json 重写为运行期规范化格式 —— 重新 install
+        # 恢复仓库原始默认值，保证 zip 与安装器播种的都是出厂默认配置
+        run: cmake --install build --prefix dist
+
       - name: Package (zip)
         shell: pwsh
         run: Compress-Archive -Path "dist\*" -DestinationPath "ClassWidgetsNext-Windows-x64.zip"
 
-      - name: Upload artifact
+      # windows-latest 镜像一般自带 Inno Setup 6（chocolatey 安装），缺失时兜底装一次
+      - name: Ensure Inno Setup 6
+        shell: pwsh
+        run: |
+          $candidates = @("$env:ProgramFiles\Inno Setup 6\ISCC.exe")
+          if (${env:ProgramFiles(x86)}) {
+            $candidates += "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          if ((Get-Command iscc -ErrorAction SilentlyContinue) -or
+              ($candidates | Where-Object { Test-Path $_ })) {
+            Write-Host "Inno Setup 已预装"
+          } else {
+            Write-Host "Inno Setup 未预装，改用 Chocolatey 安装"
+            choco install innosetup -y --no-progress
+          }
+
+      # 与本地同一脚本：解析 CWN_VERSION（CMakeLists 缺省值）+ 定位 ISCC + 编译安装器
+      - name: Package (Inno Setup installer)
+        shell: pwsh
+        run: scripts/build-installer.ps1 -SkipBuild
+
+      - name: Upload artifact (zip)
         uses: actions/upload-artifact@v4
         with:
           name: ClassWidgetsNext-Windows-x64
           path: ClassWidgetsNext-Windows-x64.zip
+          if-no-files-found: error
+
+      - name: Upload artifact (installer)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClassWidgetsNext-Windows-x64-Installer
+          path: output/ClassWidgets-*-Win-Installer.exe
           if-no-files-found: error
 
       # ---- 诊断步骤：必须放在最后，任何前置步骤失败都会触发 ----

@@ -66,8 +66,33 @@ cmake --install build --prefix dist
 windeployqt --release --compiler-runtime --qmldir app dist\ClassWidgetsNext.exe
 ```
 
+### Windows 安装器（Inno Setup 6）
+
+一键产出全中文向导安装器，依赖本机装有 [Inno Setup 6](https://jrsoftware.org/isinfo.php)
+（`winget install JRSoftware.InnoSetup`）：
+
+```powershell
+# 完整流程：构建 + 部署 + 打安装器（版本号缺省解析 CMakeLists 的 CWN_VERSION）
+scripts\build-installer.ps1
+
+# 已有 dist/ 时只重打安装器；或显式指定版本号
+scripts\build-installer.ps1 -SkipBuild
+scripts\build-installer.ps1 -Version 2.1.0
+```
+
+产物在 `output/ClassWidgets-<版本>-Win-Installer.exe`：
+
+- 全中文向导（语言包 `scripts/Installer_Languages/ChineseSimplified.isl`，官方 Inno
+  Setup 6 不含中文，故随仓库 vendor）、安装路径可改、完成页可勾选「立即运行」；
+- 装完有开始菜单项与「应用和功能」卸载条目（AppId `com.classwidgets.next`）；
+- 卸载与覆盖安装均保留 `{app}\configs`、`{app}\logs` 用户数据 —— 默认
+  `configs.json` / 默认课程表仅首次安装落地（`onlyifdoesntexist`），改过的配置不会被重置；
+- 默认安装到 `Program Files`（用户数据随之写入安装目录，与上游便携式布局一致）；
+  标准权限安装可用命令行 `/currentuser`。
+
 CI：`.github/workflows/build.yml` 在 `windows-latest` 上完成 构建 → windeployqt →
-**offscreen 冒烟测试**（`--smoke-test`：QML 就绪即退出，exit 0 = 通过）→ 打包上传 artifact。
+**offscreen 冒烟测试**（`--smoke-test`：QML 就绪即退出，exit 0 = 通过）→ 打包上传
+zip 与安装器两个 artifact。
 
 ## 运行时根查找规则（AppPaths）
 
