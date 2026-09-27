@@ -8,7 +8,8 @@ SettingsLayout {
     id: root
 
     // 注入属性：settings / instanceId / widget_id（SettingsLayout 自带 settings 声明）
-    // settings 契约见 widgets/countdownDays.qml：title 事件名、target_date "yyyy-MM-dd"
+    // settings 契约见 widgets/countdownDays.qml：title 事件名、target_date "yyyy-MM-dd"、
+    // cycle 重复周期 "none" | "weekly" | "monthly" | "yearly"（缺省 "none"）
 
     readonly property string targetDateStr:
         (root.settings && root.settings.target_date) ? root.settings.target_date : ""
@@ -69,6 +70,35 @@ SettingsLayout {
                     date.getFullYear()
                     + "-" + (m < 10 ? "0" + m : m)
                     + "-" + (d < 10 ? "0" + d : d))
+            }
+        }
+    }
+
+    SettingCard {
+        Layout.fillWidth: true
+
+        icon.name: "ic_fluent_arrow_sync_20_regular"
+        title: qsTr("Repeat")
+        description: qsTr("Repeating countdowns roll to the next occurrence; short months clamp to the last day")
+
+        ComboBox {
+            property var data: ["none", "weekly", "monthly", "yearly"]
+            model: ListModel {
+                ListElement { text: qsTr("No repeat") }
+                ListElement { text: qsTr("Weekly") }
+                ListElement { text: qsTr("Monthly") }
+                ListElement { text: qsTr("Yearly") }
+            }
+            Component.onCompleted: {
+                // 命令式初始化（对齐本页 titleField 先例）：读保存值定位，避免
+                // settings 整体重赋时 currentIndex 绑定被意外重算
+                var saved = (root.settings && root.settings.cycle) ? root.settings.cycle : "none"
+                var i = data.indexOf(saved)
+                currentIndex = i >= 0 ? i : 0
+            }
+            onCurrentIndexChanged: {
+                if (currentIndex >= 0)
+                    root.updateSetting("cycle", data[currentIndex])
             }
         }
     }

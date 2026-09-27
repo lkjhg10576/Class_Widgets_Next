@@ -216,12 +216,17 @@ Licensed under the MIT license</source>
         <translation>添加小组件</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddWidgetsDialog.qml" line="141"/>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddWidgetsDialog.qml" line="144"/>
         <source>No Widget Selected</source>
         <translation>未选择小组件</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddWidgetsDialog.qml" line="220"/>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddWidgetsDialog.qml" line="232"/>
+        <source>Up to %1 instances</source>
+        <translation>最多可添加 %1 个</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddWidgetsDialog.qml" line="241"/>
         <source>Add</source>
         <translation>添加</translation>
     </message>
@@ -5806,54 +5811,271 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
 <context>
     <name>countdownDays</name>
     <message>
-        <location filename="../../src/qml/widgets/countdownDays.qml" line="43"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="111"/>
         <source>Until %1</source>
         <translation>距离 %1 还有</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/countdownDays.qml" line="44"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="103"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="107"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="109"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="112"/>
         <source>Days Countdown</source>
         <translation>倒数日</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/countdownDays.qml" line="63"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="131"/>
         <source>%1 days</source>
         <translation>%1 天</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/countdownDays.qml" line="71"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="147"/>
         <source>Right-click to set a date</source>
         <translation>右键点击以设置目标日期</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="29"/>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="106"/>
+        <source>Since %1</source>
+        <translation>距离 %1 已过</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/countdownDays.qml" line="139"/>
+        <source>Today is the day</source>
+        <translation>就是今天</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="30"/>
         <source>Event Title</source>
         <translation>事件标题</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="30"/>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="31"/>
         <source>Shown as the widget header title</source>
         <translation>显示为小组件顶部的标题</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="35"/>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="36"/>
         <source>e.g. Final Exam</source>
         <translation>例如：期末考试</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="49"/>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="50"/>
         <source>Target Date</source>
         <translation>目标日期</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="51"/>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="52"/>
         <source>Counting down to %1</source>
         <translation>正在倒数至 %1</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="52"/>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="53"/>
         <source>Pick the day to count down to</source>
         <translation>选择要倒数的日期</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="81"/>
+        <source>Repeat</source>
+        <translation>重复周期</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="82"/>
+        <source>Repeating countdowns roll to the next occurrence; short months clamp to the last day</source>
+        <translation>循环倒数会自动滚动到下一次发生日；小月顺延至月末</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="87"/>
+        <source>No repeat</source>
+        <translation>不重复</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="88"/>
+        <source>Weekly</source>
+        <translation>每周</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="89"/>
+        <source>Monthly</source>
+        <translation>每月</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="90"/>
+        <source>Yearly</source>
+        <translation>每年</translation>
+    </message>
+</context>
+<context>
+    <name>weather</name>
+    <message>
+        <source>Right-click to set a city</source>
+        <translation>右键设置城市</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>加载中…</translation>
+    </message>
+    <message>
+        <source>Set API key in widget settings</source>
+        <translation>请到小组件设置中配置 API 密钥</translation>
+    </message>
+    <message>
+        <source>Data source</source>
+        <translation>数据源</translation>
+    </message>
+    <message>
+        <source>Xiaomi Weather (Free)</source>
+        <translation>小米天气（免费）</translation>
+    </message>
+    <message>
+        <source>AMap Weather (Paid)</source>
+        <translation>高德天气（收费）</translation>
+    </message>
+    <message>
+        <source>QWeather (Paid)</source>
+        <translation>和风天气（收费）</translation>
+    </message>
+    <message>
+        <source>WeatherCN (Paid)</source>
+        <translation>华风爱科（收费）</translation>
+    </message>
+    <message>
+        <source>Caiyun Weather (Paid)</source>
+        <translation>彩云天气（收费）</translation>
+    </message>
+    <message>
+        <source>Built-in, no configuration required</source>
+        <translation>内置数据源，无需配置</translation>
+    </message>
+    <message>
+        <source>Requires an AMap Web service key</source>
+        <translation>需要高德 Web 服务 API Key</translation>
+    </message>
+    <message>
+        <source>Requires a QWeather API key and dedicated API host</source>
+        <translation>需要和风天气 API Key 与专属 API Host</translation>
+    </message>
+    <message>
+        <source>Requires a WeatherCN API key</source>
+        <translation>需要华风爱科 API Key</translation>
+    </message>
+    <message>
+        <source>Requires a Caiyun API token</source>
+        <translation>需要彩云天气 Token</translation>
+    </message>
+    <message>
+        <source>AMap does not support weather alerts yet</source>
+        <translation>高德天气暂不支持预警</translation>
+    </message>
+    <message>
+        <source>API credentials</source>
+        <translation>API 凭据</translation>
+    </message>
+    <message>
+        <source>Stored locally in configs.json</source>
+        <translation>密钥保存在本地 configs.json</translation>
+    </message>
+    <message>
+        <source>AMap Key</source>
+        <translation>高德 Key</translation>
+    </message>
+    <message>
+        <source>QWeather Key</source>
+        <translation>和风 Key</translation>
+    </message>
+    <message>
+        <source>WeatherCN Key</source>
+        <translation>华风 Key</translation>
+    </message>
+    <message>
+        <source>Caiyun Token</source>
+        <translation>彩云 Token</translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation>显示</translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation>测试连接</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>测试中…</translation>
+    </message>
+    <message>
+        <source>Connection successful</source>
+        <translation>连接成功</translation>
+    </message>
+    <message>
+        <source>Invalid API key</source>
+        <translation>密钥无效</translation>
+    </message>
+    <message>
+        <source>Quota exceeded</source>
+        <translation>配额超限或欠费</translation>
+    </message>
+    <message>
+        <source>Network error</source>
+        <translation>网络错误</translation>
+    </message>
+    <message>
+        <source>Unexpected response</source>
+        <translation>响应异常</translation>
+    </message>
+    <message>
+        <source>City</source>
+        <translation>城市</translation>
+    </message>
+    <message>
+        <source>Search and select a city to enable weather</source>
+        <translation>搜索并选择城市以启用天气</translation>
+    </message>
+    <message>
+        <source>Search city</source>
+        <translation>搜索城市</translation>
+    </message>
+    <message>
+        <source>Refresh interval</source>
+        <translation>刷新间隔</translation>
+    </message>
+    <message>
+        <source>How often to fetch weather data (30–180 minutes)</source>
+        <translation>天气数据拉取频率（30–180 分钟）</translation>
+    </message>
+    <message>
+        <source> min</source>
+        <translation> 分钟</translation>
+    </message>
+    <message>
+        <source>Attribution</source>
+        <translation>数据来源</translation>
+    </message>
+    <message>
+        <source>Weather data from AMap</source>
+        <translation>天气数据来自高德地图</translation>
+    </message>
+    <message>
+        <source>Weather data from QWeather</source>
+        <translation>天气数据来自和风天气</translation>
+    </message>
+    <message>
+        <source>Weather data from WeatherCN</source>
+        <translation>天气数据来自华风爱科</translation>
+    </message>
+    <message>
+        <source>Weather data from Caiyun</source>
+        <translation>天气数据来自彩云天气</translation>
+    </message>
+    <message>
+        <source>Weather data from Xiaomi Weather (wtr-v3)</source>
+        <translation>天气数据来自小米天气（wtr-v3）</translation>
+    </message>
+</context>
+<context>
+    <name>WeatherService</name>
+    <message>
+        <source>Weather Alerts</source>
+        <translation>气象预警</translation>
     </message>
 </context>
 </TS>

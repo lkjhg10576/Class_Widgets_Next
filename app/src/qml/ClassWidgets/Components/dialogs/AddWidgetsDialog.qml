@@ -17,6 +17,9 @@ Dialog {
         : null
     property bool themeReloading: false
     property string widgetSource: ""
+    // 订阅 WidgetsModel 实例变化（增删 / 预设切换），供下方"数量上限"绑定重算；
+    // 本移植新增（maxInstances 纪律），上游 AddWidgetsDialog 逻辑其余不动。
+    property int instancesRev: WidgetsModel.instancesRevision
 
     onSelectedWidgetChanged: {
         // 切换时先清空再延迟加载，参考 WidgetLoader 的 cacheBuster 机制
@@ -214,12 +217,38 @@ Dialog {
                 Layout.fillHeight: true
             }
 
+            Text {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                // 本移植新增：达到 maxInstances 时提示（max_instances 缺省按不限量处理）
+                visible: {
+                    if (addWidgetsDialog.selectedWidget === null)
+                        return false
+                    addWidgetsDialog.instancesRev // 订阅实例变化
+                    const limit = addWidgetsDialog.selectedWidget.max_instances || 0
+                    return limit > 0
+                        && WidgetsModel.instanceCount(addWidgetsDialog.selectedWidget.id) >= limit
+                }
+                text: addWidgetsDialog.selectedWidget
+                    ? qsTr("Up to %1 instances").arg(addWidgetsDialog.selectedWidget.max_instances)
+                    : ""
+                color: "#C42B1C"
+                font.pixelSize: 12
+            }
+
             Button {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 icon.name: "ic_fluent_add_20_regular"
                 text: qsTr("Add")
                 highlighted: true
-                enabled: addWidgetsDialog.selectedWidget !== null
+                // 本移植新增：达到 maxInstances 时禁用（真正拦截在 WidgetsModel.addInstance）
+                enabled: {
+                    if (addWidgetsDialog.selectedWidget === null)
+                        return false
+                    addWidgetsDialog.instancesRev // 订阅实例变化
+                    const limit = addWidgetsDialog.selectedWidget.max_instances || 0
+                    return limit <= 0
+                        || WidgetsModel.instanceCount(addWidgetsDialog.selectedWidget.id) < limit
+                }
                 onClicked: {
                     //添加
                     WidgetsModel.addInstance(addWidgetsDialog.selectedWidget.id)

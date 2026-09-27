@@ -16,6 +16,7 @@ struct WidgetDefinition
     QObject *backendObj = nullptr;
     QUrl settingsQml;
     QVariantMap defaultSettings;
+    int maxInstances = 0; // 同一预设内允许的最大实例数，0 = 不限量（本移植新增，上游无此键）
 };
 
 struct WidgetInstance
@@ -35,6 +36,9 @@ class WidgetsModel : public QAbstractListModel
     Q_PROPERTY(QString currentPreset READ currentPreset NOTIFY modelChanged)
     Q_PROPERTY(QVariantMap presets READ presets NOTIFY modelChanged)
     Q_PROPERTY(QVariantList definitionsList READ definitionsList NOTIFY definitionChanged)
+    // 实例增删 / 预设切换时自增（NOTIFY 沿用 modelChanged）；QML 侧引用它即可
+    // 让"是否达到 maxInstances"这类绑定在实例变化时重算。
+    Q_PROPERTY(int instancesRevision READ instancesRevision NOTIFY modelChanged)
 
 public:
     enum Roles {
@@ -76,6 +80,10 @@ public:
     QString currentPreset() const { return m_currentPreset; }
     QVariantMap presets() const;
     QVariantList definitionsList() const;
+    int instancesRevision() const { return m_instancesRevision; }
+
+    // 当前预设（m_instances）中指定 typeId 的实例数；供 QML 侧做数量上限判断。
+    Q_INVOKABLE int instanceCount(const QString &typeId) const;
 
 signals:
     void modelChanged();
@@ -101,4 +109,5 @@ private:
     QHash<QString, QVector<PresetEntry>> m_presets;
     QString m_currentPreset;
     ConfigStore *m_configStore = nullptr;
+    int m_instancesRevision = 0;
 };

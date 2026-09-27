@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.21)
 
 # ---- 版本段（M5 发布流水线）----
 # project(VERSION) 无法被命令行覆盖，故经缓存变量中转：
-# 本地构建用默认值 2.0.0.0；CI 发版时传 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]]
+# 本地构建用默认值 2.0.1.0；CI 发版时传 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]]
 # 覆盖 project(VERSION) 与下方 configure_file 的 Version.h（格式校验在此完成，
 # project(VERSION) 只接受 1-4 段纯数字）。
-set(CWN_VERSION "2.0.0.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]]）")
+set(CWN_VERSION "2.0.1.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]]）")
 if(CWN_VERSION_OVERRIDE)
     if(NOT CWN_VERSION_OVERRIDE MATCHES "^[0-9]+(\\.[0-9]+){0,3}$")
         message(FATAL_ERROR
@@ -84,8 +84,15 @@ set(CWN_SOURCES
     src/core/automations/AutomationManager.cpp
     src/core/automations/BuiltinTasks.cpp
     src/core/automations/UpdateCheckTask.cpp
-    # 天气小组件数据源（小米天气 wtr-v3）
+    # 天气小组件数据门面 + 多数据源 Provider（小米/高德/和风/华风爱科/彩云）
     src/core/weather/WeatherService.cpp
+    src/core/weather/WeatherProvider.cpp
+    src/core/weather/WeatherCodes.cpp
+    src/core/weather/providers/XiaomiProvider.cpp
+    src/core/weather/providers/AmapProvider.cpp
+    src/core/weather/providers/QweatherProvider.cpp
+    src/core/weather/providers/WeathercnProvider.cpp
+    src/core/weather/providers/CaiyunProvider.cpp
 )
 
 qt_add_executable(ClassWidgetsNext WIN32 ${CWN_SOURCES})

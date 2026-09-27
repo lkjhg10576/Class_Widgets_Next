@@ -55,7 +55,7 @@ void AppCentral::initialize(bool enableFirstRunGate)
     m_pluginManager = new PluginManagerStub(this);
 
     // 天气小组件数据源（须先于 registerBuiltinWidgets 就绪，以便为其定义挂专属 backend）
-    m_weatherService = new WeatherService(m_configs, this);
+    m_weatherService = new WeatherService(m_configs, m_notification, this);
 
     // 内置小组件注册表（替代 cw_widgets 插件，对应 _load_theme_and_plugins 的插件加载）
     registerBuiltinWidgets();

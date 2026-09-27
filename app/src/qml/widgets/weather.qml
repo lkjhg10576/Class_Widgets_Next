@@ -20,30 +20,8 @@ Widget {
     readonly property bool hasData: weatherInfo && weatherInfo.status !== "empty"
     readonly property var current: hasData ? weatherInfo.current : null
     readonly property var today: hasData ? weatherInfo.today : null
+    // 气象预警不再在本组件展示：由 WeatherService 推送到灵动通知小组件
 
-    // 最高等级预警（等级归一 + 配色对齐上游 level_to_letter 与等级色板）
-    readonly property var topAlert: {
-        if (!hasData || !weatherInfo.alerts || weatherInfo.alerts.length === 0)
-            return null
-        const rank = { "B": 0, "Y": 1, "O": 2, "R": 3 }
-        let best = null
-        for (let i = 0; i < weatherInfo.alerts.length; i++) {
-            const a = weatherInfo.alerts[i]
-            if (!best || rank[alertLetter(a.level)] > rank[alertLetter(best.level)])
-                best = a
-        }
-        return best
-    }
-
-    function alertLetter(raw) {
-        if (raw === "Y" || raw === "黄色") return "Y"
-        if (raw === "O" || raw === "橙色") return "O"
-        if (raw === "R" || raw === "红色") return "R"
-        return "B"
-    }
-
-    // 天气现象代码 → 文本：对齐上游 weather_code_to_text 逐条表；数据源 locale 固定
-    // zh_cn（预警 type 等字段本身即中文），故此处用中文常量而非 qsTr 英文源
     function weatherText(code) {
         const map = {
             0: "晴", 1: "多云", 2: "阴", 3: "阵雨", 4: "雷阵雨", 5: "雷阵雨伴有冰雹",
@@ -105,17 +83,6 @@ Widget {
                         ? Math.round(root.current.temperature) + "°"
                         : "--°"
                 }
-
-                Icon {
-                    visible: root.topAlert !== null
-                    icon: "ic_fluent_warning_20_regular"
-                    size: miniMode ? 14 : 16
-                    color: root.topAlert
-                        ? ({
-                            B: "#3b82f6", Y: "#eab308", O: "#f97316", R: "#ef4444"
-                        })[root.alertLetter(root.topAlert.level)] || "#eab308"
-                        : "transparent"
-                }
             }
 
             Subtitle {
@@ -123,6 +90,8 @@ Widget {
                 text: {
                     if (!root.cityConfigured)
                         return qsTr("Right-click to set a city")
+                    if (hasData && weatherInfo.status === "unconfigured")
+                        return qsTr("Set API key in widget settings")
                     if (!root.current)
                         return qsTr("Loading…")
                     let line = weatherText(root.current.weatherCode)

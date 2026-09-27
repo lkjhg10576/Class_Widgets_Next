@@ -104,7 +104,11 @@ QList<WidgetDefinition> BuiltinWidgetProvider::widgets() const
     weather.defaultSettings = weatherDefaults;
 
     // 倒数日（本移植新增内置组件，同天气先例为"新增文件"而非上游改动）；
-    // settings.title 为事件名，settings.target_date 为 "yyyy-MM-dd" 目标日字符串。
+    // settings.title 为事件名，settings.target_date 为 "yyyy-MM-dd" 目标日字符串，
+    // settings.cycle 为重复周期 "none" | "weekly" | "monthly" | "yearly"（缺省 "none"，
+    // 存量配置无此键时 loadPreset 以 defaultSettings 补齐，行为与旧版一致）。
+    // 同一预设内最多 3 个实例（maxInstances 由 WidgetsModel.addInstance 强制执行，
+    // 每个实例独立 settings，即最多同时显示 3 个不同的倒数日事件）。
     // 名称翻译走显式 "Widgets" 上下文（.ts 中内置组件名即归于此，同
     // ScheduleManager 的 QCoreApplication::translate 用法）
     WidgetDefinition countdownDays;
@@ -115,7 +119,9 @@ QList<WidgetDefinition> BuiltinWidgetProvider::widgets() const
     QVariantMap countdownDaysDefaults;
     countdownDaysDefaults.insert(QStringLiteral("title"), QString());
     countdownDaysDefaults.insert(QStringLiteral("target_date"), QString());
+    countdownDaysDefaults.insert(QStringLiteral("cycle"), QStringLiteral("none"));
     countdownDays.defaultSettings = countdownDaysDefaults;
+    countdownDays.maxInstances = 3;
 
     return { currentActivity, time, eventCountdown, upcomingActivities, dynamicNotification,
              customText, weather, countdownDays };

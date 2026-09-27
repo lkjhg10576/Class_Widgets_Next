@@ -21,6 +21,7 @@ QVariantMap definitionToVariantMap(const WidgetDefinition &def)
     map.insert(QStringLiteral("backend_obj"), QVariant::fromValue(def.backendObj));
     map.insert(QStringLiteral("settings_qml"), def.settingsQml.toString());
     map.insert(QStringLiteral("default_settings"), def.defaultSettings);
+    map.insert(QStringLiteral("max_instances"), def.maxInstances);
     return map;
 }
 } // namespace
@@ -193,6 +194,16 @@ QVariantList WidgetsModel::definitionsList() const
     return list;
 }
 
+int WidgetsModel::instanceCount(const QString &typeId) const
+{
+    int count = 0;
+    for (const WidgetInstance &w : m_instances) {
+        if (w.typeId == typeId)
+            ++count;
+    }
+    return count;
+}
+
 void WidgetsModel::updatePreset(const QString &presetName, const QVariantList &entries)
 {
     m_presets.insert(presetName, normalizeEntries(entries));
@@ -231,6 +242,7 @@ void WidgetsModel::loadPreset(const QString &presetName)
     m_instances = newInstances;
     m_currentPreset = presetName;
     endResetModel();
+    ++m_instancesRevision;
     emit modelChanged();
 }
 
@@ -259,6 +271,14 @@ void WidgetsModel::addInstance(const QString &typeId)
         return;
     const WidgetDefinition &definition = m_definitions.value(typeId);
 
+    // 同一预设内实例数上限（0 = 不限量）；仅拦截新增，不破坏手改配置塞进的存量
+    if (definition.maxInstances > 0 && instanceCount(typeId) >= definition.maxInstances) {
+        cwn::Log::warn(QStringLiteral("Cannot add instance of \"%1\": limit %2 reached")
+                           .arg(typeId)
+                           .arg(definition.maxInstances));
+        return;
+    }
+
     WidgetInstance instance;
     instance.instanceId = newInstanceId();
     instance.typeId = typeId;
@@ -268,6 +288,7 @@ void WidgetsModel::addInstance(const QString &typeId)
     m_instances.append(instance);
     endInsertRows();
     syncCurrentPreset();
+    ++m_instancesRevision;
     emit modelChanged();
 }
 
@@ -293,6 +314,7 @@ void WidgetsModel::removeInstance(const QString &instanceId)
             m_instances.removeAt(i);
             endRemoveRows();
             syncCurrentPreset();
+            ++m_instancesRevision;
             emit modelChanged();
             return;
         }

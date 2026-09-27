@@ -3,7 +3,7 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 共 10 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件，见下）
+## 当前状态：`app/src/qml` 共 11 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限，见下）
 > 另有 4 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
 > 倒数日小组件及其设置页（改动 9）。
 > `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
@@ -11,7 +11,7 @@
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
-| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10）** |
+| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10、11）** |
 | `app/src/themes/` | 上游内置主题定义 | **1 处（material Color.qml，改动 7；上游原样保留在文件外注释）** |
 | `app/assets/` | 上游资产 | **无（逐字复制）** |
 | `app/themes/` | 上游外部主题扫描目录 | **无（逐字复制）** |
@@ -129,13 +129,16 @@ Material You 主题下所有小组件 Loader.Error、整主题回退默认。
 
 | # | 文件 | 性质 | 说明 |
 |---|---|---|---|
-| 9.1 | `widgets/countdownDays.qml` | 新增 | 上方 header 显示 `距离（标题）还有`，下方 `N 天`；settings 契约 `title` + `target_date`（"yyyy-MM-dd"）；天数按目标日 0 点 − 今日 0 点计算，订阅 UnionTimer 秒心跳实现跨零点自动重算（A6 纪律，不自开 QTimer）；backend 用通用 WidgetBackend |
-| 9.2 | `widgets/settings/countdownDays.qml` | 新增 | 事件标题（TextField，命令式初始化对齐 settings/Text.qml 先例）+ 目标日期（RinUI `CalendarDatePicker`，选择后写回 `target_date`）；沿用 settings 整体重赋契约（Ok 时由 WidgetSettingsDialog 调 `WidgetsModel.updateSettings` 持久化） |
+| 9.1 | `widgets/countdownDays.qml` | 新增 | 显示状态机：未配置 → 默认名 + 右键提示；未来 → `距离（标题）还有 N 天`；就是今天 → 事件名 + `就是今天`；已过（仅不重复）→ `距离（标题）已过 N 天`（正数，负数不再外露）。settings 契约 `title` + `target_date`（"yyyy-MM-dd"）+ `cycle`（"none" \| "weekly" \| "monthly" \| "yearly"，缺省 "none"）；循环型按年月日分量向前滚动到下一次发生日（小月/平年顺延至月末最后一天，避免毫秒加减跨夏令时偏差）；天数按目标日 0 点 − 今日 0 点计算，订阅 UnionTimer 秒心跳实现跨零点自动重算（A6 纪律，不自开 QTimer）；backend 用通用 WidgetBackend |
+| 9.2 | `widgets/settings/countdownDays.qml` | 新增 | 事件标题（TextField，命令式初始化对齐 settings/Text.qml 先例）+ 目标日期（RinUI `CalendarDatePicker`，选择后写回 `target_date`）+ 重复周期（RinUI `ComboBox`，四档不重复/每周/每月/每年，写回 `cycle`，命令式初始化定位）；沿用 settings 整体重赋契约（Ok 时由 WidgetSettingsDialog 调 `WidgetsModel.updateSettings` 持久化） |
 
 配套改动：`src/core/BuiltinWidgets.cpp` 注册项（名称翻译走显式 `"Widgets"` 上下文，
-同 ScheduleManager 的 `QCoreApplication::translate` 用法）；`app/assets/locales/` 的
-`zh_CN` / `zh_SIMPLIFIED` / `zh_HK` 三个 `.ts` 补 `Widgets` 词条与 `countdownDays`
-context，`.qm` 已用 lrelease 重新生成（其余语言无中文词条，显示英文源文，与天气组件同状态）。
+同 ScheduleManager 的 `QCoreApplication::translate` 用法）：`defaultSettings` 新增
+`cycle`（存量无此键的配置由 `loadPreset` 以默认值补齐，无需迁移）；`maxInstances = 3`
+（同一预设内最多 3 个实例，真正拦截在 `WidgetsModel.addInstance`，UI 侧见改动 11）；
+`app/assets/locales/` 的 `zh_CN` / `zh_SIMPLIFIED` / `zh_HK` 三个 `.ts` 补 `Widgets`
+词条与 `countdownDays` context（新增 Since %1 / Today is the day / 重复周期四档等），
+`.qm` 已用 lrelease 重新生成（其余语言无中文词条，显示英文源文，与天气组件同状态）。
 
 ### 10. 「即将上课」组件：显示缩写开关 + 宽度自适应（2026-09-26）
 
@@ -150,6 +153,22 @@ context，`.qm` 已用 lrelease 重新生成（其余语言无中文词条，显
 （Marquee Title / 滚动描述 / 显示全称）、新增 2 条（Show abbreviation 及其说明），
 三个 zh 语种已译，其余语种暂回退英文原文。
 同步上游时：本条与上游对这两个文件的差异需手工三方合并（上游仍保留 `marquee` 分支）。
+
+### 11. `AddWidgetsDialog.qml`：实例数量上限 UI（2026-09-27）
+
+为支撑倒数日"同一预设最多 3 个"（改动 9），引入通用的 `maxInstances` 机制。
+C++ 侧（不在上游同步区）：`WidgetDefinition` 新增 `maxInstances`（0 = 不限量，
+随 `definitionsList` 以 `max_instances` 键暴露给 QML）；`WidgetsModel.addInstance`
+达到上限时拒绝并记 warn（只拦新增，不破坏手改配置的存量）；新增
+`Q_INVOKABLE instanceCount(typeId)` 与 `instancesRevision` 属性（实例增删/预设切换
+时自增，NOTIFY 沿用 `modelChanged`）供 QML 绑定刷新。
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 11.1 | `ClassWidgets/Components/dialogs/AddWidgetsDialog.qml` | 对话框新增 `instancesRev` 属性订阅实例变化；「添加」按钮达到上限时禁用；按钮上方新增上限提示（`Up to %1 instances`，三个 zh 语种已译）；`max_instances` 缺省按不限量处理，上限为 0 的组件行为与原来一致 |
+
+同步上游时：本条是上游文件改动，若上游重写此对话框，需把 `instancesRev` /
+`enabled` / 提示三处逻辑手工合入。
 
 ## 修改申请流程
 
