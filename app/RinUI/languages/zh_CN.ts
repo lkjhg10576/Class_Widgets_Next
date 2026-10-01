@@ -186,7 +186,9 @@ Please try again later.</source>
         <source> load failed! 
 
  Because of </source>
-        <translation type="unfinished"></translation>
+        <translation> 加载失败！
+
+原因：</translation>
     </message>
     <message>
         <location filename="../components/Navigation/ErrorPage.qml" line="41"/>
@@ -211,7 +213,7 @@ Please try again later.</source>
 <context>
     <name>InfoBar</name>
     <message>
-        <location filename="../components/StatusAndInfo/InfoBar.qml" line="177"/>
+        <location filename="../components/StatusAndInfo/InfoBar.qml" line="176"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
@@ -219,17 +221,17 @@ Please try again later.</source>
 <context>
     <name>NavigationBar</name>
     <message>
-        <location filename="../components/Navigation/NavigationBar.qml" line="244"/>
+        <location filename="../components/Navigation/NavigationBar.qml" line="341"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="../components/Navigation/NavigationBar.qml" line="285"/>
+        <location filename="../components/Navigation/NavigationBar.qml" line="382"/>
         <source>Open Navigation</source>
         <translation>展开导航</translation>
     </message>
     <message>
-        <location filename="../components/Navigation/NavigationBar.qml" line="285"/>
+        <location filename="../components/Navigation/NavigationBar.qml" line="382"/>
         <source>Close Navigation</source>
         <translation>收起导航</translation>
     </message>
@@ -237,12 +239,12 @@ Please try again later.</source>
 <context>
     <name>PickerView</name>
     <message>
-        <location filename="../components/DateAndTime/PickerView.qml" line="26"/>
+        <location filename="../components/DateAndTime/PickerView.qml" line="55"/>
         <source>AM</source>
         <translation>上午</translation>
     </message>
     <message>
-        <location filename="../components/DateAndTime/PickerView.qml" line="26"/>
+        <location filename="../components/DateAndTime/PickerView.qml" line="55"/>
         <source>PM</source>
         <translation>下午</translation>
     </message>
@@ -309,7 +311,7 @@ Please try again later.</source>
 <context>
     <name>TitleBar</name>
     <message>
-        <location filename="../windows/TitleBar.qml" line="197"/>
+        <location filename="../windows/TitleBar.qml" line="199"/>
         <source>Fluent TitleBar</source>
         <translation>流畅标题栏</translation>
     </message>
@@ -320,6 +322,14 @@ Please try again later.</source>
         <location filename="../components/StatusAndInfo/Toast.qml" line="156"/>
         <source>Close</source>
         <translation>关闭</translation>
+    </message>
+</context>
+<context>
+    <name>ToolTip</name>
+    <message>
+        <location filename="../components/StatusAndInfo/ToolTip.qml" line="12"/>
+        <source>Tooltip</source>
+        <translation>工具提示</translation>
     </message>
 </context>
 </TS>

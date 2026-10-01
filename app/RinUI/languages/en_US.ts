@@ -188,7 +188,7 @@ Please try again later.</source>
 <context>
     <name>InfoBar</name>
     <message>
-        <location filename="../components/StatusAndInfo/InfoBar.qml" line="177"/>
+        <location filename="../components/StatusAndInfo/InfoBar.qml" line="176"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -196,17 +196,17 @@ Please try again later.</source>
 <context>
     <name>NavigationBar</name>
     <message>
-        <location filename="../components/Navigation/NavigationBar.qml" line="244"/>
+        <location filename="../components/Navigation/NavigationBar.qml" line="341"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../components/Navigation/NavigationBar.qml" line="285"/>
+        <location filename="../components/Navigation/NavigationBar.qml" line="382"/>
         <source>Open Navigation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../components/Navigation/NavigationBar.qml" line="285"/>
+        <location filename="../components/Navigation/NavigationBar.qml" line="382"/>
         <source>Close Navigation</source>
         <translation type="unfinished"></translation>
     </message>
@@ -214,12 +214,12 @@ Please try again later.</source>
 <context>
     <name>PickerView</name>
     <message>
-        <location filename="../components/DateAndTime/PickerView.qml" line="26"/>
+        <location filename="../components/DateAndTime/PickerView.qml" line="55"/>
         <source>AM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../components/DateAndTime/PickerView.qml" line="26"/>
+        <location filename="../components/DateAndTime/PickerView.qml" line="55"/>
         <source>PM</source>
         <translation type="unfinished"></translation>
     </message>
@@ -286,7 +286,7 @@ Please try again later.</source>
 <context>
     <name>TitleBar</name>
     <message>
-        <location filename="../windows/TitleBar.qml" line="197"/>
+        <location filename="../windows/TitleBar.qml" line="199"/>
         <source>Fluent TitleBar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -296,6 +296,14 @@ Please try again later.</source>
     <message>
         <location filename="../components/StatusAndInfo/Toast.qml" line="156"/>
         <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ToolTip</name>
+    <message>
+        <location filename="../components/StatusAndInfo/ToolTip.qml" line="12"/>
+        <source>Tooltip</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
