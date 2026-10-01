@@ -1695,6 +1695,14 @@ Do you want to continue using them, or discard and restore the original schedule
         <source>Run Class Widgets on startup</source>
         <translation type="unfinished">スタートアップ時に Class Widgets を実行</translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation>拡張機能</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>設定</translation>
+    </message>
 </context>
 <context>
     <name>Interactions</name>
@@ -3690,6 +3698,10 @@ It&apos;s incompatible and may cause unexpected issues.</source>
         <source>Shortcuts</source>
         <translation type="obsolete">ショートカット</translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation>拡張機能</translation>
+    </message>
 </context>
 <context>
     <name>Shortcuts</name>
@@ -5526,6 +5538,411 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <location filename="../../src/qml/widgets/upcomingActivities.qml" line="66"/>
         <source>Unset</source>
         <translation>Unset</translation>
+    </message>
+</context>
+<context>
+    <name>Extensions</name>
+    <message>
+        <source>天气</source>
+        <translation>天気</translation>
+    </message>
+    <message>
+        <source>城市天气与恶劣天气预警，配置收敛到本扩展页</source>
+        <translation>都市の天気と悪天候警報。設定はこの拡張ページに集約</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>ランダム指名</translation>
+    </message>
+    <message>
+        <source>屏幕悬浮点名按钮，按名单与权重随机抽取学生</source>
+        <translation>画面に浮かぶ指名ボタン。名簿と重みに応じて生徒をランダムに抽選</translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation>時間割クイックビュー</translation>
+    </message>
+    <message>
+        <source>小组件下方的当日课表缩写条，高亮当前课与下一课</source>
+        <translation>ウィジェットの下に出る当日時間割の略称バー。現在の授業と次の授業を強調表示</translation>
+    </message>
+</context>
+<context>
+    <name>Weather</name>
+    <message>
+        <source> 分钟</source>
+        <translation> 分</translation>
+    </message>
+    <message>
+        <source>API Host</source>
+        <translation>API Host</translation>
+    </message>
+    <message>
+        <source>API Key 无效</source>
+        <translation>API キーが無効です</translation>
+    </message>
+    <message>
+        <source>API 凭据</source>
+        <translation>API 認証情報</translation>
+    </message>
+    <message>
+        <source>仅保存在本地 configs.json</source>
+        <translation>ローカルの configs.json にのみ保存されます</translation>
+    </message>
+    <message>
+        <source>内置，无需配置</source>
+        <translation>内蔵、設定不要</translation>
+    </message>
+    <message>
+        <source>刷新间隔</source>
+        <translation>更新間隔</translation>
+    </message>
+    <message>
+        <source>华风爱科 Key</source>
+        <translation>WeatherCN キー</translation>
+    </message>
+    <message>
+        <source>华风爱科（付费）</source>
+        <translation>WeatherCN（有料）</translation>
+    </message>
+    <message>
+        <source>和风天气 Key</source>
+        <translation>QWeather キー</translation>
+    </message>
+    <message>
+        <source>和风天气（付费）</source>
+        <translation>QWeather（有料）</translation>
+    </message>
+    <message>
+        <source>响应异常</source>
+        <translation>応答が異常です</translation>
+    </message>
+    <message>
+        <source>城市</source>
+        <translation>都市</translation>
+    </message>
+    <message>
+        <source>天气</source>
+        <translation>天気</translation>
+    </message>
+    <message>
+        <source>天气数据拉取频率（30–180 分钟）</source>
+        <translation>天気データの取得頻度（30〜180 分）</translation>
+    </message>
+    <message>
+        <source>天气数据来自华风爱科</source>
+        <translation>天気データ提供元：WeatherCN</translation>
+    </message>
+    <message>
+        <source>天气数据来自和风天气</source>
+        <translation>天気データ提供元：QWeather</translation>
+    </message>
+    <message>
+        <source>天气数据来自小米天气 (wtr-v3)</source>
+        <translation>天気データ提供元：Xiaomi 天気 (wtr-v3)</translation>
+    </message>
+    <message>
+        <source>天气数据来自彩云天气</source>
+        <translation>天気データ提供元：Caiyun 天気</translation>
+    </message>
+    <message>
+        <source>天气数据来自高德地图</source>
+        <translation>天気データ提供元：AMap</translation>
+    </message>
+    <message>
+        <source>小米天气（免费）</source>
+        <translation>Xiaomi 天気（無料）</translation>
+    </message>
+    <message>
+        <source>彩云天气 Token</source>
+        <translation>Caiyun トークン</translation>
+    </message>
+    <message>
+        <source>彩云天气（付费）</source>
+        <translation>Caiyun 天気（有料）</translation>
+    </message>
+    <message>
+        <source>搜索城市</source>
+        <translation>都市を検索</translation>
+    </message>
+    <message>
+        <source>搜索并选择城市以启用天气</source>
+        <translation>都市を検索して選択すると天気が有効になります</translation>
+    </message>
+    <message>
+        <source>数据来源</source>
+        <translation>データ提供元</translation>
+    </message>
+    <message>
+        <source>数据源</source>
+        <translation>データソース</translation>
+    </message>
+    <message>
+        <source>显示</source>
+        <translation>表示</translation>
+    </message>
+    <message>
+        <source>测试中…</source>
+        <translation>テスト中…</translation>
+    </message>
+    <message>
+        <source>测试连接</source>
+        <translation>接続テスト</translation>
+    </message>
+    <message>
+        <source>网络错误</source>
+        <translation>ネットワークエラー</translation>
+    </message>
+    <message>
+        <source>连接成功</source>
+        <translation>接続に成功しました</translation>
+    </message>
+    <message>
+        <source>配额已用尽</source>
+        <translation>割り当てを使い切りました</translation>
+    </message>
+    <message>
+        <source>需要华风爱科 API Key</source>
+        <translation>WeatherCN の API キーが必要です</translation>
+    </message>
+    <message>
+        <source>需要和风天气 API Key 与专属 API Host</source>
+        <translation>QWeather の API キーと専用 API ホストが必要です</translation>
+    </message>
+    <message>
+        <source>需要彩云天气 Token</source>
+        <translation>Caiyun のトークンが必要です</translation>
+    </message>
+    <message>
+        <source>需要高德开放平台 Web 服务 Key</source>
+        <translation>AMap オープンプラットフォームの Web サービスキーが必要です</translation>
+    </message>
+    <message>
+        <source>高德 Key</source>
+        <translation>AMap キー</translation>
+    </message>
+    <message>
+        <source>高德天气（付费）</source>
+        <translation>AMap 天気（有料）</translation>
+    </message>
+    <message>
+        <source>高德暂不支持恶劣天气预警</source>
+        <translation>AMap は現在、悪天候警報に対応していません</translation>
+    </message>
+</context>
+<context>
+    <name>RollCall</name>
+    <message>
+        <source>从 TXT 导入</source>
+        <translation>TXT からインポート</translation>
+    </message>
+    <message>
+        <source>会话内不重复</source>
+        <translation>セッション中は重複なし</translation>
+    </message>
+    <message>
+        <source>共 %1 人</source>
+        <translation>全 %1 人</translation>
+    </message>
+    <message>
+        <source>删除</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>单次内不重复</source>
+        <translation>1 回の指名で重複なし</translation>
+    </message>
+    <message>
+        <source>单次内不重复：每次点名从全体重抽；会话内不重复：本会话点过的人排除，关闭结果窗口后重置</source>
+        <translation>1 回の指名：毎回全員から抽選します。セッション中：このセッションで指名済みの人は除外され、結果ウィンドウを閉じるとリセットされます</translation>
+    </message>
+    <message>
+        <source>名单</source>
+        <translation>名簿</translation>
+    </message>
+    <message>
+        <source>名单为空：从 TXT 导入（每行一个名字，UTF-8）或手动添加</source>
+        <translation>名簿が空です：TXT からインポート（1 行 1 名、UTF-8）するか手動で追加してください</translation>
+    </message>
+    <message>
+        <source>名单已清空</source>
+        <translation>名簿を消去しました</translation>
+    </message>
+    <message>
+        <source>导入名单（TXT，每行一个名字）</source>
+        <translation>名簿をインポート（TXT、1 行 1 名）</translation>
+    </message>
+    <message>
+        <source>导入失败：文件为空、无法读取或不含有效名字</source>
+        <translation>インポート失敗：ファイルが空、読み込めない、または有効な名前がありません</translation>
+    </message>
+    <message>
+        <source>导入完成：新增 %1 人，跳过重名 %2 人</source>
+        <translation>インポート完了：%1 人追加、重複 %2 人をスキップ</translation>
+    </message>
+    <message>
+        <source>已删除「%1」</source>
+        <translation>「%1」を削除しました</translation>
+    </message>
+    <message>
+        <source>已添加「%1」</source>
+        <translation>「%1」を追加しました</translation>
+    </message>
+    <message>
+        <source>所有文件 (*)</source>
+        <translation>すべてのファイル (*)</translation>
+    </message>
+    <message>
+        <source>手动添加</source>
+        <translation>手動追加</translation>
+    </message>
+    <message>
+        <source>改名失败：姓名为空或与其他行重名</source>
+        <translation>名前変更失敗：名前が空または他の行と重複しています</translation>
+    </message>
+    <message>
+        <source>权重 %1（-100% 永不抽中，+100% 概率翻倍）</source>
+        <translation>重み %1（-100% で抽選されず、+100% で確率 2 倍）</translation>
+    </message>
+    <message>
+        <source>权重提交失败：名字可能已被改名</source>
+        <translation>重みの保存失敗：名前が変更された可能性があります</translation>
+    </message>
+    <message>
+        <source>添加</source>
+        <translation>追加</translation>
+    </message>
+    <message>
+        <source>添加失败：姓名为空或与现有名单重复</source>
+        <translation>追加失敗：名前が空または既存の名簿と重複しています</translation>
+    </message>
+    <message>
+        <source>清空名单</source>
+        <translation>名簿を消去</translation>
+    </message>
+    <message>
+        <source>纯文本文件 (*.txt)</source>
+        <translation>プレーンテキスト (*.txt)</translation>
+    </message>
+    <message>
+        <source>输入姓名</source>
+        <translation>名前を入力</translation>
+    </message>
+    <message>
+        <source>重名会被拒绝并提示</source>
+        <translation>重複した名前は拒否されます</translation>
+    </message>
+    <message>
+        <source>重复策略</source>
+        <translation>重複ポリシー</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>ランダム指名</translation>
+    </message>
+</context>
+<context>
+    <name>SchedulePeek</name>
+    <message>
+        <source>%1 分钟</source>
+        <translation>%1 分</translation>
+    </message>
+    <message>
+        <source>分组间隔阈值</source>
+        <translation>グループ間隔しきい値</translation>
+    </message>
+    <message>
+        <source>常驻显示</source>
+        <translation>常時表示</translation>
+    </message>
+    <message>
+        <source>显示模式</source>
+        <translation>表示モード</translation>
+    </message>
+    <message>
+        <source>相邻两节课间隔达到该分钟数时，速览条中插入分组竖线；普通课间不插</source>
+        <translation>隣の授業との間隔がこの分数以上になると、バーにグループ区切りの縦線を表示します（通常の休み時間は非表示）</translation>
+    </message>
+    <message>
+        <source>自动弹出</source>
+        <translation>自動表示</translation>
+    </message>
+    <message>
+        <source>自动弹出：下课弹出、下次上课收起；常驻显示：当天有课即显示</source>
+        <translation>自動表示：休み時間に現れ、次の授業で隠れます。常時表示：当日の授業がある間ずっと表示</translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation>時間割クイックビュー</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallFloat</name>
+    <message>
+        <source>取消</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>点 1 名</source>
+        <translation>1 人指名</translation>
+    </message>
+    <message>
+        <source>点 2 名</source>
+        <translation>2 人指名</translation>
+    </message>
+    <message>
+        <source>点 3 名</source>
+        <translation>3 人指名</translation>
+    </message>
+    <message>
+        <source>点名</source>
+        <translation>指名</translation>
+    </message>
+    <message>
+        <source>请先在设置中导入名单</source>
+        <translation>まず設定で名簿をインポートしてください</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallResult</name>
+    <message>
+        <source>关闭</source>
+        <translation>閉じる</translation>
+    </message>
+    <message>
+        <source>再点 1 名</source>
+        <translation>あと 1 人</translation>
+    </message>
+    <message>
+        <source>再点 2 名</source>
+        <translation>あと 2 人</translation>
+    </message>
+    <message>
+        <source>再点 3 名</source>
+        <translation>あと 3 人</translation>
+    </message>
+    <message>
+        <source>名单人数不足，已抽出全部 %1 人</source>
+        <translation>名簿の人数が足りず、%1 人全員を選びました</translation>
+    </message>
+    <message>
+        <source>没有可点的人：请在设置中导入名单，或关闭窗口开始新会话</source>
+        <translation>指名できる人がいません：設定で名簿をインポートするか、ウィンドウを閉じて新しいセッションを開始してください</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>ランダム指名</translation>
+    </message>
+</context>
+<context>
+    <name>weather</name>
+    <message>
+        <source>Set a city in Extensions - Weather settings</source>
+        <translation>「拡張機能 - 天気」で都市を設定してください</translation>
+    </message>
+    <message>
+        <source>Set API key in Extensions - Weather settings</source>
+        <translation>「拡張機能 - 天気」で API キーを設定してください</translation>
     </message>
 </context>
 </TS>

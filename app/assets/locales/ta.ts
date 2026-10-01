@@ -1665,6 +1665,14 @@ Do you want to continue using them, or discard and restore the original schedule
         <source>Run Class Widgets on startup</source>
         <translation>தொடக்கத்தில் வகுப்பு விட்செட்களை இயக்கவும்</translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Interactions</name>
@@ -3591,6 +3599,10 @@ It&apos;s incompatible and may cause unexpected issues.</source>
         <source>Update</source>
         <translation>புதுப்பிப்பு</translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Shortcuts</name>
@@ -5279,6 +5291,411 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <location filename="../../src/qml/widgets/upcomingActivities.qml" line="66"/>
         <source>Unset</source>
         <translation>அமைக்கப்படவில்லை</translation>
+    </message>
+</context>
+<context>
+    <name>Extensions</name>
+    <message>
+        <source>天气</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>城市天气与恶劣天气预警，配置收敛到本扩展页</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>屏幕悬浮点名按钮，按名单与权重随机抽取学生</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>小组件下方的当日课表缩写条，高亮当前课与下一课</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Weather</name>
+    <message>
+        <source> 分钟</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Host</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Key 无效</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API 凭据</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>仅保存在本地 configs.json</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>内置，无需配置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>刷新间隔</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>华风爱科 Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>华风爱科（付费）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>和风天气 Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>和风天气（付费）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>响应异常</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>城市</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气数据拉取频率（30–180 分钟）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气数据来自华风爱科</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气数据来自和风天气</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气数据来自小米天气 (wtr-v3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气数据来自彩云天气</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>天气数据来自高德地图</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>小米天气（免费）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>彩云天气 Token</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>彩云天气（付费）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>搜索城市</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>搜索并选择城市以启用天气</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>数据来源</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>数据源</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>显示</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>测试中…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>测试连接</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>网络错误</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>连接成功</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>配额已用尽</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>需要华风爱科 API Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>需要和风天气 API Key 与专属 API Host</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>需要彩云天气 Token</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>需要高德开放平台 Web 服务 Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>高德 Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>高德天气（付费）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>高德暂不支持恶劣天气预警</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RollCall</name>
+    <message>
+        <source>从 TXT 导入</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>会话内不重复</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>共 %1 人</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>删除</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>单次内不重复</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>单次内不重复：每次点名从全体重抽；会话内不重复：本会话点过的人排除，关闭结果窗口后重置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>名单</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>名单为空：从 TXT 导入（每行一个名字，UTF-8）或手动添加</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>名单已清空</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>导入名单（TXT，每行一个名字）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>导入失败：文件为空、无法读取或不含有效名字</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>导入完成：新增 %1 人，跳过重名 %2 人</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>已删除「%1」</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>已添加「%1」</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>所有文件 (*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>手动添加</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>改名失败：姓名为空或与其他行重名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>权重 %1（-100% 永不抽中，+100% 概率翻倍）</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>权重提交失败：名字可能已被改名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>添加</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>添加失败：姓名为空或与现有名单重复</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>清空名单</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>纯文本文件 (*.txt)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>输入姓名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>重名会被拒绝并提示</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>重复策略</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SchedulePeek</name>
+    <message>
+        <source>%1 分钟</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>分组间隔阈值</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>常驻显示</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>显示模式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>相邻两节课间隔达到该分钟数时，速览条中插入分组竖线；普通课间不插</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>自动弹出</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>自动弹出：下课弹出、下次上课收起；常驻显示：当天有课即显示</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RollCallFloat</name>
+    <message>
+        <source>取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>点 1 名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>点 2 名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>点 3 名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>点名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>请先在设置中导入名单</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RollCallResult</name>
+    <message>
+        <source>关闭</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>再点 1 名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>再点 2 名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>再点 3 名</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>名单人数不足，已抽出全部 %1 人</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>没有可点的人：请在设置中导入名单，或关闭窗口开始新会话</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>weather</name>
+    <message>
+        <source>Set a city in Extensions - Weather settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set API key in Extensions - Weather settings</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

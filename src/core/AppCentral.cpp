@@ -9,6 +9,8 @@
 #include "TrayIcon.h"
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
+#include "extensions/ExtensionManager.h"
+#include "extensions/RollCallService.h"
 #include "notification/NotificationService.h"
 #include "schedule/ClassSwapManager.h"
 #include "schedule/ScheduleEditor.h"
@@ -28,6 +30,7 @@
 #include <QProcess>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QTimer>
 #include <QWindow>
 
 AppCentral::AppCentral(QObject *parent)
@@ -63,7 +66,20 @@ void AppCentral::initialize(bool enableFirstRunGate)
     // 加载配置与主题（对应 run() 里的 _load_config 与 _load_theme_and_plugins 的主题部分）
     m_configs->load();
     m_configs->startAutoSave();
-    m_weatherService->start(); // 60s 轮询 tick；首拉由 QML 侧 request() 触发
+    // 「扩展功能」框架（extensions-feature-plan 阶段 A）：静态注册表 + 开关状态。
+    // 须先于天气迁移等后续接线就绪，因此放在配置加载之后、与天气服务相邻创建
+    m_extensionManager = new ExtensionManager(m_configs, this);
+    // C1（extensions-feature-plan §6）：随机点名服务（名单读写/加权抽取/txt 解析）。
+    // 无网络无定时器，仅持 ConfigStore 指针，configs->load() 之后创建即可
+    m_rollCallService = new RollCallService(m_configs, this);
+    // B4（extensions-feature-plan §5）：天气 60s 轮询 tick 改由扩展开关控制——
+    // 未启用时不唤醒网络检查。本行必须在 ExtensionManager 构造之后：构造内的
+    // 一次性迁移（B3）若识别出存量天气实例会自动启用扩展，此处 isEnabled 即
+    // 反映迁移结果，老用户升级后轮询行为无缝保持。首拉仍由 QML 组件 request() 触发。
+    if (m_extensionManager->isEnabled(QStringLiteral("classwidgets.ext.weather")))
+        m_weatherService->start();
+    // B1：模型读取扩展开关过滤「添加小组件」列表中的天气定义（definitionsList）
+    m_widgetsModel->setExtensionManager(m_extensionManager);
     m_themeManager->setConfigStore(m_configs); // 启用配置锁检查/回写
 
     // M3 主题恢复链（对应 theme_recovery.py 与 windows.py 的 ThemeLoadErrorDialog）
@@ -125,6 +141,18 @@ void AppCentral::initialize(bool enableFirstRunGate)
 
     connectServices();
 
+    // C5（extensions-feature-plan §6）：启动时点名扩展已启用 → 自动打开悬浮按钮窗。
+    // 必须经 0ms 定时器延迟到事件循环：main() 里 WidgetsWindow::run()（创建共享
+    // 主引擎）在本方法返回之后、app.exec() 之前同步执行；若在此立即 open，
+    // AppWindowManager 会因主窗口缺席回退独立引擎（教程门场景即如此），白白多
+    // 编译一整套 RinUI。定时器触发时共享引擎已就绪，走共享引擎路径。
+    if (m_extensionManager->isEnabled(QStringLiteral("classwidgets.ext.rollCall"))) {
+        QTimer::singleShot(0, this, [this] {
+            if (m_windowManager)
+                m_windowManager->openRollCallFloat();
+        });
+    }
+
     emit initialized();
     cwn::Log::info(QStringLiteral("AppCentral initialization completed"));
 }
@@ -169,6 +197,50 @@ void AppCentral::connectServices()
             m_utilsBackend, &cwn::utils::UtilsBackend::retranslate);
     connect(this, &AppCentral::retranslate,
             m_notification, &NotificationService::retranslateProviders);
+
+    // ---- 「扩展功能」开关接线（§5 B2/B4 天气；§6 C5 随机点名）----
+    // 开关翻转的三件联动：①「添加小组件」列表过滤（B1，definitionsList 依赖
+    // 开关状态，须手动发 definitionChanged）；②实例自动增删（开启=当前预设
+    // 无天气则补一个，关闭=全部预设清干净，城市已收敛全局键故移除无损失）；
+    // ③轮询启停。启动期不经过这里：迁移不发 extensionToggled，已启用扩展的
+    // 实例由 WidgetsWindow::run 的 loadConfig 从配置装载（推断已核实：loadPreset
+    // 逐条读 presets，天气实例原样恢复）。
+    connect(m_extensionManager, &ExtensionManager::extensionToggled, this,
+            [this](const QString &id, bool enabled) {
+                if (!m_widgetsModel) // 防御：模型缺席时仅跳过实例联动，不崩
+                    return;
+                m_widgetsModel->refreshDefinitions();
+                if (id == QLatin1String("classwidgets.ext.weather")) {
+                    if (enabled) {
+                        if (m_weatherService)
+                            m_weatherService->start();
+                        if (m_widgetsModel->instanceCount(WeatherService::widgetTypeId()) == 0)
+                            m_widgetsModel->addInstance(WeatherService::widgetTypeId());
+                    } else {
+                        if (m_weatherService)
+                            m_weatherService->stop();
+                        m_widgetsModel->removeAllInstancesOf(WeatherService::widgetTypeId());
+                    }
+                } else if (id == QLatin1String("classwidgets.ext.rollCall")) {
+                    // C5（extensions-feature-plan §6）：开 → 弹悬浮点名按钮窗；
+                    // 关 → 悬浮窗与结果窗一并下线（结果窗可能开着），并清会话
+                    // 排除名单 —— 功能下线即整个会话作废，重新开启视为新会话
+                    if (m_windowManager) {
+                        if (enabled) {
+                            m_windowManager->openRollCallFloat();
+                        } else {
+                            m_windowManager->closeRollCallFloat();
+                            m_windowManager->closeRollCallResult();
+                        }
+                    }
+                    if (!enabled && m_rollCallService)
+                        m_rollCallService->clearSession();
+                }
+                // 课表速览（classwidgets.ext.schedulePeek）无需 C++ 接线：
+                // SchedulePeekBar.qml 经 "Extensions" 上下文属性自行观测开关
+                // （绑定内显式读 extensions 属性建立通知依赖），蒙版重算链由
+                // WidgetsWindow::onQmlReady 直连速览条几何信号承担
+            });
 }
 
 void AppCentral::setWidgetsWindow(WidgetsWindow *window)
@@ -262,6 +334,10 @@ void AppCentral::setupQmlContext(QQmlEngine *engine)
     context->setContextProperty(QStringLiteral("WindowManager"), m_windowManager);
     context->setContextProperty(QStringLiteral("PathManager"), &AppPaths::instance());
     context->setContextProperty(QStringLiteral("ClassSwapManager"), m_classSwapManager);
+    // 「扩展功能」框架（本仓库新增上下文名，非 central.py 对齐项）
+    context->setContextProperty(QStringLiteral("Extensions"), m_extensionManager);
+    // 随机点名服务（阶段 C1）；"RollCall" 名字经 grep 确认与既有上下文无冲突
+    context->setContextProperty(QStringLiteral("RollCall"), m_rollCallService);
     context->setContextProperty(QStringLiteral("UtilsBackend"), m_utilsBackend);
     context->setContextProperty(QStringLiteral("UpdaterBridge"), m_updaterBridge);
     context->setContextProperty(QStringLiteral("ThemeLoadErrorDialog"),
@@ -285,6 +361,7 @@ QObject *AppCentral::notification() const { return m_notification; }
 QObject *AppCentral::scheduleEditor() const { return m_scheduleEditor; }
 QObject *AppCentral::classSwapManager() const { return m_classSwapManager; }
 QObject *AppCentral::weather() const { return m_weatherService; }
+QObject *AppCentral::rollCall() const { return m_rollCallService; }
 QObject *AppCentral::scheduleManager() const { return m_scheduleManager; }
 QObject *AppCentral::translator() const { return m_translator; }
 QObject *AppCentral::themeManager() const { return m_themeManager; }

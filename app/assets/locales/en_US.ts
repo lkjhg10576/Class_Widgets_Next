@@ -1532,6 +1532,14 @@ Do you want to continue using them, or discard and restore the original schedule
         <source>Run Class Widgets on startup</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Interactions</name>
@@ -3359,6 +3367,10 @@ It&apos;s incompatible and may cause unexpected issues.</source>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Shortcuts</name>
@@ -4880,6 +4892,411 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
     <message>
         <location filename="../../src/qml/widgets/settings/upcomingActivities.qml" line="33"/>
         <source>Use the abbreviation set for each subject, or its first character when unset</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Extensions</name>
+    <message>
+        <source>天气</source>
+        <translation>Weather</translation>
+    </message>
+    <message>
+        <source>城市天气与恶劣天气预警，配置收敛到本扩展页</source>
+        <translation>City weather and severe weather alerts, with settings consolidated on this extension page</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>Random Roll Call</translation>
+    </message>
+    <message>
+        <source>屏幕悬浮点名按钮，按名单与权重随机抽取学生</source>
+        <translation>A floating on-screen roll call button that picks students at random from the roster, honoring weights</translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation>Schedule Peek</translation>
+    </message>
+    <message>
+        <source>小组件下方的当日课表缩写条，高亮当前课与下一课</source>
+        <translation>A compact today's schedule bar below the widgets, highlighting the current and next class</translation>
+    </message>
+</context>
+<context>
+    <name>Weather</name>
+    <message>
+        <source> 分钟</source>
+        <translation> min</translation>
+    </message>
+    <message>
+        <source>API Host</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API Key 无效</source>
+        <translation>Invalid API key</translation>
+    </message>
+    <message>
+        <source>API 凭据</source>
+        <translation>API credentials</translation>
+    </message>
+    <message>
+        <source>仅保存在本地 configs.json</source>
+        <translation>Stored only in local configs.json</translation>
+    </message>
+    <message>
+        <source>内置，无需配置</source>
+        <translation>Built-in, no configuration needed</translation>
+    </message>
+    <message>
+        <source>刷新间隔</source>
+        <translation>Refresh interval</translation>
+    </message>
+    <message>
+        <source>华风爱科 Key</source>
+        <translation>WeatherCN key</translation>
+    </message>
+    <message>
+        <source>华风爱科（付费）</source>
+        <translation>WeatherCN (Paid)</translation>
+    </message>
+    <message>
+        <source>和风天气 Key</source>
+        <translation>QWeather key</translation>
+    </message>
+    <message>
+        <source>和风天气（付费）</source>
+        <translation>QWeather (Paid)</translation>
+    </message>
+    <message>
+        <source>响应异常</source>
+        <translation>Unexpected response</translation>
+    </message>
+    <message>
+        <source>城市</source>
+        <translation>City</translation>
+    </message>
+    <message>
+        <source>天气</source>
+        <translation>Weather</translation>
+    </message>
+    <message>
+        <source>天气数据拉取频率（30–180 分钟）</source>
+        <translation>How often weather data is fetched (30–180 minutes)</translation>
+    </message>
+    <message>
+        <source>天气数据来自华风爱科</source>
+        <translation>Weather data from WeatherCN</translation>
+    </message>
+    <message>
+        <source>天气数据来自和风天气</source>
+        <translation>Weather data from QWeather</translation>
+    </message>
+    <message>
+        <source>天气数据来自小米天气 (wtr-v3)</source>
+        <translation>Weather data from Xiaomi Weather (wtr-v3)</translation>
+    </message>
+    <message>
+        <source>天气数据来自彩云天气</source>
+        <translation>Weather data from Caiyun Weather</translation>
+    </message>
+    <message>
+        <source>天气数据来自高德地图</source>
+        <translation>Weather data from AMap</translation>
+    </message>
+    <message>
+        <source>小米天气（免费）</source>
+        <translation>Xiaomi Weather (Free)</translation>
+    </message>
+    <message>
+        <source>彩云天气 Token</source>
+        <translation>Caiyun token</translation>
+    </message>
+    <message>
+        <source>彩云天气（付费）</source>
+        <translation>Caiyun Weather (Paid)</translation>
+    </message>
+    <message>
+        <source>搜索城市</source>
+        <translation>Search cities</translation>
+    </message>
+    <message>
+        <source>搜索并选择城市以启用天气</source>
+        <translation>Search and select a city to enable weather</translation>
+    </message>
+    <message>
+        <source>数据来源</source>
+        <translation>Data provider</translation>
+    </message>
+    <message>
+        <source>数据源</source>
+        <translation>Data source</translation>
+    </message>
+    <message>
+        <source>显示</source>
+        <translation>Show</translation>
+    </message>
+    <message>
+        <source>测试中…</source>
+        <translation>Testing…</translation>
+    </message>
+    <message>
+        <source>测试连接</source>
+        <translation>Test connection</translation>
+    </message>
+    <message>
+        <source>网络错误</source>
+        <translation>Network error</translation>
+    </message>
+    <message>
+        <source>连接成功</source>
+        <translation>Connection successful</translation>
+    </message>
+    <message>
+        <source>配额已用尽</source>
+        <translation>Quota exhausted</translation>
+    </message>
+    <message>
+        <source>需要华风爱科 API Key</source>
+        <translation>Requires a WeatherCN API key</translation>
+    </message>
+    <message>
+        <source>需要和风天气 API Key 与专属 API Host</source>
+        <translation>Requires a QWeather API key and dedicated API host</translation>
+    </message>
+    <message>
+        <source>需要彩云天气 Token</source>
+        <translation>Requires a Caiyun token</translation>
+    </message>
+    <message>
+        <source>需要高德开放平台 Web 服务 Key</source>
+        <translation>Requires an AMap web service key</translation>
+    </message>
+    <message>
+        <source>高德 Key</source>
+        <translation>AMap key</translation>
+    </message>
+    <message>
+        <source>高德天气（付费）</source>
+        <translation>AMap Weather (Paid)</translation>
+    </message>
+    <message>
+        <source>高德暂不支持恶劣天气预警</source>
+        <translation>AMap does not support weather alerts yet</translation>
+    </message>
+</context>
+<context>
+    <name>RollCall</name>
+    <message>
+        <source>从 TXT 导入</source>
+        <translation>Import from TXT</translation>
+    </message>
+    <message>
+        <source>会话内不重复</source>
+        <translation>No repeats within a session</translation>
+    </message>
+    <message>
+        <source>共 %1 人</source>
+        <translation>Total: %1</translation>
+    </message>
+    <message>
+        <source>删除</source>
+        <translation>Delete</translation>
+    </message>
+    <message>
+        <source>单次内不重复</source>
+        <translation>No repeats within one draw</translation>
+    </message>
+    <message>
+        <source>单次内不重复：每次点名从全体重抽；会话内不重复：本会话点过的人排除，关闭结果窗口后重置</source>
+        <translation>No repeats within one draw: every roll call redraws from everyone. No repeats within a session: people already picked in this session are excluded, reset when the result window closes</translation>
+    </message>
+    <message>
+        <source>名单</source>
+        <translation>Roster</translation>
+    </message>
+    <message>
+        <source>名单为空：从 TXT 导入（每行一个名字，UTF-8）或手动添加</source>
+        <translation>Empty roster: import from TXT (one name per line, UTF-8) or add names manually</translation>
+    </message>
+    <message>
+        <source>名单已清空</source>
+        <translation>Roster cleared</translation>
+    </message>
+    <message>
+        <source>导入名单（TXT，每行一个名字）</source>
+        <translation>Import roster (TXT, one name per line)</translation>
+    </message>
+    <message>
+        <source>导入失败：文件为空、无法读取或不含有效名字</source>
+        <translation>Import failed: the file is empty, unreadable, or contains no valid names</translation>
+    </message>
+    <message>
+        <source>导入完成：新增 %1 人，跳过重名 %2 人</source>
+        <translation>Import done: %1 added, %2 duplicates skipped</translation>
+    </message>
+    <message>
+        <source>已删除「%1」</source>
+        <translation>Deleted “%1”</translation>
+    </message>
+    <message>
+        <source>已添加「%1」</source>
+        <translation>Added “%1”</translation>
+    </message>
+    <message>
+        <source>所有文件 (*)</source>
+        <translation>All files (*)</translation>
+    </message>
+    <message>
+        <source>手动添加</source>
+        <translation>Add manually</translation>
+    </message>
+    <message>
+        <source>改名失败：姓名为空或与其他行重名</source>
+        <translation>Rename failed: the name is empty or duplicates another entry</translation>
+    </message>
+    <message>
+        <source>权重 %1（-100% 永不抽中，+100% 概率翻倍）</source>
+        <translation>Weight %1 (-100%: never picked; +100%: double chance)</translation>
+    </message>
+    <message>
+        <source>权重提交失败：名字可能已被改名</source>
+        <translation>Failed to save weight: the name may have been renamed</translation>
+    </message>
+    <message>
+        <source>添加</source>
+        <translation>Add</translation>
+    </message>
+    <message>
+        <source>添加失败：姓名为空或与现有名单重复</source>
+        <translation>Add failed: the name is empty or already in the roster</translation>
+    </message>
+    <message>
+        <source>清空名单</source>
+        <translation>Clear roster</translation>
+    </message>
+    <message>
+        <source>纯文本文件 (*.txt)</source>
+        <translation>Plain text files (*.txt)</translation>
+    </message>
+    <message>
+        <source>输入姓名</source>
+        <translation>Enter a name</translation>
+    </message>
+    <message>
+        <source>重名会被拒绝并提示</source>
+        <translation>Duplicate names are rejected with a notice</translation>
+    </message>
+    <message>
+        <source>重复策略</source>
+        <translation>Repeat policy</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>Random Roll Call</translation>
+    </message>
+</context>
+<context>
+    <name>SchedulePeek</name>
+    <message>
+        <source>%1 分钟</source>
+        <translation>%1 min</translation>
+    </message>
+    <message>
+        <source>分组间隔阈值</source>
+        <translation>Group gap threshold</translation>
+    </message>
+    <message>
+        <source>常驻显示</source>
+        <translation>Always visible</translation>
+    </message>
+    <message>
+        <source>显示模式</source>
+        <translation>Display mode</translation>
+    </message>
+    <message>
+        <source>相邻两节课间隔达到该分钟数时，速览条中插入分组竖线；普通课间不插</source>
+        <translation>When the gap between two adjacent classes reaches this many minutes, a vertical separator is inserted in the peek bar; regular breaks are not separated</translation>
+    </message>
+    <message>
+        <source>自动弹出</source>
+        <translation>Auto popup</translation>
+    </message>
+    <message>
+        <source>自动弹出：下课弹出、下次上课收起；常驻显示：当天有课即显示</source>
+        <translation>Auto popup: appears after class, hides at the next class; always visible: shown whenever there are classes today</translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation>Schedule Peek</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallFloat</name>
+    <message>
+        <source>取消</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <source>点 1 名</source>
+        <translation>Pick 1</translation>
+    </message>
+    <message>
+        <source>点 2 名</source>
+        <translation>Pick 2</translation>
+    </message>
+    <message>
+        <source>点 3 名</source>
+        <translation>Pick 3</translation>
+    </message>
+    <message>
+        <source>点名</source>
+        <translation>Roll Call</translation>
+    </message>
+    <message>
+        <source>请先在设置中导入名单</source>
+        <translation>Import a roster in settings first</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallResult</name>
+    <message>
+        <source>关闭</source>
+        <translation>Close</translation>
+    </message>
+    <message>
+        <source>再点 1 名</source>
+        <translation>Pick 1 more</translation>
+    </message>
+    <message>
+        <source>再点 2 名</source>
+        <translation>Pick 2 more</translation>
+    </message>
+    <message>
+        <source>再点 3 名</source>
+        <translation>Pick 3 more</translation>
+    </message>
+    <message>
+        <source>名单人数不足，已抽出全部 %1 人</source>
+        <translation>Not enough names in the roster; picked all %1</translation>
+    </message>
+    <message>
+        <source>没有可点的人：请在设置中导入名单，或关闭窗口开始新会话</source>
+        <translation>No one left to pick: import a roster in settings, or close this window to start a new session</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>Random Roll Call</translation>
+    </message>
+</context>
+<context>
+    <name>weather</name>
+    <message>
+        <source>Set a city in Extensions - Weather settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set API key in Extensions - Weather settings</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

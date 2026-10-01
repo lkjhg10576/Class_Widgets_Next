@@ -50,6 +50,13 @@ public:
     // AppCentral 在 configs->load() 之后调用：启动 60s 轮询 tick
     void start();
 
+    // 停止 60s 轮询 tick（extensions-feature-plan §5 B4：天气扩展关闭时调用）。
+    // 与 start() 对称；本类全部逻辑在 GUI 线程事件循环内（见类注释线程模型），
+    // 停 QTimer 即停全部自动重拉，无需其他状态清理。在途网络回包仍正常入缓存
+    // （QTimer 停止不影响已发出的请求），期间无组件消费，weatherData() 按
+    // 缓存原样返回 empty/unconfigured/stale 契约状态，不崩。
+    void stop() { m_pollTimer.stop(); }
+
     bool busy() const { return m_pendingFetches > 0; }
 
     // --- QML 契约 ---

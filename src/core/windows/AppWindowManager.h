@@ -72,6 +72,14 @@ public slots:
     Q_INVOKABLE void openPluginPlaza();             // manager.py:125 open_plugin_plaza —— no-op 别名
                                                     //（与 M1 SupportStubs::WindowManagerStub 兼容）
 
+    // 随机点名扩展两窗口（阶段 C5，extensions-feature-plan §6，本仓库自有窗口，
+    // 上游 manager.py 无对应）：悬浮按钮窗与结果窗，语义与 openSettings/closeSettings
+    // 相同（单例 ensure + show/raise/activate；close 走 releaseWindow 即销毁重建）
+    Q_INVOKABLE void openRollCallFloat();
+    Q_INVOKABLE void closeRollCallFloat();
+    Q_INVOKABLE void openRollCallResult();
+    Q_INVOKABLE void closeRollCallResult();
+
 public:
     // 对应 manager.py:161-178 open_theme_load_error —— 主题恢复流程入口。
     // 依赖的 "ThemeLoadErrorDialog" 上下文属性（windows.py:210）本阶段未注册，
@@ -91,6 +99,9 @@ private:
         ThemeLoadError,
         Tutorial,
         Debugger,
+        // 随机点名扩展（阶段 C5，本仓库自有，无 manager.py 对应键）
+        RollCallFloat,
+        RollCallResult,
     };
 
     RinUiWindowBase *ensure(WindowId id);           // manager.py:198-204 ensure

@@ -1692,6 +1692,14 @@ Do you want to continue using them, or discard and restore the original schedule
         <source>Run Class Widgets on startup</source>
         <translation>開機後自動運行 Class Widgets</translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation>擴展功能</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>設定</translation>
+    </message>
 </context>
 <context>
     <name>Interactions</name>
@@ -3631,6 +3639,10 @@ It&apos;s incompatible and may cause unexpected issues.</source>
         <source>Update</source>
         <translation type="unfinished">更新</translation>
     </message>
+    <message>
+        <source>Extensions</source>
+        <translation>擴展功能</translation>
+    </message>
 </context>
 <context>
     <name>Shortcuts</name>
@@ -5523,6 +5535,411 @@ then tap &quot;Edit Widget Screen&quot; in the menu to experience it.</source>
         <location filename="../../src/qml/widgets/settings/countdownDays.qml" line="90"/>
         <source>Yearly</source>
         <translation>每年</translation>
+    </message>
+</context>
+<context>
+    <name>Extensions</name>
+    <message>
+        <source>天气</source>
+        <translation>天氣</translation>
+    </message>
+    <message>
+        <source>城市天气与恶劣天气预警，配置收敛到本扩展页</source>
+        <translation>城市天氣與惡劣天氣預警，設定收斂到本擴展頁</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>隨機點名</translation>
+    </message>
+    <message>
+        <source>屏幕悬浮点名按钮，按名单与权重随机抽取学生</source>
+        <translation>螢幕懸浮點名按鈕，按名單與權重隨機抽取學生</translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation>課表速覽</translation>
+    </message>
+    <message>
+        <source>小组件下方的当日课表缩写条，高亮当前课与下一课</source>
+        <translation>小組件下方的當日課表縮寫條，突顯目前與下一節課</translation>
+    </message>
+</context>
+<context>
+    <name>Weather</name>
+    <message>
+        <source> 分钟</source>
+        <translation> 分鐘</translation>
+    </message>
+    <message>
+        <source>API Host</source>
+        <translation>API Host</translation>
+    </message>
+    <message>
+        <source>API Key 无效</source>
+        <translation>API Key 無效</translation>
+    </message>
+    <message>
+        <source>API 凭据</source>
+        <translation>API 憑證</translation>
+    </message>
+    <message>
+        <source>仅保存在本地 configs.json</source>
+        <translation>僅儲存於本地 configs.json</translation>
+    </message>
+    <message>
+        <source>内置，无需配置</source>
+        <translation>內置，無需設定</translation>
+    </message>
+    <message>
+        <source>刷新间隔</source>
+        <translation>刷新間隔</translation>
+    </message>
+    <message>
+        <source>华风爱科 Key</source>
+        <translation>華風愛科 Key</translation>
+    </message>
+    <message>
+        <source>华风爱科（付费）</source>
+        <translation>華風愛科（付費）</translation>
+    </message>
+    <message>
+        <source>和风天气 Key</source>
+        <translation>和風天氣 Key</translation>
+    </message>
+    <message>
+        <source>和风天气（付费）</source>
+        <translation>和風天氣（付費）</translation>
+    </message>
+    <message>
+        <source>响应异常</source>
+        <translation>回應異常</translation>
+    </message>
+    <message>
+        <source>城市</source>
+        <translation>城市</translation>
+    </message>
+    <message>
+        <source>天气</source>
+        <translation>天氣</translation>
+    </message>
+    <message>
+        <source>天气数据拉取频率（30–180 分钟）</source>
+        <translation>天氣資料抓取頻率（30–180 分鐘）</translation>
+    </message>
+    <message>
+        <source>天气数据来自华风爱科</source>
+        <translation>天氣資料來自華風愛科</translation>
+    </message>
+    <message>
+        <source>天气数据来自和风天气</source>
+        <translation>天氣資料來自和風天氣</translation>
+    </message>
+    <message>
+        <source>天气数据来自小米天气 (wtr-v3)</source>
+        <translation>天氣資料來自小米天氣 (wtr-v3)</translation>
+    </message>
+    <message>
+        <source>天气数据来自彩云天气</source>
+        <translation>天氣資料來自彩雲天氣</translation>
+    </message>
+    <message>
+        <source>天气数据来自高德地图</source>
+        <translation>天氣資料來自高德地圖</translation>
+    </message>
+    <message>
+        <source>小米天气（免费）</source>
+        <translation>小米天氣（免費）</translation>
+    </message>
+    <message>
+        <source>彩云天气 Token</source>
+        <translation>彩雲天氣 Token</translation>
+    </message>
+    <message>
+        <source>彩云天气（付费）</source>
+        <translation>彩雲天氣（付費）</translation>
+    </message>
+    <message>
+        <source>搜索城市</source>
+        <translation>搜尋城市</translation>
+    </message>
+    <message>
+        <source>搜索并选择城市以启用天气</source>
+        <translation>搜尋並選擇城市以啟用天氣</translation>
+    </message>
+    <message>
+        <source>数据来源</source>
+        <translation>資料提供方</translation>
+    </message>
+    <message>
+        <source>数据源</source>
+        <translation>資料來源</translation>
+    </message>
+    <message>
+        <source>显示</source>
+        <translation>顯示</translation>
+    </message>
+    <message>
+        <source>测试中…</source>
+        <translation>測試中…</translation>
+    </message>
+    <message>
+        <source>测试连接</source>
+        <translation>測試連線</translation>
+    </message>
+    <message>
+        <source>网络错误</source>
+        <translation>網路錯誤</translation>
+    </message>
+    <message>
+        <source>连接成功</source>
+        <translation>連線成功</translation>
+    </message>
+    <message>
+        <source>配额已用尽</source>
+        <translation>配額已用盡</translation>
+    </message>
+    <message>
+        <source>需要华风爱科 API Key</source>
+        <translation>需要華風愛科 API Key</translation>
+    </message>
+    <message>
+        <source>需要和风天气 API Key 与专属 API Host</source>
+        <translation>需要和風天氣 API Key 與專屬 API Host</translation>
+    </message>
+    <message>
+        <source>需要彩云天气 Token</source>
+        <translation>需要彩雲天氣 Token</translation>
+    </message>
+    <message>
+        <source>需要高德开放平台 Web 服务 Key</source>
+        <translation>需要高德開放平台 Web 服務 Key</translation>
+    </message>
+    <message>
+        <source>高德 Key</source>
+        <translation>高德 Key</translation>
+    </message>
+    <message>
+        <source>高德天气（付费）</source>
+        <translation>高德天氣（付費）</translation>
+    </message>
+    <message>
+        <source>高德暂不支持恶劣天气预警</source>
+        <translation>高德暫不支援惡劣天氣預警</translation>
+    </message>
+</context>
+<context>
+    <name>RollCall</name>
+    <message>
+        <source>从 TXT 导入</source>
+        <translation>從 TXT 匯入</translation>
+    </message>
+    <message>
+        <source>会话内不重复</source>
+        <translation>會話內不重複</translation>
+    </message>
+    <message>
+        <source>共 %1 人</source>
+        <translation>共 %1 人</translation>
+    </message>
+    <message>
+        <source>删除</source>
+        <translation>刪除</translation>
+    </message>
+    <message>
+        <source>单次内不重复</source>
+        <translation>單次內不重複</translation>
+    </message>
+    <message>
+        <source>单次内不重复：每次点名从全体重抽；会话内不重复：本会话点过的人排除，关闭结果窗口后重置</source>
+        <translation>單次內不重複：每次點名從全體重抽；會話內不重複：本會話點過的人排除，關閉結果視窗後重設</translation>
+    </message>
+    <message>
+        <source>名单</source>
+        <translation>名單</translation>
+    </message>
+    <message>
+        <source>名单为空：从 TXT 导入（每行一个名字，UTF-8）或手动添加</source>
+        <translation>名單為空：從 TXT 匯入（每行一個名字，UTF-8）或手動添加</translation>
+    </message>
+    <message>
+        <source>名单已清空</source>
+        <translation>名單已清空</translation>
+    </message>
+    <message>
+        <source>导入名单（TXT，每行一个名字）</source>
+        <translation>匯入名單（TXT，每行一個名字）</translation>
+    </message>
+    <message>
+        <source>导入失败：文件为空、无法读取或不含有效名字</source>
+        <translation>匯入失敗：檔案為空、無法讀取或不含有效名字</translation>
+    </message>
+    <message>
+        <source>导入完成：新增 %1 人，跳过重名 %2 人</source>
+        <translation>匯入完成：新增 %1 人，跳過重名 %2 人</translation>
+    </message>
+    <message>
+        <source>已删除「%1」</source>
+        <translation>已刪除「%1」</translation>
+    </message>
+    <message>
+        <source>已添加「%1」</source>
+        <translation>已添加「%1」</translation>
+    </message>
+    <message>
+        <source>所有文件 (*)</source>
+        <translation>所有檔案 (*)</translation>
+    </message>
+    <message>
+        <source>手动添加</source>
+        <translation>手動添加</translation>
+    </message>
+    <message>
+        <source>改名失败：姓名为空或与其他行重名</source>
+        <translation>改名失敗：姓名為空或與其他行重名</translation>
+    </message>
+    <message>
+        <source>权重 %1（-100% 永不抽中，+100% 概率翻倍）</source>
+        <translation>權重 %1（-100% 永不抽中，+100% 機率翻倍）</translation>
+    </message>
+    <message>
+        <source>权重提交失败：名字可能已被改名</source>
+        <translation>權重提交失敗：名字可能已被改名</translation>
+    </message>
+    <message>
+        <source>添加</source>
+        <translation>添加</translation>
+    </message>
+    <message>
+        <source>添加失败：姓名为空或与现有名单重复</source>
+        <translation>添加失敗：姓名為空或與現有名單重複</translation>
+    </message>
+    <message>
+        <source>清空名单</source>
+        <translation>清空名單</translation>
+    </message>
+    <message>
+        <source>纯文本文件 (*.txt)</source>
+        <translation>純文字檔案 (*.txt)</translation>
+    </message>
+    <message>
+        <source>输入姓名</source>
+        <translation>輸入姓名</translation>
+    </message>
+    <message>
+        <source>重名会被拒绝并提示</source>
+        <translation>重名會被拒絕並提示</translation>
+    </message>
+    <message>
+        <source>重复策略</source>
+        <translation>重複策略</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>隨機點名</translation>
+    </message>
+</context>
+<context>
+    <name>SchedulePeek</name>
+    <message>
+        <source>%1 分钟</source>
+        <translation>%1 分鐘</translation>
+    </message>
+    <message>
+        <source>分组间隔阈值</source>
+        <translation>分組間隔閾值</translation>
+    </message>
+    <message>
+        <source>常驻显示</source>
+        <translation>常駐顯示</translation>
+    </message>
+    <message>
+        <source>显示模式</source>
+        <translation>顯示模式</translation>
+    </message>
+    <message>
+        <source>相邻两节课间隔达到该分钟数时，速览条中插入分组竖线；普通课间不插</source>
+        <translation>相鄰兩節課的間隔達到該分鐘數時，速覽條中插入分組直線；一般課間不插入</translation>
+    </message>
+    <message>
+        <source>自动弹出</source>
+        <translation>自動彈出</translation>
+    </message>
+    <message>
+        <source>自动弹出：下课弹出、下次上课收起；常驻显示：当天有课即显示</source>
+        <translation>自動彈出：下課時彈出、次の上課時收起；常駐顯示：當日有課即顯示</translation>
+    </message>
+    <message>
+        <source>课表速览</source>
+        <translation>課表速覽</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallFloat</name>
+    <message>
+        <source>取消</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>点 1 名</source>
+        <translation>點 1 名</translation>
+    </message>
+    <message>
+        <source>点 2 名</source>
+        <translation>點 2 名</translation>
+    </message>
+    <message>
+        <source>点 3 名</source>
+        <translation>點 3 名</translation>
+    </message>
+    <message>
+        <source>点名</source>
+        <translation>點名</translation>
+    </message>
+    <message>
+        <source>请先在设置中导入名单</source>
+        <translation>請先在設定中匯入名單</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallResult</name>
+    <message>
+        <source>关闭</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>再点 1 名</source>
+        <translation>再點 1 名</translation>
+    </message>
+    <message>
+        <source>再点 2 名</source>
+        <translation>再點 2 名</translation>
+    </message>
+    <message>
+        <source>再点 3 名</source>
+        <translation>再點 3 名</translation>
+    </message>
+    <message>
+        <source>名单人数不足，已抽出全部 %1 人</source>
+        <translation>名單人數不足，已抽出全部 %1 人</translation>
+    </message>
+    <message>
+        <source>没有可点的人：请在设置中导入名单，或关闭窗口开始新会话</source>
+        <translation>沒有可點的人：請在設定中匯入名單，或關閉視窗開始新會話</translation>
+    </message>
+    <message>
+        <source>随机点名</source>
+        <translation>隨機點名</translation>
+    </message>
+</context>
+<context>
+    <name>weather</name>
+    <message>
+        <source>Set a city in Extensions - Weather settings</source>
+        <translation>請到「擴展功能-天氣」中設定城市</translation>
+    </message>
+    <message>
+        <source>Set API key in Extensions - Weather settings</source>
+        <translation>請到「擴展功能-天氣」中設定 API 金鑰</translation>
     </message>
 </context>
 </TS>

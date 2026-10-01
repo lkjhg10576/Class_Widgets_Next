@@ -165,6 +165,35 @@ void AppWindowManager::openDebugger()
     open(WindowId::Debugger);
 }
 
+// ─────────────── 随机点名扩展窗口（阶段 C5，本仓库自有，上游无对应）───────────────
+
+void AppWindowManager::openRollCallFloat()
+{
+    // 单例语义照 openSettings：已存在则 show/raise/activate，不重建窗口对象；
+    // 位置/展开态等运行期状态留在 QML 与配置键，重建时从 extensions.roll_call.* 恢复
+    open(WindowId::RollCallFloat);
+}
+
+void AppWindowManager::closeRollCallFloat()
+{
+    // 关闭即销毁（releaseWindow 的 0ms singleShot 语义）；扩展开关关闭与
+    // QML onClosing 拦截都走这里
+    releaseWindow(WindowId::RollCallFloat);
+}
+
+void AppWindowManager::openRollCallResult()
+{
+    // 点名结果窗：每次点名后弹出/抬升；QML 在 onCompleted/visibleChanged 时
+    // 按 preferences.display 选屏重新居中（open 的 show/raise/activate 复用
+    // 已有窗口对象时位置保持上一次居中结果，屏幕不变即正确）
+    open(WindowId::RollCallResult);
+}
+
+void AppWindowManager::closeRollCallResult()
+{
+    releaseWindow(WindowId::RollCallResult);
+}
+
 // ─────────────────────────── C++ API ───────────────────────────
 
 void AppWindowManager::openThemeLoadError(const QString &failedThemeId, bool recovered)
@@ -369,6 +398,8 @@ QString AppWindowManager::windowName(WindowId id)
     case WindowId::ThemeLoadError: return QStringLiteral("theme_load_error");
     case WindowId::Tutorial: return QStringLiteral("tutorial");
     case WindowId::Debugger: return QStringLiteral("debugger");
+    case WindowId::RollCallFloat: return QStringLiteral("roll_call_float");
+    case WindowId::RollCallResult: return QStringLiteral("roll_call_result");
     }
     return QString();
 }
@@ -408,6 +439,12 @@ QString AppWindowManager::windowQmlPath(WindowId id)
     case WindowId::Debugger:
         // core/utils/debugger.py:15 → QML_PATH / "Debugger" / "MainWindow.qml"
         return qmlRoot + QStringLiteral("/Debugger/MainWindow.qml");
+    case WindowId::RollCallFloat:
+        // 阶段 C3：点名悬浮按钮窗（Windows 目录，路径写法照 Settings/Editor）
+        return cwRoot + QStringLiteral("/Windows/RollCallFloat.qml");
+    case WindowId::RollCallResult:
+        // 阶段 C4：点名结果窗
+        return cwRoot + QStringLiteral("/Windows/RollCallResult.qml");
     }
     return QString();
 }
@@ -428,6 +465,10 @@ QString AppWindowManager::notInitializedMessage(WindowId id)
         return QStringLiteral("Theme load error dialog window not initialized correctly.");
     case WindowId::Tutorial: return QStringLiteral("Tutorial window not initialized correctly.");
     case WindowId::Debugger: return QStringLiteral("Debugger window not initialized correctly.");
+    case WindowId::RollCallFloat:
+        return QStringLiteral("RollCallFloat window not initialized correctly.");
+    case WindowId::RollCallResult:
+        return QStringLiteral("RollCallResult window not initialized correctly.");
     }
     return QStringLiteral("Window not initialized correctly.");
 }

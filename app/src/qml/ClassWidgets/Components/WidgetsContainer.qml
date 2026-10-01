@@ -374,6 +374,26 @@ Column {
         }
     }
 
+    // [CWN-EXT-D3] 课表速览条（扩展 classwidgets.ext.schedulePeek，项目自有组件，
+    // 见 SchedulePeek.qml 设置页与 extensions-feature-plan.md §7 阶段 D）。放在根
+    // Column 中 widgetsFlow 之后：Column 自然排布使其贴于小组件组正下方，
+    // hide/anchor/偏移随 Column 总尺寸自动跟随（calcX/calcY 读的就是本 Column）。
+    SchedulePeekBar {
+        id: schedulePeekBar // objectName 已在组件内设置，C++ 蒙版 findChild 依赖
+    }
+
+    // [CWN-EXT-D3] 几何联动：速览条显隐/高宽变化（含弹出动画逐帧高度）必须驱动
+    // contentGeometryChanged —— 复用既有触发链（WidgetLoader 宽高 L231-232 同款路径：
+    // contentGeometryChanged → MainInterface.qml onContentGeometryChanged→geometryChanged
+    // → WidgetsWindow 已连的 widgetsLoader 信号 → scheduleMaskUpdate），只补速览条
+    // 自身触发，不改动既有发射点，无双发/漏发。
+    Connections {
+        target: schedulePeekBar
+        function onVisibleChanged() { widgetsContainer.contentGeometryChanged() }
+        function onHeightChanged() { widgetsContainer.contentGeometryChanged() }
+        function onWidthChanged() { widgetsContainer.contentGeometryChanged() }
+    }
+
     // 添加小组件&完成
     RowLayout {
         id: addWidgetsContainer

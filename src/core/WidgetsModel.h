@@ -6,6 +6,7 @@
 #include <QVector>
 
 class ConfigStore;
+class ExtensionManager;
 
 // 小组件定义（对应 model.py 的 WidgetDefinition TypedDict）
 struct WidgetDefinition
@@ -77,6 +78,22 @@ public:
     void loadConfig();
     void setConfigStore(ConfigStore *store) { m_configStore = store; }
 
+    // 「扩展功能」联动（extensions-feature-plan §5 B1）：definitionsList 按扩展
+    // 开关过滤受控小组件定义（当前仅天气 ↔ classwidgets.ext.weather）。
+    // 未注入（空指针）时不做任何过滤——扩展框架缺席场景下全量定义进列表，
+    // 保证既有行为零影响。
+    void setExtensionManager(ExtensionManager *manager) { m_extensionManager = manager; }
+
+    // 扩展开关翻转后由 AppCentral 接线调用：definitionsList 的过滤结果依赖开关
+    // 状态，但其 NOTIFY（definitionChanged）不会被模型自身的数据变化触发，
+    // 须手动通知 QML（AddWidgetsDialog）重取列表
+    void refreshDefinitions() { emit definitionChanged(); }
+
+    // 扩展整体下线时调用（§5 B2）：从全部预设移除指定类型实例并走既有持久化
+    // 通路。removeInstance 只删当前预设视图，不满足「关闭扩展=功能下线」的
+    // 全预设清理语义，故补此最小方法。
+    void removeAllInstancesOf(const QString &typeId);
+
     QString currentPreset() const { return m_currentPreset; }
     QVariantMap presets() const;
     QVariantList definitionsList() const;
@@ -109,5 +126,6 @@ private:
     QHash<QString, QVector<PresetEntry>> m_presets;
     QString m_currentPreset;
     ConfigStore *m_configStore = nullptr;
+    ExtensionManager *m_extensionManager = nullptr;
     int m_instancesRevision = 0;
 };

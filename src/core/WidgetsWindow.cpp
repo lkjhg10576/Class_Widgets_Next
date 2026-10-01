@@ -165,6 +165,19 @@ void WidgetsWindow::onQmlReady(QObject *obj, const QUrl &objUrl)
         cwn::Log::info(QStringLiteral("Floating widget container connected for mask updates"));
     }
 
+    // 阶段 D（课表速览）：速览条在 widgetsLoader 的 Column 内（widgetsFlow 之后），
+    // 显隐切换与弹出动画会逐帧改变其 width/height/visible，需与 floatingWidgetContainer
+    // 同样接入蒙版重算节拍（scheduleMaskUpdate 自带 pending 合并，逐帧连接不放大开销）。
+    // 找不到（扩展关闭时组件仍在 Column 里，正常应总能命中）只记日志，不影响既有链路。
+    if (QObject *schedulePeekBar =
+            obj->findChild<QObject *>(QStringLiteral("schedulePeekBar"))) {
+        // widthChanged/heightChanged 实参签名为 (qreal)，字符串连接必须写全
+        connect(schedulePeekBar, SIGNAL(widthChanged(qreal)), this, SLOT(scheduleMaskUpdate()));
+        connect(schedulePeekBar, SIGNAL(heightChanged(qreal)), this, SLOT(scheduleMaskUpdate()));
+        connect(schedulePeekBar, SIGNAL(visibleChanged()), this, SLOT(scheduleMaskUpdate()));
+        cwn::Log::info(QStringLiteral("Schedule peek bar connected for mask updates"));
+    }
+
     scheduleMaskUpdate();
     m_qmlReady = true;
     emit qmlReady();
@@ -271,6 +284,23 @@ void WidgetsWindow::updateMask()
             mask = mask.united(QRegion(QRect(int(floatingContainer->x()),
                                              int(floatingContainer->y()),
                                              fwWidth, fwHeight)));
+        }
+    }
+
+    // 阶段 D：课表速览条并入 mask 并集。它是 widgetsLoader（Column）的直接子项、
+    // widgetsFlow 之后，坐标换算与上面 flow 子项同源：子项局部坐标 + widgetsLoader
+    // 的窗口偏移（floatingContainer 是窗口直接子项才可用裸 x/y，这里不能照抄）。
+    // 隐藏（visible=false，含扩展开关关闭）或零尺寸（收起动画起点）时跳过，
+    // 不扩大可交互区域；否则速览条会被原生蒙版裁掉、不可见不可点。
+    QQuickItem *schedulePeekBar =
+        widgetsLoader->findChild<QQuickItem *>(QStringLiteral("schedulePeekBar"));
+    if (schedulePeekBar && schedulePeekBar->isVisible()) {
+        const int peekWidth = int(schedulePeekBar->width());
+        const int peekHeight = int(schedulePeekBar->height());
+        if (peekWidth > 0 && peekHeight > 0) {
+            mask = mask.united(QRegion(QRect(int(schedulePeekBar->x() + widgetsLoader->x()),
+                                             int(schedulePeekBar->y() + widgetsLoader->y()),
+                                             peekWidth, peekHeight)));
         }
     }
 

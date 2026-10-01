@@ -57,6 +57,12 @@ FluentWindow {
             icon: "ic_fluent_paint_brush_sparkle_20_regular",
             page: PathManager.qml("pages/settings/Personalization.qml"),
         },
+        // [CWN-EXT-A4] 「扩展功能」入口（上游同步区改动，登记条目随阶段 E 写入 QML_MODIFICATIONS.md）
+        {
+            title: qsTr("Extensions"),
+            icon: "ic_fluent_puzzle_cube_20_regular",
+            page: PathManager.qml("pages/settings/Extensions/Index.qml"),
+        },
         {
             title: qsTr("Notification & Time"),
             icon: "ic_fluent_alert_badge_20_regular",

@@ -14,6 +14,29 @@ C++ + Qt Quick，目标是把安装体积从 ~226 MB 压到 **40–50 MB**、常
 > 设置窗口/编辑器/主题切换在 M2–M3 陆续落地；**本版本暂不支持外部插件**
 > （插件系统推迟到 Phase 2，见下）。
 
+## 扩展功能
+
+除小组件外，内置「扩展功能」模块（设置窗口 → 扩展功能）：不绑定小组件的
+官方功能单元，独立开关与配置页，配置键统一在 `extensions.*`。当前三项
+（实施计划与记录见 [extensions-feature-plan.md](extensions-feature-plan.md)）：
+
+- **天气**（迁入）：天气小组件不再以自由添加的内置组件出现，改由扩展开关
+  控制——开启自动添加、关闭移除；城市/数据源/API 凭据/刷新间隔等配置收敛
+  到「扩展功能-天气」页，写全局 `weather.*` 键，存量实例的 `settings.city`
+  自动迁移，无损。
+- **随机点名**（新增）：屏幕悬浮可拖动的「点名」按钮（位置记忆），点击展开
+  点 1/2/3 名面板，居中结果窗展示抽中名单；名单在扩展页管理（TXT 导入、
+  增删改名、权重 -100%~+100%、单次/会话内不重复策略），键
+  `extensions.roll_call.*`。
+- **课表速览**（新增）：小组件组下方的当日课表缩写条，当前课橙色、下一课
+  绿色圆形高亮，自动（下课弹出、上课收起）或常驻显示，键
+  `extensions.schedule_peek.*`。
+
+与插件（Phase 2）的区别：扩展是**官方功能模块**，随程序构建，**不加载任何
+第三方代码**；配置键空间 `extensions.*` 与插件的 `plugins.*` 严格分离，
+不复用 `Plugins.qml` 页面与插件注册通路。Phase 2 插件系统落地时两者并行、
+互不占用对方的开关与键位。
+
 ## 仓库布局
 
 ```
@@ -27,6 +50,7 @@ Class_Widgets_Next/
 │     ├─ WidgetsModel.*    # WidgetListModel 移植（9 role + 9 slot 一字不改）
 │     ├─ BuiltinWidgets.*  # IWidgetProvider + 内置 7 个小组件注册表 + backend
 │     ├─ weather/          # WeatherService：天气组件数据源（小米天气 wtr-v3）
+│     ├─ extensions/       # ExtensionManager 扩展注册表/开关；RollCallService 点名
 │     ├─ CWThemeManager.*  # 主题扫描/查询/切换信号面（M3 补拦截器）
 │     ├─ AppCentral.*      # 聚合门面 + QML 上下文注册（名字与上游逐字一致）
 │     ├─ RinUiWindowBase.* # pip RinUI 的 Python 层等价物（每窗口引擎 + release 语义）

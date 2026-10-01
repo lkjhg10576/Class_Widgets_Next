@@ -1,3 +1,20 @@
+/*
+ * ⚠️ 本文件已退役（阶段 B 天气迁移，extensions-feature-plan §5 B5，2026-10）。
+ *
+ * 取代者：pages/settings/Extensions/Weather.qml（全局「扩展功能-天气」配置页）。
+ * 退役原因：天气从「每个实例右键设置」改为「扩展开关 + 全局配置」——
+ *   1) BuiltinWidgets.cpp 的天气定义不再设置 settingsQml，右键设置入口在
+ *      WidgetsContainer.qml 中因 model.settingsQml 为空而禁用，本页已无任何
+ *      引用路径（grep 全仓库除本文件自身与注释外零引用）；
+ *   2) 城市键从实例 settings.city 收敛为全局 weather.city，组件本体
+ *      （widgets/weather.qml）改读 Configs.data.weather.city，本文件按实例
+ *      settings 读写城市的逻辑已与组件数据源脱节，保留可运行状态仅为对照。
+ *
+ * 保留不删的理由：作为迁移源与回退参考（计划允许"保留文件待清理"）；如需
+ * 复活本页须同时恢复 BuiltinWidgets 的 settingsQml 并把城市读写键改回实例
+ * settings.city，否则城市配置与组件实际读取的全局键不一致。后续阶段清理时
+ * 连同 defaultSettings 的 city 残留键一并移除。
+ */
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts

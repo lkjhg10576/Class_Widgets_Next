@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.21)
 
 # ---- 版本段（M5 发布流水线）----
 # project(VERSION) 无法被命令行覆盖，故经缓存变量中转：
-# 本地构建用默认值 2.0.1.0；CI 发版时传 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]]
+# 本地构建用默认值 2.1.0.0；CI 发版时传 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]]
 # 覆盖 project(VERSION) 与下方 configure_file 的 Version.h（格式校验在此完成，
 # project(VERSION) 只接受 1-4 段纯数字）。
-set(CWN_VERSION "2.0.1.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]]）")
+set(CWN_VERSION "2.1.0.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]]）")
 if(CWN_VERSION_OVERRIDE)
     if(NOT CWN_VERSION_OVERRIDE MATCHES "^[0-9]+(\\.[0-9]+){0,3}$")
         message(FATAL_ERROR
@@ -44,6 +44,12 @@ set(CWN_SOURCES
     src/core/CWThemeManager.cpp
     src/core/SupportStubs.cpp
     src/core/AppCentral.cpp
+    # 扩展功能框架
+    src/core/extensions/ExtensionManager.cpp
+    src/core/extensions/ExtensionManager.h
+    # 随机点名扩展服务（阶段 C1：名单存储 + 加权抽取 + txt 解析）
+    src/core/extensions/RollCallService.cpp
+    src/core/extensions/RollCallService.h
     src/core/RinUiWindowBase.cpp
     src/core/WidgetsWindow.cpp
     src/core/TrayIcon.cpp

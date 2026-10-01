@@ -3,15 +3,15 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 共 11 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限，见下）
-> 另有 4 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
-> 倒数日小组件及其设置页（改动 9）。
+## 当前状态：`app/src/qml` 共 13 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限 + 2 处扩展功能接入（Settings 导航项 / WidgetsContainer 速览条挂载，改动 12），见下）
+> 另有 11 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
+> 倒数日小组件及其设置页（改动 9）、扩展功能 7 个 QML（改动 12）。
 > `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
 > 与改动 8（WidgetLoader.qml 失败恢复，属 `app/src/qml`）已偏离上游。
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
-| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10、11）** |
+| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10、11、12）** |
 | `app/src/themes/` | 上游内置主题定义 | **1 处（material Color.qml，改动 7；上游原样保留在文件外注释）** |
 | `app/assets/` | 上游资产 | **无（逐字复制）** |
 | `app/themes/` | 上游外部主题扫描目录 | **无（逐字复制）** |
@@ -78,8 +78,17 @@ C++ 侧为 `src/core/weather/WeatherService.*`）。因是**新增文件**而非
 
 | # | 文件 | 性质 | 说明 |
 |---|---|---|---|
-| 5.1 | `widgets/weather.qml` | 新增 | 内置组件 `classwidgets.weather`；backend 为注入的 WeatherService（唯一非通用 backend 的内置组件） |
-| 5.2 | `widgets/settings/weather.qml` | 新增 | 城市搜索（350ms 防抖）+ 刷新间隔（全局键 `weather.poll_interval`，秒）+ 数据源标注 |
+| 5.1 | `widgets/weather.qml` | 新增 | 内置组件 `classwidgets.weather`；backend 为注入的 WeatherService（唯一非通用 backend 的内置组件）。2026-10 天气迁移见下方追记 |
+| 5.2 | `widgets/settings/weather.qml` | 新增→**退役** | 城市搜索（350ms 防抖）+ 刷新间隔（全局键 `weather.poll_interval`，秒）+ 数据源标注。2026-10 天气迁移中被扩展页取代，见下方追记 |
+
+**追记（2026-10-01，阶段 B 天气迁移，extensions-feature-plan.md §5）**：
+`widgets/weather.qml` 城市读取从每实例 `settings.city` 改为全局 `weather.city`
+（JSON 字符串，键由 ConfigStore 默认树保证存在），空态两处提示文案改指
+「扩展功能-天气」页（`Set a city / Set API key in Extensions - Weather settings`）；
+`widgets/settings/weather.qml` **退役**——`BuiltinWidgets.cpp` 天气定义不再设置
+`settingsQml`，右键设置入口因 `model.settingsQml` 为空而禁用，全仓库对该文件的
+引用归零（文件头部注释已声明退役与复活条件）。两文件均为项目自有新增文件而非
+上游文件，改动不构成上游同步冲突面。
 
 ### 6. 两个 Interactions 页移除预览图 `sourceSize`（修复引导第 4 步整进程卡死）
 
@@ -169,6 +178,50 @@ C++ 侧（不在上游同步区）：`WidgetDefinition` 新增 `maxInstances`（
 
 同步上游时：本条是上游文件改动，若上游重写此对话框，需把 `instancesRev` /
 `enabled` / 提示三处逻辑手工合入。
+
+### 12. 扩展功能三扩展（2026-10-01，extensions-feature-plan.md 阶段 A–D）
+
+新增官方「扩展功能」模块（框架 + 天气迁移 / 随机点名 / 课表速览三扩展）。
+C++ 实现全部在同步区外；本节登记**上游同步区改动 2 处**（12.1、12.2）与
+**新增 QML 文件 7 个**（12.3–12.9，按改动 5/9 纪律：新增文件不与上游冲突，
+上游若出现同名路径需复核）。扩展与插件严格分离：不复用 `plugins.*` 键、
+`Plugins.qml` 页与 `PluginManagerStub`，也不加载任何第三方代码。
+
+**改动（上游同步区，2 处）**：
+
+| # | 文件 | 位置 | 改动 |
+|---|---|---|---|
+| 12.1 | `ClassWidgets/Windows/Settings.qml` | `navigationItems` 数组，「个性化」条目之后（行内注释 `[CWN-EXT-A4]`） | 插入导航项 `{ title: qsTr("Extensions"), icon: "ic_fluent_puzzle_cube_20_regular", page: pages/settings/Extensions/Index.qml }`（计划 §4 A4）。文案源文为英文 `Extensions`，各语种译文已进 .ts。同步上游：纯增量插入，若上游重排 `navigationItems` 把该项放回「个性化」之后即可 |
+| 12.2 | `ClassWidgets/Components/WidgetsContainer.qml` | 根 `Column` 内、`widgetsFlow` 之后、`addWidgetsContainer` 之前（行内注释 `[CWN-EXT-D3]`） | 插入 `SchedulePeekBar { id: schedulePeekBar }`（组件在 Column 自然排布下贴于小组件组正下方，hide/anchor 偏移随 Column 总高自动跟随），并新增 `Connections`：速览条 `visible/width/height` 变化即发射既有信号 `contentGeometryChanged()`，把速览条弹出/收起接入「MainInterface → WidgetsWindow 重算蒙版」的既有几何链路（复用触发链、不新增直连、不改既有发射点）。计划 §7 D3。同步上游：插入点以 `widgetsFlow` 闭合为锚，纯增量 |
+
+**新增（QML，7 个）**：
+
+| # | 文件 | 说明 |
+|---|---|---|
+| 12.3 | `ClassWidgets/pages/settings/Extensions/Index.qml` | 扩展列表页：渲染 `ExtensionManager` 注册表（图标/名称/描述 + Switch 开关写回 `extensions.enabled` +「设置」跳子页，跳页写法照 `Home.qml` 先例）。计划 §4 A3 |
+| 12.4 | `ClassWidgets/pages/settings/Extensions/Weather.qml` | 天气扩展配置页：由 `widgets/settings/weather.qml` 迁移改造——城市搜索/选择（读写全局 `weather.city`）+ 数据源 + API 凭据 + 刷新间隔四张卡。计划 §5 B5 |
+| 12.5 | `ClassWidgets/pages/settings/Extensions/RollCall.qml` | 随机点名配置页：名单管理（TXT 导入经 `RollCallService.importNamesFromUrl`、手动添加、改名、删除、权重滑杆 -100~+100）+ 重复策略（单次内/会话内不重复）。计划 §6 C2 |
+| 12.6 | `ClassWidgets/pages/settings/Extensions/SchedulePeek.qml` | 课表速览配置页：显示模式（`extensions.schedule_peek.mode` auto/always）+ 分组间隔阈值滑杆（`split_gap_minutes`，5~60）。计划 §7 D5 |
+| 12.7 | `ClassWidgets/Components/SchedulePeekBar.qml` | 速览条本体：当日课表格（`objectName: "schedulePeekBar"`，C++ 蒙版 `findChild` 依赖）——课程缩写（`subject.simplifiedName` 首字，未设取全名首字）、相邻间隔 ≥ 阈值插分组竖线、当前课橙色/下一课绿色圆形高亮；auto 模式下课弹出上课收起（显示条件含 `futureCount ≥ 1` 实现放学后隐藏）、always 常驻、当天无课隐藏。数据全部读 `ScheduleRuntime` 既有属性，零新增 C++ 接口。计划 §7 D1/D2 |
+| 12.8 | `ClassWidgets/Windows/RollCallFloat.qml` | 悬浮点名窗：无边框置顶透明 `Window`，圆形「点名」按钮可拖动（钳位/持久化照 `FloatingWidgetContainer.qml` 先例，位置键 `extensions.roll_call.button_x/y`，-1=选中屏右上角默认）、点击展开 点1/2/3名+取消 面板并按按钮所在屏幕半区向左/右展开。计划 §6 C3 |
+| 12.9 | `ClassWidgets/Windows/RollCallResult.qml` | 点名结果窗：居中于 `preferences.display` 选中屏幕，大字号列出抽中名字，「再点 1/2/3 名」+「关闭」；关闭时清空会话排除名单（session 策略）。计划 §6 C4 |
+
+配套改动（C++，同步区外，登记于此供追溯）：新增
+`src/core/extensions/ExtensionManager.{h,cpp}`（注册表 + `extensions.enabled` 读写 +
+`Extensions` QML 上下文 + B3 一次性老配置迁移）与
+`RollCallService.{h,cpp}`（名单/加权抽取/TXT 解析，`importNamesFromUrl` 纯解析无副作用，
+写回在设置页完成），二者加入 `CMakeLists.txt`；改动 `AppCentral.{h,cpp}`（装配、上下文
+注册、`rollCall` 属性、天气轮询随开关 start/stop）、`ConfigStore.cpp`（`extensions.*`
+进 defaultConfig 与 `kScalarSpecs`，`avoid_repeat`/`mode` 用枚举白名单收紧）、
+`WidgetsModel.cpp`（`definitionsList` 未启用时过滤天气定义；天气 `WidgetDefinition`
+`maxInstances=1`、`settingsQml` 不再赋值，见 `BuiltinWidgets.cpp`）、
+`AppWindowManager.{h,cpp}`（`RollCallFloat`/`RollCallResult` 两窗口接入 + 开关接线）、
+`WidgetsWindow.cpp`（`updateMask()` 并入速览条矩形，计划 §7 D4）。
+
+配套翻译：`app/assets/locales/*.ts` 8 语种各新增 99 条（`Extensions`（C++ 名称/描述）、
+`Weather`、`RollCall`、`SchedulePeek`、`RollCallFloat`、`RollCallResult`、`Index`、
+`Settings`、`weather` 九个 context；en_US 中文源条目给出英文译文、纯英文源条目回退，
+it/lzh/ta 暂空回退源文），`.qm` 已用 lrelease 重新生成（2026-10-01）。
 
 ## 修改申请流程
 

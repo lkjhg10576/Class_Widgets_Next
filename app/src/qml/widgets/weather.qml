@@ -12,8 +12,12 @@ Widget {
     // text: qsTr("Weather")
 
     // backend = WeatherService（AppCentral::registerBuiltinWidgets 为本组件注入专属数据源）。
-    // settings.city 为城市 JSON 字符串：{"cityId","name","lat","lon","province"}
-    readonly property string cityJson: (settings && settings.city) ? settings.city : ""
+    // 阶段 B 天气迁移：城市从每实例 settings.city 收敛为全局配置 weather.city
+    // （JSON 字符串 {"cityId","name","lat","lon","province","adcode","wcnKey"}，
+    // 在「扩展功能-天气」页配置）。实例 settings.city 仅是存量残留键，不再读取；
+    // weather.city 由 ConfigStore 默认树保证存在（"" = 未配置），仍判空防御。
+    readonly property string cityJson: (Configs.data.weather && Configs.data.weather.city)
+                                       ? Configs.data.weather.city : ""
     readonly property bool cityConfigured: cityJson.length > 0
     property var weatherInfo: null
 
@@ -88,10 +92,12 @@ Widget {
             Subtitle {
                 visible: !miniMode
                 text: {
+                    // 文案指向「扩展功能-天气」页：右键实例设置入口已随天气迁移
+                    // 退役（BuiltinWidgets 不再为天气定义 settingsQml），旧文案会误导用户
                     if (!root.cityConfigured)
-                        return qsTr("Right-click to set a city")
+                        return qsTr("Set a city in Extensions - Weather settings")
                     if (hasData && weatherInfo.status === "unconfigured")
-                        return qsTr("Set API key in widget settings")
+                        return qsTr("Set API key in Extensions - Weather settings")
                     if (!root.current)
                         return qsTr("Loading…")
                     let line = weatherText(root.current.weatherCode)

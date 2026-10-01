@@ -12,6 +12,7 @@ class AutomationManager;
 class ClassSwapManager;
 class ConfigStore;
 class CWThemeManager;
+class ExtensionManager;
 class ScheduleEditor;
 class ScheduleManager;
 class ScheduleRuntime;
@@ -19,6 +20,7 @@ class ThemeLoadErrorDialog;
 class ThemeRecovery;
 class Translator;
 class NotificationService;
+class RollCallService;
 class UpdaterBridge;
 class WidgetsModel;
 class WidgetsWindow;
@@ -40,6 +42,7 @@ class AppCentral : public QObject
     Q_PROPERTY(QObject *scheduleEditor READ scheduleEditor NOTIFY initialized)
     Q_PROPERTY(QObject *classSwapManager READ classSwapManager NOTIFY initialized)
     Q_PROPERTY(QObject *weather READ weather CONSTANT)
+    Q_PROPERTY(QObject *rollCall READ rollCall CONSTANT)
     Q_PROPERTY(QObject *scheduleManager READ scheduleManager NOTIFY updated)
     Q_PROPERTY(QObject *translator READ translator NOTIFY initialized)
     Q_PROPERTY(QObject *themeManager READ themeManager CONSTANT)
@@ -87,6 +90,7 @@ public:
     QObject *translator() const;
     QObject *themeManager() const;
     QObject *weather() const;
+    QObject *rollCall() const;
     bool restartRequired() const { return m_restartRequired; }
     QVariant globalConfig() const;
 
@@ -105,6 +109,8 @@ public:
                                const QString &fallbackFont = QStringLiteral("Microsoft YaHei")) const;
 
     ConfigStore *configs() const { return m_configs; }
+    // 「扩展功能」框架注册表/开关状态（QML 侧走上下文属性 "Extensions"）
+    ExtensionManager *extensionManager() const { return m_extensionManager; }
     WidgetsModel *widgetsModel() const { return m_widgetsModel; }
     CWThemeManager *themeManagerObject() const { return m_themeManager; }
 
@@ -138,6 +144,8 @@ private:
     TrayIcon *m_trayIcon = nullptr;
     WidgetBackend *m_widgetBackend = nullptr;
     WeatherService *m_weatherService = nullptr;
+    ExtensionManager *m_extensionManager = nullptr;
+    RollCallService *m_rollCallService = nullptr;
 
     // M1 占位已全部替换（M2-M4）：SupportStubs 仅剩 PluginManagerStub
     Translator *m_translator = nullptr;

@@ -2,6 +2,8 @@
 
 #include "ConfigStore.h"
 #include "Logger.h"
+#include "extensions/ExtensionManager.h"
+#include "weather/WeatherService.h"
 
 #include <QUuid>
 
@@ -189,8 +191,16 @@ QVariantMap WidgetsModel::presets() const
 QVariantList WidgetsModel::definitionsList() const
 {
     QVariantList list;
-    for (const WidgetDefinition &def : m_definitions)
+    for (const WidgetDefinition &def : m_definitions) {
+        // §5 B1：天气小组件与扩展 classwidgets.ext.weather 联动——未启用时不进
+        // 「添加小组件」列表。过滤条件只命中天气的 type_id，其余内置定义
+        // （含将来注册的插件组件）不受影响；扩展框架未注入时同样全量放行。
+        // 开关翻转后由 AppCentral 接线调 refreshDefinitions() 触发 QML 重取。
+        if (m_extensionManager && def.id == WeatherService::widgetTypeId()
+            && !m_extensionManager->isEnabled(QStringLiteral("classwidgets.ext.weather")))
+            continue;
         list.append(definitionToVariantMap(def));
+    }
     return list;
 }
 
@@ -319,6 +329,40 @@ void WidgetsModel::removeInstance(const QString &instanceId)
             return;
         }
     }
+}
+
+void WidgetsModel::removeAllInstancesOf(const QString &typeId)
+{
+    // §5 B2（扩展整体下线）：removeInstance 按 instanceId 只作用于当前预设视图
+    // （m_instances），关闭开关要求「全部预设都不再保留该类型实例」。实例的
+    // 唯一事实源是 m_presets（saveConfig 全量写回 preferences.widgets_presets），
+    // 因此先遍历所有预设删除条目，再逐行移除当前视图（begin/endRemoveRows 让
+    // QML 侧正确销毁组件），最后走既有 syncCurrentPreset + modelChanged→saveConfig
+    // 持久化通路，不绕过模型直写配置。
+    bool removedAny = false;
+    for (auto it = m_presets.begin(); it != m_presets.end(); ++it) {
+        QVector<PresetEntry> &entries = it.value();
+        for (int i = entries.size() - 1; i >= 0; --i) {
+            if (entries.at(i).typeId == typeId) {
+                entries.remove(i);
+                removedAny = true;
+            }
+        }
+    }
+    // 倒序删除，行号不会因先前移除而失效
+    for (int i = m_instances.size() - 1; i >= 0; --i) {
+        if (m_instances.at(i).typeId != typeId)
+            continue;
+        beginRemoveRows(QModelIndex(), i, i);
+        m_instances.remove(i);
+        endRemoveRows();
+        removedAny = true;
+    }
+    if (!removedAny)
+        return; // 无任何匹配实例：不发通知、不写配置（避免空操作落盘）
+    syncCurrentPreset();
+    ++m_instancesRevision;
+    emit modelChanged();
 }
 
 void WidgetsModel::updateSettings(const QString &instanceId, const QVariantMap &settings)

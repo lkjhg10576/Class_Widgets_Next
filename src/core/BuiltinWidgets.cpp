@@ -92,16 +92,23 @@ QList<WidgetDefinition> BuiltinWidgetProvider::widgets() const
     customText.settingsQml = widgetUri(QStringLiteral("widgets/settings/Text.qml"));
     customText.defaultSettings = textDefaults;
 
-    // 天气（本移植新增内置组件，数据源小米天气 wtr-v3，上游 CW2 无对应注册项）；
-    // settings.city 为城市 JSON 字符串，契约见 WeatherService 类注释
+    // 天气（本移植新增内置组件，上游 CW2 无对应注册项；多数据源见
+    // weather-multi-provider-plan.md，扩展化见 extensions-feature-plan §5 B1）。
+    // settingsQml 置空：右键「小组件设置」入口退役（WidgetsContainer 按
+    // model.settingsQml 判空禁用该项），城市/数据源/凭据/刷新间隔全部收归
+    // 全局「扩展功能-天气」页（pages/settings/Extensions/Weather.qml）。
+    // maxInstances=1：城市已收敛为全局 weather.city，多实例只会是同一份数据的
+    // 重复展示，开启扩展时自动添加也依赖该上限保持单一实例。
+    // defaultSettings 的 city 键保留不删：存量实例配置形状不变（迁移同样保留
+    // 实例上的旧键），组件本体已不再读取实例 settings.city，仅作无害残留。
     WidgetDefinition weather;
     weather.id = WeatherService::widgetTypeId();
     weather.name = WidgetBackend::tr("Weather");
     weather.qmlPath = widgetUri(QStringLiteral("widgets/weather.qml"));
-    weather.settingsQml = widgetUri(QStringLiteral("widgets/settings/weather.qml"));
     QVariantMap weatherDefaults;
     weatherDefaults.insert(QStringLiteral("city"), QString());
     weather.defaultSettings = weatherDefaults;
+    weather.maxInstances = 1;
 
     // 倒数日（本移植新增内置组件，同天气先例为"新增文件"而非上游改动）；
     // settings.title 为事件名，settings.target_date 为 "yyyy-MM-dd" 目标日字符串，

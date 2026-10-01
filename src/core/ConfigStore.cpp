@@ -54,6 +54,11 @@ constexpr const char *kZOrder[] = { "top", "bottom", "normal", nullptr };
 constexpr const char *kCountdownPrecision[] = { "second", "minute", nullptr };
 // model.py:98-101 TapAction（hide 复用于 HideInteractionsConfig.action）
 constexpr const char *kTapAction[] = { "hide", "mini_mode", "floating_widget", nullptr };
+// 「扩展功能」分区取值白名单（本仓库自有模型，无上游对应：见 extensions-feature-plan §6）
+// 点名重复策略：single=每次点名从全体重新抽取；session=会话内已点过的排除
+constexpr const char *kRollCallAvoidRepeat[] = { "single", "session", nullptr };
+// 速览显示模式：auto=下课弹出、上课收起；always=当天有课常驻
+constexpr const char *kSchedulePeekMode[] = { "auto", "always", nullptr };
 
 // 各分区注释标注对应 model.py 的模型类与行号
 const ScalarSpec kScalarSpecs[] = {
@@ -114,6 +119,18 @@ const ScalarSpec kScalarSpecs[] = {
     { "notifications.default_sound", ScalarKind::OptStr },
     { "notifications.volume", ScalarKind::Float },
     { "notifications.default_duration", ScalarKind::Int },
+    // ExtensionsConfig（「扩展功能」分区，本仓库自有模型：extensions-feature-plan §6）
+    { "extensions.roll_call.avoid_repeat", ScalarKind::Enum, kRollCallAvoidRepeat },
+    { "extensions.roll_call.button_x", ScalarKind::Int },
+    { "extensions.roll_call.button_y", ScalarKind::Int },
+    { "extensions.schedule_peek.mode", ScalarKind::Enum, kSchedulePeekMode },
+    { "extensions.schedule_peek.split_gap_minutes", ScalarKind::Int },
+    // 天气全局城市（extensions-feature-plan §5 B3 天气迁移的收敛键）：JSON 字符
+    // 串 {cityId,name,lat,lon,province,adcode,wcnKey}，"" = 未配置。声明为 Str
+    // 后 sanitize 会在 load 时补默认空串，QML 侧 Configs.data.weather.city
+    // 恒可读。其余 weather.* 键（provider/poll_interval/keys.*）沿用
+    // weather-multi-provider-plan 惯例不落声明表（读取方自带兜底），保持不动。
+    { "weather.city", ScalarKind::Str },
 };
 
 const ScalarSpec *findScalarSpec(const QString &dottedKey)
@@ -452,6 +469,52 @@ bool normalizeWidgetPresets(QJsonObject &root, const QString &path, const QJsonO
     return true;
 }
 
+// extensions.roll_call.names：点名名单 [{name, weight}]（extensions-feature-plan §6）。
+// name 无法规范为字符串（缺失/对象/数组）的条目丢弃——没有名字的条目无法渲染；
+// weight 宽松纠正为 int 并钳位 [-100, 100]（缺失/不可解析按 0=等权处理，不丢条目，
+// ±100 是权重语义的上下界：-100 永不抽中、+100 概率翻倍）
+bool normalizeRollCallNames(QJsonObject &root, const QString &path, const QJsonObject &defaults)
+{
+    const QJsonValue current = jsonGetAt(root, path);
+    if (!current.isArray()) {
+        jsonSetAt(root, path, jsonGetAt(defaults, path));
+        return true;
+    }
+    bool changed = false;
+    QJsonArray out;
+    for (const QJsonValue &e : current.toArray()) {
+        if (!e.isObject()) {
+            changed = true;
+            continue;
+        }
+        QJsonObject entry = e.toObject();
+        const std::optional<QJsonValue> name = coerceString(entry.value(QLatin1String("name")));
+        if (!name.has_value()) {
+            changed = true;
+            continue;
+        }
+        if (!entry.value(QLatin1String("name")).isString())
+            changed = true;
+        entry.insert(QLatin1String("name"), *name);
+
+        std::optional<QJsonValue> weight = coerceInt(entry.value(QLatin1String("weight")));
+        if (!weight.has_value()) {
+            weight = QJsonValue(0);
+            changed = true;
+        }
+        const int clamped = qBound(-100, weight->toInt(), 100);
+        const QJsonValue stored = entry.value(QLatin1String("weight"));
+        if (!stored.isDouble() || stored.toInt() != clamped)
+            changed = true;
+        entry.insert(QLatin1String("weight"), clamped);
+        out.append(entry);
+    }
+    if (!changed)
+        return false;
+    jsonSetAt(root, path, out);
+    return true;
+}
+
 // model.py:22-24 的默认 preset 条目构造（type_id + instance_id + 空 settings）
 QJsonObject defaultWidgetPreset(const char *typeId, const char *instanceId)
 {
@@ -605,6 +668,31 @@ QJsonObject ConfigStore::defaultConfig()
     notifications.insert(QStringLiteral("default_duration"), 8000);
     notifications.insert(QStringLiteral("level_sounds"), levelSounds);
 
+    // 「扩展功能」分区（本仓库自有模型，无上游对应：见 extensions-feature-plan §6）。
+    // 与 plugins.* 严格分离：扩展是官方功能模块的开关与调参，非第三方代码
+    QJsonObject rollCall; // 随机点名扩展
+    rollCall.insert(QStringLiteral("names"), QJsonArray()); // [{name, weight}]，阶段 C 填充
+    rollCall.insert(QStringLiteral("avoid_repeat"), QStringLiteral("single"));
+    rollCall.insert(QStringLiteral("button_x"), -1); // -1 = 从未拖动，首显落默认屏幕右上角
+    rollCall.insert(QStringLiteral("button_y"), -1);
+
+    QJsonObject schedulePeek; // 课表速览扩展
+    schedulePeek.insert(QStringLiteral("mode"), QStringLiteral("auto"));
+    schedulePeek.insert(QStringLiteral("split_gap_minutes"), 15);
+
+    QJsonObject extensions;
+    extensions.insert(QStringLiteral("enabled"), QJsonArray()); // 启用中的扩展 id 列表
+    extensions.insert(QStringLiteral("roll_call"), rollCall);
+    extensions.insert(QStringLiteral("schedule_peek"), schedulePeek);
+
+    // 天气分区（本仓库自有模型，weather-multi-provider-plan / extensions-feature-plan
+    // §5 B3）：仅声明全局城市 weather.city（JSON 字符串，"" = 未配置）。
+    // provider/poll_interval/keys.* 由设置页经 Configs.set 动态路径写入、读取方
+    // 自带兜底，历来不在默认树中，维持现状不补，避免 mergeDefaults 对存量用户
+    // 产生无意义的结构回退。
+    QJsonObject weather;
+    weather.insert(QStringLiteral("city"), QString());
+
     QJsonObject root; // manager.py:18-26 RootConfig
     root.insert(QStringLiteral("app"), app);
     root.insert(QStringLiteral("locale"), locale);
@@ -614,6 +702,8 @@ QJsonObject ConfigStore::defaultConfig()
     root.insert(QStringLiteral("plugins"), plugins);
     root.insert(QStringLiteral("network"), network);
     root.insert(QStringLiteral("notifications"), notifications);
+    root.insert(QStringLiteral("extensions"), extensions);
+    root.insert(QStringLiteral("weather"), weather);
     return root;
 }
 
@@ -686,6 +776,11 @@ void ConfigStore::sanitize()
     if (normalizePlainObject(m_json, QStringLiteral("schedule.class_swap"), defaults))
         ++fixed;
     if (normalizeWidgetPresets(m_json, QStringLiteral("preferences.widgets_presets"), defaults))
+        ++fixed;
+    // 「扩展功能」分区容器：enabled 照 plugins.enabled 先例；names 逐元素校验
+    if (normalizeStringList(m_json, QStringLiteral("extensions.enabled"), defaults))
+        ++fixed;
+    if (normalizeRollCallNames(m_json, QStringLiteral("extensions.roll_call.names"), defaults))
         ++fixed;
 
     if (fixed > 0)
