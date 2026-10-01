@@ -264,6 +264,49 @@ GC 无从运行 —— 被替换的旧委托持续堆积，内存随导入线性
 5000 次）；存量重名/批内重名/空名/裸字符串/权重越界钳位、BOM/CRLF/空行/文件内
 去重解析均符合契约；20000 行 TXT 解析 + 合入 70 ms。
 
+## 改动 15：课表速览条加宽 + 小组件外观/隐藏联动（2026-10-01）
+
+用户反馈：速览条字体过小、条过窄；圆角不跟随「小组件外观-圆角」设置；小组件
+隐藏（滑出屏幕边缘 / 收成浮窗）后速览条仍有一截残留。本次只改**新增文件**
+`SchedulePeekBar.qml`（改动 12.7 的增量），不触碰上游同步区任何文件。
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 15.1 | `ClassWidgets/Components/SchedulePeekBar.qml`（改动 12.7 的增量） | ① **加宽**：格径 26→32、缩写字号 14→18、格间距 6→8、内边距 8/5→10/6（条高 36→44），并与小组件「缩放」同键联动（`preferences.scale_factor` 同乘 `cellSize`/`rowSpacing`/`fontSize`/内边距）；② **外观跟随**：圆角 = `preferences.widget_corner_radius × scaleFactor`（按条高一半封顶，22px 圆角配 44px 条高即胶囊形）、背景不透明度 = `preferences.opacity`（均与 `Theme/components/Widget.qml:10,26` 同键同法，字体/字重原本已跟随）；③ **隐藏跟随**：`shouldShow` 增加最高优先级判据 `widgetsHidden = interactions.hide.state`（点击隐藏与自动隐藏任务共用该键，含浮窗模式），小组件隐藏时整条 `visible=false`，并经既有 `contentGeometryChanged → 蒙版重算`信号链同步摘出；④ 顺带修复 sep 格 `text: modelData.text` 对 QString 赋 undefined 的 QML 告警（`|| ""`）。 |
+
+**验证**（本机独立沙箱 + `--smoke-test`，与运行中实例完全隔离的临时根目录）：
+- 默认外观（scale=1 / opacity=1 / radius=22）：速览条 101×44，字号 18、格径 32、
+  圆角 22（胶囊形）、不透明度 1；
+- 外观联动（scale=1.5 / opacity=0.5 / radius=40）：151×66，字号 27、格径 48、
+  圆角 33（40×1.5=60 按 66/2=33 封顶）、不透明度 0.5；
+- `interactions.hide.state=true`：`visible=false`（修复前 top_center 锚点会残留
+  条高的大部分）；置回 `false` 且 auto 条件满足（已下课 + 有下一节）时 `visible=true`；
+- 冒烟加载零 QML 告警（退出 teardown 的 context 置空告警除外）。既有 C++ 直连
+  `connect SIGNAL(widthChanged(qreal))` 因签名不符自始未生效的告警仍在：蒙版更新
+  一直由 WidgetsContainer 的 `contentGeometryChanged` 中转链承担，功能无影响，
+  本次未动 C++。
+
+## 改动 16：托盘面板（TrayPanel）整体移除，托盘交互收敛到原生菜单（2026-10-01）
+
+用户反馈：托盘右键已在 B4 改为 win32 原生菜单，但左键仍会弹出 TrayPanel
+（快捷面板），"Qt6 Widgets 去除不够完全"。本次把左键面板整条链路拆掉：
+托盘左键/中键/双击/右键统一弹原生菜单（`TrayIcon`），应用不再因托盘交互
+创建任何 QML 窗口。
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 16.1 | `MainInterface.qml` | 删除 `trayPanelLoader`（Loader + TrayPanel 组件）与 `Connections.onTogglePanel` 分支；`import ClassWidgets.Windows` 随之不再被任何文件使用（该模块现无类型），一并移除 |
+| 16.2 | `ClassWidgets/Windows/TrayPanel.qml` | **删除**（上游文件）。功能去向：课表切换 → 托盘菜单"Switch Schedule"（SwitchScheduleDialog，B4 已建）；宫格快捷方式 5 个目标中 4 个（设置/课程表/调休/换课）已在托盘菜单，插件广场本阶段为 no-op（改动 3）；What's New → 设置窗口关于页；调试器属 `app.debug_mode` 开发功能 |
+| 16.3 | `ClassWidgets/Components/TrayShortcuts.qml` | **删除**（上游文件，仅被 TrayPanel 引用）。`UtilsBackend` 的 shortcuts 注册表/`executeShortcut` C++ 接口保留（`preferences.shortcuts` 配置与"调休"快捷方式信号路径仍在用） |
+| 16.4 | `ClassWidgets/Components/qmldir` / `ClassWidgets/Windows/qmldir` | 移除 `TrayShortcuts` / `TrayPanel` 注册行（`ClassWidgets.Windows` 暂成空模块，保留 qmldir 供上游同步与后续类型回填） |
+
+对应 C++ 侧（不属 QML 同步区，仅备忘）：`TrayIcon` 删除 `togglePanel(QPoint)`
+信号（左键/中键/双击改发原生菜单），新增 `quitRequested`（托盘"退出"经
+`AppCentral::quit()` 的 `exit(0)` 绕过 Qt 6.8+ quit() 的窗口关闭协商——悬浮
+小组件窗口 onClosing 拒绝关闭会吞掉退出，此前表现为"要点两次退出"）；
+`main.cpp` 移除 togglePanel 接线；`AppCentral` 删除 togglePanel 转发信号与
+`onTrayTogglePanel` 槽。
+
 ## 修改申请流程
 
 1. 尽量不动 QML：能由 C++ 宿主、部署脚本或 vendored 副本解决的，不改上游文件；

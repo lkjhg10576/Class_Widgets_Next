@@ -11,11 +11,11 @@ cmake_minimum_required(VERSION 3.21)
 # !! 换版本号必须走 scripts\build-installer.ps1（它会显式传 -DCWN_VERSION=<新版本>）。
 #    单独改下面这行的默认值，对已存在的 build/ 无效：CWN_VERSION 是 CACHE 变量，
 #    缓存里已有值时 set(... CACHE ...) 的新默认值会被静默忽略（实测：把默认值改成
-#    2.1.0.6 后不传 -D 重新配置，产出的仍是旧版本）。要清干净只能删 build/ 重配。
+#    2.1.0.7 后不传 -D 重新配置，产出的仍是旧版本）。要清干净只能删 build/ 重配。
 #
 # CI（.github/workflows/build.yml）以 -SkipBuild 调用打包脚本，不参与本段配置，
 # 其安装器版本号同样取自下面的缺省值 —— 改版本号只需改这一处。
-set(CWN_VERSION "2.1.0.5" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
+set(CWN_VERSION "2.1.0.6" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
 if(CWN_VERSION_OVERRIDE)
     set(CWN_VERSION "${CWN_VERSION_OVERRIDE}")
 endif()
