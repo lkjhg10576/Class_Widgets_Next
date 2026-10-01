@@ -2,7 +2,6 @@
 
 #include <QFont>
 #include <QObject>
-#include <QPoint>
 #include <QStringList>
 #include <QVariant>
 
@@ -115,14 +114,11 @@ public:
     CWThemeManager *themeManagerObject() const { return m_themeManager; }
 
 public slots:
-    // 托盘转发（tray.py togglePanel → central.togglePanel）
-    void onTrayTogglePanel(const QPoint &pos);
     void onTrayEditModeRequested();
 
 signals:
     void updated();
     void initialized();
-    void togglePanel(const QPoint &pos);
     void widgetRegistered(const QString &widgetId);
     void retranslate();
     void trayShortcutRequested(const QString &shortcutId);

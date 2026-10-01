@@ -6,7 +6,6 @@ import QtQuick.Layouts
 import QtQuick.Window as QQW
 import RinUI
 import ClassWidgets.Components
-import ClassWidgets.Windows
 
 QQW.Window {
     id: root
@@ -90,24 +89,10 @@ QQW.Window {
         }
     }
 
-    // A5（内存优化）：TrayPanel（含 ListView/ScheduleClip 整棵对象树）原先启动即
-    // 常驻实例化；改为首次打开托盘面板才创建，之后保持
+    // B4（托盘菜单扩展）：调休弹窗必须挂在常驻主窗口——RinUI Dialog 是 QQC2
+    // Popup，渲染在所属窗口 overlay 内，挂在会 hide 的窗口下会随宿主一起消失。
     Connections {
         target: AppCentral
-        function onTogglePanel(pos) {
-            if (!trayPanelLoader.active) {
-                // 同步创建（Loader 默认非异步）；创建晚于本次信号，需补调 openAt
-                trayPanelLoader.active = true
-                if (trayPanelLoader.item && trayPanelLoader.item.openAt)
-                    trayPanelLoader.item.openAt(pos)
-                return
-            }
-            if (trayPanelLoader.item)
-                trayPanelLoader.item.raise()
-        }
-        // B4（托盘菜单扩展）：调休弹窗常驻主窗口（RinUI Dialog 是 QQC2 Popup，
-        // 渲染在所属窗口 overlay 内——挂 TrayPanel 下时面板一隐藏弹窗就没了）。
-        // 托盘菜单"调休"与托盘面板宫格两条路径在此汇合。
         function onTrayShortcutRequested(shortcutId) {
             if (shortcutId === "com.classwidgets.reschedule-day") {
                 // 从托盘菜单触发时主窗口不在前台，先激活拿到键盘焦点（Esc/Enter 可用）
@@ -123,7 +108,7 @@ QQW.Window {
         }
     }
 
-    // 托盘菜单/托盘面板宫格共用的"调休"弹窗（原 TrayPanel 内，B4 移入主窗口）
+    // 托盘菜单"调休"入口的弹出界面（原 TrayPanel 宫格路径已随面板移除）
     RescheduleDayDialog {
         id: rescheduleDayDialog
         title: qsTr("Reschedule Day")
@@ -198,14 +183,6 @@ QQW.Window {
         onClicked: {
             if (!Configs.isKeyLocked("interactions.hide.state"))
                 Configs.set("interactions.hide.state", false)
-        }
-    }
-
-    Loader {
-        id: trayPanelLoader
-        active: false
-        sourceComponent: Component {
-            TrayPanel {}
         }
     }
 

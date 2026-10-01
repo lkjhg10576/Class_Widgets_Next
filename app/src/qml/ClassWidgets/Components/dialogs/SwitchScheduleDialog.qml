@@ -5,9 +5,8 @@ import RinUI
 import "../editor" // ScheduleClip（dialogs/ 无 qmldir，QML 隐式导入只覆盖本目录）
 
 // 托盘菜单"切换课程表"的弹出界面（B4 托盘菜单扩展）。
-// 与 TrayPanel 内嵌的课程表切换区使用同一套 ScheduleClip + load() 路径；
-// 实例常驻 MainInterface（TrayPanel 经 Loader 按需创建，见 A5），因此
-// 打开时重扫课表目录，保证运行期导入/新建的课表及时出现。
+// 实例常驻 MainInterface，因此打开时重扫课表目录，
+// 保证运行期导入/新建的课表及时出现。
 Dialog {
     id: switchScheduleDialog
     title: qsTr("Switch Schedule")

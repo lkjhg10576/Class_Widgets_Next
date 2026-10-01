@@ -6,7 +6,6 @@ FloatingWidgetContainer 1.0 FloatingWidgetContainer.qml
 Watermark 1.0 Watermark.qml
 Introduction 1.0 Introduction.qml
 Skeleton 1.0 Skeleton.qml
-TrayShortcuts 1.0 TrayShortcuts.qml
 RestartButton 1.0 RestartButton.qml
 
 # Dialogs

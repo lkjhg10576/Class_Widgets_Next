@@ -2,27 +2,22 @@
 
 #include <QtCore/qt_windows.h> // HWND/HICON/HBITMAP 等 Windows 类型（自带 NOMINMAX）
 #include <QObject>
-#include <QPoint>
 
 // 对应上游 core/utils/tray.py 的 TrayIcon（T11）。
-// 图标用 assets/images/tray_icon.png；点击（任意激活方式）发 togglePanel(pos)，
-// MainInterface.qml 的 Connections 收到后 raise TrayPanel（tray.py:42-47 on_click）。
 //
-// M4 扩展：补全托盘右键菜单（上游 tray.py 本体无菜单，菜单项对应
-// central.py 的窗口管理入口 / 编辑模式 / 迷你模式语义聚合，文本经
-// "TrayIcon" 翻译上下文）：
+// B4 后续（用户反馈）：托盘面板（TrayPanel）整体移除——托盘不再唤起任何 QML
+// 窗口，左键/中键/双击/右键统一弹原生菜单；"退出"经 quitRequested 信号交
+// AppCentral::quit()（exit(0)，绕过 Qt 6.8+ quit() 的窗口关闭协商）。
+//
+// M4 扩展：托盘菜单项对应 central.py 的窗口管理入口 / 编辑模式 / 迷你模式
+// 语义聚合，文本经 "TrayIcon" 翻译上下文：
 //   Open Settings / Schedule Editor / Class Swap / Mini Mode / Toggle Edit Mode
-//   / Tutorial / About / Quit，各自通过同名 *Requested 信号交由主控连接
+//   / Tutorial / Quit，各自通过同名 *Requested 信号交由主控连接
 //   （main.cpp / AppCentral 不在本任务改动范围内，现有 connect 保持不变）。
-// 保持既有信号 togglePanel(QPoint) / editModeRequested 的签名与语义不变；
 // retranslate() 供语言切换后刷新菜单（连接 AppCentral::retranslate）。
 //
 // B4（内存优化）：不再使用 QSystemTrayIcon/QMenu（Qt6::Widgets），改用 win32
 // Shell_NotifyIcon + 原生 HMENU 弹出菜单，使进程可以只链接 Qt6::Gui。
-// 对外接口与旧实现逐位对齐：
-//   - 左键/中键/双击 → togglePanel(QCursor::pos())（旧 activated 任意 reason 语义）
-//   - 右键 → 仅弹原生菜单（不再发 togglePanel：旧行为会先唤起 TrayPanel 再被
-//     菜单抢焦点收回，实测观感为"闪一下大窗口"，用户反馈后移除）
 //   - showMessage → NIF_INFO 气泡（旧 QSystemTrayIcon::Information 语义）
 //   - explorer 重启（TaskbarCreated）后自动重新添加图标
 class TrayIcon : public QObject
@@ -42,8 +37,7 @@ public:
     void retranslate();
 
 signals:
-    // ── 既有信号（main.cpp:84-86 / AppCentral 的连接不能破坏）──
-    void togglePanel(const QPoint &pos);
+    // ── 既有信号（main.cpp / AppCentral 的连接不能破坏）──
     void editModeRequested();
     // ── M4：菜单动作信号 ──
     void openSettingsRequested();     // 打开设置（对应 window_manager.open_settings）
@@ -55,6 +49,7 @@ signals:
     void rescheduleDayRequested();    // 调休（com.classwidgets.reschedule-day 同路径）
     void switchScheduleRequested();   // 切换课程表（MainInterface 弹 SwitchScheduleDialog）
     void restartRequested();          // 重启（AppCentral::restart 自启新实例）
+    void quitRequested();             // 退出（AppCentral::quit：exit(0) 绕过关闭协商）
 
 private:
     // 菜单命令 ID（TrackPopupMenu(TPM_RETURNCMD) 返回值 → 信号映射）

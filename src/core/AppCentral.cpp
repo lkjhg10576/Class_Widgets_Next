@@ -285,6 +285,9 @@ void AppCentral::setTrayIcon(TrayIcon *icon)
             this, &AppCentral::traySwitchScheduleRequested);
     // 重启：AppCentral::restart 自启新实例后退出
     connect(icon, &TrayIcon::restartRequested, this, [this] { restart(); });
+    // 退出：必须走本类 quit()（exit(0) 绕过 Qt 6.8+ quit() 的窗口关闭协商——
+    // 悬浮小组件等 onClosing 拒绝关闭的窗口会吞掉 quit()，表现为"要点两次退出"）
+    connect(icon, &TrayIcon::quitRequested, this, &AppCentral::quit);
     // 迷你模式切换（tray.py toggle_mini_mode：写 preferences.mini_mode）
     connect(icon, &TrayIcon::miniModeRequested, this, [this] {
         bool current = false;
@@ -458,11 +461,6 @@ QFont AppCentral::getQFont(const QString &targetFont, const QString &fallbackFon
     font.setFamilies(families);
     font.setStyleHint(QFont::SansSerif);
     return font;
-}
-
-void AppCentral::onTrayTogglePanel(const QPoint &pos)
-{
-    emit togglePanel(pos);
 }
 
 void AppCentral::onTrayEditModeRequested()

@@ -199,16 +199,12 @@ LRESULT TrayIcon::handleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
     if (msg != kTrayCallbackMsg)
         return DefWindowProcW(m_hwnd, msg, wParam, lParam);
 
-    // 旧实现：activated 任意 reason 都发 togglePanel(QCursor::pos())。
-    // 用户反馈（B4 实测）：右键若先唤起 QML TrayPanel 再弹原生菜单，面板会被
-    // 菜单抢焦点立即收回，产生"闪一下大窗口"的观感——右键改为只弹菜单；
-    // 左键/中键/双击保持 togglePanel 语义。
+    // B4 后续（用户反馈）：托盘面板（TrayPanel）整体移除后，托盘不再唤起任何
+    // QML 窗口——任意按键激活统一弹原生菜单，左键与右键行为一致。
     switch (lParam) {
     case WM_LBUTTONUP:
     case WM_LBUTTONDBLCLK:
     case WM_MBUTTONUP:
-        emit togglePanel(QCursor::pos());
-        break;
     case WM_RBUTTONUP:
     case WM_RBUTTONDBLCLK:
         showContextMenu();
@@ -301,7 +297,11 @@ void TrayIcon::showContextMenu()
         break;
     case CmdQuit:
         cwn::Log::info(QStringLiteral("Quit requested from tray"));
-        QCoreApplication::quit();
+        // 不能在此直接 QCoreApplication::quit()：Qt 6.8+ 的 quit() 会先向所有
+        // 可见窗口请求关闭，悬浮小组件等 onClosing 拒绝关闭的窗口会吞掉退出
+        // （实测表现为"要点两次退出"）。经 AppCentral::quit() 的 exit(0)
+        // 绕过窗口关闭协商，一次点击即整体退出。
+        emit quitRequested();
         break;
     default:
         break; // 用户取消
