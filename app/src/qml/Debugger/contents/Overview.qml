@@ -7,39 +7,39 @@ ColumnLayout {
     Layout.fillWidth: true
     Text {
         typography: Typography.BodyStrong
-        text: "Overview"
+        text: qsTr("Overview")
     }
 
     SettingExpander {
         Layout.fillWidth: true
         icon.name: "ic_fluent_alert_badge_20_regular"
-        title: "Notifications"
-        description: "Debug"
+        title: qsTr("Notifications")
+        description: qsTr("Debug")
 
         SettingItem {
-            title: "Send notifications"
+            title: qsTr("Send notifications")
             // 此 SettingItem 没有描述
             ColumnLayout {
                 Layout.fillWidth: true
                 ComboBox {
                     id: notificationLevel
                     Layout.fillWidth: true
-                    model: ["Info", "Announcement", "Warning", "System"]
+                    model: [qsTr("Info"), qsTr("Announcement"), qsTr("Warning"), qsTr("System")]
                 }
                 TextField {
                     id: notificationTitle
                     Layout.fillWidth: true
-                    placeholderText: "Title"
+                    placeholderText: qsTr("Title")
                 }
                 TextField {
                     id: notificationText
                     Layout.fillWidth: true
-                    placeholderText: "Text"
+                    placeholderText: qsTr("Text")
                 }
 
                 Button {
                     highlighted: true
-                    text: "Send"
+                    text: qsTr("Send")
                     onClicked: {
                         let provider = UtilsBackend.debugNotificationProvider
                         if (provider) {
@@ -68,11 +68,11 @@ ColumnLayout {
     SettingExpander {
         Layout.fillWidth: true
         icon.name: "ic_fluent_info_20_regular"
-        title: "Overview"
+        title: qsTr("Overview")
         description: "Class Widgets Next | " + AppCentral.globalConfig.app.version
 
         SettingItem {
-            title: "Version"
+            title: qsTr("Version")
             // 此 SettingItem 没有描述
             Text {
                 text: AppCentral.globalConfig.app.version

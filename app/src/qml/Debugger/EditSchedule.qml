@@ -7,7 +7,7 @@ import Debugger
 
 ApplicationWindow {
     id: mainWindow
-    title: "Class Widgets Debugger"
+    title: qsTr("Class Widgets Debugger")
     width: 900
     height: 600
     minimumWidth: 425
@@ -46,29 +46,29 @@ ApplicationWindow {
 
     FluentPage {
         anchors.fill: parent
-        title: "Edit Schedule"
+        title: qsTr("Edit Schedule")
 
         SettingExpander {
             Layout.fillWidth: true
-            title: "MetaInfo"
+            title: qsTr("MetaInfo")
             icon.name: "ic_fluent_notepad_20_regular"
 
             SettingItem {
-                title: "ID"
+                title: qsTr("ID")
                 TextField {
                     text: AppCentral.scheduleEditor.meta.id
                     readOnly: true
                 }
             }
             SettingItem {
-                title: "Version"
+                title: qsTr("Version")
                 TextField {
                     text: AppCentral.scheduleEditor.meta.version
                     readOnly: true
                 }
             }
             SettingItem {
-                title: "fMax Week Cycle Length"
+                title: qsTr("Max Week Cycle Length")
                 SpinBox {
                     from: 1
                     to: 4
@@ -76,7 +76,7 @@ ApplicationWindow {
                 }
             }
             SettingItem {
-                title: "Start Date"
+                title: qsTr("Start Date")
                 DatePicker {
                     Component.onCompleted: {
                         setDate(AppCentral.scheduleEditor.meta.startDate)
@@ -87,10 +87,10 @@ ApplicationWindow {
 
         SettingExpander {
             Layout.fillWidth: true
-            title: "Schedule"
+            title: qsTr("Schedule")
             icon.name: "ic_fluent_calendar_clock_20_regular"
             action: Button {
-                text: "Add Day"
+                text: qsTr("Add Day")
                 onClicked: AppCentral.scheduleEditor.addDay(
                     0, null, null
                 )
@@ -113,7 +113,7 @@ ApplicationWindow {
                         spacing: 4
                         Button {
                             icon.name: "ic_fluent_add_20_regular"
-                            text: "Add"
+                            text: qsTr("Add")
                             onClicked: AppCentral.scheduleEditor.addEntry(
                                 modelData.id, "class", null, null, null, null
                             )
@@ -172,7 +172,7 @@ ApplicationWindow {
 
     // func
     function getDayTitle(day) {
-        const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        const weekDays = [qsTr("Monday"), qsTr("Tuesday"), qsTr("Wednesday"), qsTr("Thursday"), qsTr("Friday"), qsTr("Saturday"), qsTr("Sunday")]
 
         if (day.date) {
             // 日期模式
@@ -186,15 +186,15 @@ ApplicationWindow {
             const weeks = day.weeks
 
             if (weeks === "all") {
-                return `${dayName} (All Weeks)`
+                return qsTr("%1 (All Weeks)").arg(dayName)
             } else if (typeof weeks === "number") {
-                return `${dayName} (Cycle: ${weeks})`
+                return qsTr("%1 (Cycle: %2)").arg(dayName).arg(weeks)
             } else if (Array.isArray(weeks)) {
-                return `${dayName} (Weeks: ${weeks.join(",")})`
+                return qsTr("%1 (Weeks: %2)").arg(dayName).arg(weeks.join(","))
             }
         }
 
-        return "Unknown"
+        return qsTr("Unknown")
     }
 
     Frame {
@@ -210,7 +210,7 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             highlighted: false
-            text: "Save"
+            text: qsTr("Save")
             onClicked: AppCentral.scheduleEditor.save()
         }
     }

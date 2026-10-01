@@ -90,6 +90,9 @@ weather.keys.caiyun.token
   API Key 限额）；错误体 code 401/403→auth、402/429→quota；`metadata.attributions` 需随数据展示
   （设置页归属卡承载）。
 - **华风爱科**：`openapi.weathercn.com`（AccuWeather 风格 PascalCase，双单位）；
+  鉴权走 URL 参数 `apikey`（网关为 Kong key-auth：文档所写 X-Gw-API-Key 头实测
+  401 未实现；apikey 头能过网关但后端业务不读该头，400 "Apikey invalid."，
+  仅查询串里的 apikey 能通到业务层）；
   `/locations/v1/cities/translate|geoposition/search.json`、`/currentconditions/v1/{key}.json`、
   `/forecasts/v1/daily/5day/{key}.json`、`/alerts/v1/{key}.json`（数组，无预警时 `[]`）。
 - **彩云**：`api.caiyunapp.com/v2.6/{token}/{lon},{lat}/weather?alert=true&dailysteps=3&hourlysteps=24`

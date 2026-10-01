@@ -223,6 +223,47 @@ C++ 实现全部在同步区外；本节登记**上游同步区改动 2 处**（
 `Settings`、`weather` 九个 context；en_US 中文源条目给出英文译文、纯英文源条目回退，
 it/lzh/ta 暂空回退源文），`.qm` 已用 lrelease 重新生成（2026-10-01）。
 
+## 改动 13：扩展功能三修复（2026-10-01）
+
+用户反馈的三个问题（点名操作无反馈 / 名单列表位置 / 天气不刷新），涉及改动 12 的
+两个新增文件与既有 `widgets/weather.qml`。
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 13.1 | `ClassWidgets/pages/settings/Extensions/RollCall.qml`（改动 12.5 的增量） | ① **操作反馈**：导入 TXT / 手动添加 / 清空 / 改名 / 权重提交 / 删除的结果由原来只写「手动添加」卡片描述行（Caption 小字，长页面里易被忽略）改为 `floatLayer.createInfoBar(...)` 浮层（成功 4s 自动关闭，失败以 Error 配色醒目弹出）；文案全部复用本页既有 `.ts` 条目，零新增可翻译字符串；② **名单列表**：逐行改名/权重/删除的 `Repeater` 从「手动添加」之后移到「重复策略」**下方**，并补列表段标题行（「名单」+ 右侧 `共 %1 人`）与空名单引导行，行标题带 `序号.` 前缀 |
+| 13.2 | `widgets/weather.qml` | 新增 `onBackendChanged`（`WidgetLoader` 在 `Loader.Ready` 后才注入 backend，晚于本项 `Component.onCompleted`，此前首次拉取要等 `cityJson` 二次变化才触发）与 `Connections.onConfigChanged`（数据源/凭据变更后立即重读 `weatherData()`，反映新源的 `unconfigured` 等解释态）；拉取逻辑抽为 `requestFromBackend()` 供两处复用 |
+| 13.3 | `ClassWidgets/pages/settings/Extensions/Weather.qml`（改动 12.4 的增量） | 数据源切换、凭据（key/host）提交、城市选定三处均调用 `AppCentral.weather.applyConfigChange()`，改动即时生效（原来切源后要等组件自身 request 或 60s 轮询） |
+
+配套 C++ 改动（同步区外，登记供追溯）：`WeatherService::start()` 增加启动即拉取
+（读 `weather.city` 登记活动城市并 `fetchNow`，不再依赖 QML 组件的加载时序）；
+`applyConfigChange()` 先把 `weather.city` 并入活动城市再逐个 `manual` 重拉，并新增
+`configChanged()` 信号供消费者刷新解释态；新增私有辅助 `configuredCity()`。
+`scripts/build-installer.ps1` 的 ISCC 定位增加本机 D 盘候选路径；版本号升至 2.1.0.2。
+
+## 改动 14：随机点名 TXT 导入大名单内存暴涨/假死修复（2026-10-01）
+
+用户反馈：名单人数较多时经 TXT 导入后内存持续走高、软件整体无响应卡死。
+
+**根因**：导入按「解析结果逐名 `addName`」合入。每次 `addName` 都会
+`ConfigStore::set` → 整树 `dataChanged` → 设置页 `Repeater`（模型绑定
+`Configs.data.extensions.roll_call.names`）全量重建每人一张 `SettingCard`，并
+整份 `configs.json` 落盘；导入 N 人到现有 M 人名单是 O(N·(M+N)) 次 QML 委托
+创建与 N 次全量磁盘写。整个循环还在同一事件循环回合内执行，QML 延迟销毁与
+GC 无从运行 —— 被替换的旧委托持续堆积，内存随导入线性攀升直至卡死/OOM。
+班级规模（几十人）下每轮重建量小，问题直到大名单才暴露。
+
+**修复**：
+
+| # | 文件 | 改动 |
+|---|---|---|
+| 14.1 | `src/core/extensions/RollCallService.{h,cpp}`（同步区外；改动 12 配套 C++ 的增量） | 新增 `Q_INVOKABLE int mergeNames(const QVariantList &entries)`：`importNamesFromUrl` 解析结果的批量写入口——一次完成存量/批内去重（空名/重名跳过）与权重缺省 0、钳位 [-100,100]，单次写回 + 单次 `save()` + 一次 `namesChanged`，返回实际新增人数；无新增时不产生写入与信号。`addName`/`updateName`/`removeName` 等单条编辑语义不变 |
+| 14.2 | `ClassWidgets/pages/settings/Extensions/RollCall.qml`（改动 12.5/13.1 的增量） | `importFromFile` 改为「`importNamesFromUrl` 解析一次 + `mergeNames` 合并一次」，替代原先逐名 `addName` 的循环；「导入完成：新增 x 人，跳过重名 y 人」提示文案与语义不变 |
+
+**验证**：临时测试工程（仓库外）直连 `ConfigStore` + `RollCallService` 断言 22 项
+全过——5000 人批量合入仅 1 次 `dataChanged`/`namesChanged`（18 ms，旧逐名路径为
+5000 次）；存量重名/批内重名/空名/裸字符串/权重越界钳位、BOM/CRLF/空行/文件内
+去重解析均符合契约；20000 行 TXT 解析 + 合入 70 ms。
+
 ## 修改申请流程
 
 1. 尽量不动 QML：能由 C++ 宿主、部署脚本或 vendored 副本解决的，不改上游文件；

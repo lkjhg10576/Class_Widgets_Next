@@ -5,8 +5,9 @@
 class ConfigStore;
 
 // 华风爱科数据源（https://openapi.weathercn.com，AccuWeather 风格 PascalCase
-// 响应 + Metric/Imperial 双单位）。鉴权用 API Key（X-Gw-API-Key 头，避免进
-// URL 日志）。fetch 内部聚合 currentconditions + 5day forecasts + alerts 三
+// 响应 + Metric/Imperial 双单位）。鉴权用 URL 参数 apikey（实测后端业务只读
+// 查询串里的 apikey：走 apikey 头能过 Kong 网关但后端报 400，走文档所写的
+// X-Gw-API-Key 头则连网关都不认）。fetch 内部聚合 currentconditions + 5day forecasts + alerts 三
 // 请求后一次 fetchFinished；预警请求失败可降级。
 // 城市定位：搜索走 /locations/v1/cities/translate；城市来自其他源时用
 // geoposition 由经纬度惰性解析 Location Key（会话内缓存）；温度取 Metric，
@@ -26,7 +27,6 @@ public:
 private:
     QString key() const;
     QUrl apiUrl(const QString &path, const QUrlQuery &query) const;
-    std::list<std::pair<QString, QString>> authHeader() const;
     void resolveKeyAndFetch(const CityInfo &city);
     void fetchWeather(const CityInfo &city, const QString &locationKey);
     void handleFetchResponse(const QString &cityId, int which, const QJsonDocument &doc,

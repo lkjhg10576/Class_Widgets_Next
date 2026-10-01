@@ -95,7 +95,7 @@ Clip {
                 id: title
                 width: parent.width
                 typography: Typography.BodyStrong
-                text: "课程表（1）"
+                text: qsTr("课程表（1）")
             }
             Text {
                 id: description

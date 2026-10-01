@@ -36,14 +36,14 @@ bool WeathercnProvider::isConfigured() const
 
 QUrl WeathercnProvider::apiUrl(const QString &path, const QUrlQuery &query) const
 {
+    // 鉴权只能走 URL 参数 apikey：Kong 网关层认 apikey 头，但实测后端业务
+    // 不读该头（400 "Apikey invalid."），仅查询串里的 apikey 能通到业务层
+    // （文档所写 X-Gw-API-Key 头则连网关都不认，401）。
     QUrl url(QLatin1String(kBase) + path);
-    url.setQuery(query);
+    QUrlQuery full(query);
+    full.addQueryItem(QStringLiteral("apikey"), key());
+    url.setQuery(full);
     return url;
-}
-
-std::list<std::pair<QString, QString>> WeathercnProvider::authHeader() const
-{
-    return { { QStringLiteral("X-Gw-API-Key"), key() } };
 }
 
 void WeathercnProvider::searchCity(const QString &keyword)
@@ -58,7 +58,7 @@ void WeathercnProvider::searchCity(const QString &keyword)
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("q"), trimmed);
     query.addQueryItem(QStringLiteral("language"), QStringLiteral("zh-cn"));
-    getJson(apiUrl(QStringLiteral("/locations/v1/cities/translate"), query), authHeader(),
+    getJson(apiUrl(QStringLiteral("/locations/v1/cities/translate"), query), {},
             cwn::weather::kSearchTimeoutMs,
             [this](const QJsonDocument &doc, const QString &errorKind, int) {
                 QVariantList cities;
@@ -120,7 +120,7 @@ void WeathercnProvider::resolveKeyAndFetch(const CityInfo &city)
                                     QString::number(city.longitude, 'f', 3)));
     query.addQueryItem(QStringLiteral("language"), QStringLiteral("zh-cn"));
     getJson(apiUrl(QStringLiteral("/locations/v1/cities/geoposition/search.json"), query),
-            authHeader(), cwn::weather::kSearchTimeoutMs,
+            {}, cwn::weather::kSearchTimeoutMs,
             [this, city](const QJsonDocument &doc, const QString &errorKind, int) {
                 QString kind = errorKind;
                 QString locationKey;
@@ -151,7 +151,7 @@ void WeathercnProvider::fetchWeather(const CityInfo &city, const QString &locati
             query.addQueryItem(QStringLiteral("details"), QStringLiteral("true"));
         if (which == 1)
             query.addQueryItem(QStringLiteral("metric"), QStringLiteral("true"));
-        getJson(apiUrl(path, query), authHeader(), cwn::weather::kFetchTimeoutMs,
+        getJson(apiUrl(path, query), {}, cwn::weather::kFetchTimeoutMs,
                 [this, cityId, which](const QJsonDocument &doc, const QString &errorKind, int) {
                     handleFetchResponse(cityId, which, doc, errorKind);
                 });
@@ -332,7 +332,7 @@ void WeathercnProvider::testConnection()
     // 用北京 Location Key（101924）作探针
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("language"), QStringLiteral("zh-cn"));
-    getJson(apiUrl(QStringLiteral("/currentconditions/v1/101924.json"), query), authHeader(),
+    getJson(apiUrl(QStringLiteral("/currentconditions/v1/101924.json"), query), {},
             cwn::weather::kFetchTimeoutMs,
             [this](const QJsonDocument &doc, const QString &errorKind, int) {
                 if (!errorKind.isEmpty()) {

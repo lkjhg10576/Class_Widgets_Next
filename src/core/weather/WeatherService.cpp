@@ -90,6 +90,14 @@ void WeatherService::start()
 {
     if (!m_pollTimer.isActive())
         m_pollTimer.start();
+    // 启动即拉一次：组件侧 request() 依赖 QML 加载时序（Loader 异步、城市绑定
+    // 重算），首个 60s 唤醒前可能一直是空白。此处按 weather.city 主动登记活动
+    // 城市并拉取，软件一启动就有数据；组件随后 request() 命中的是新鲜缓存，
+    // 不会重复请求（isFresh 短路）。
+    if (const auto city = configuredCity(); city.isValid()) {
+        m_activeCities.insert(city.cityId, city);
+        fetchNow(city, /*manual=*/false);
+    }
 }
 
 void WeatherService::onPollTick()
@@ -152,9 +160,16 @@ void WeatherService::refresh(const QString &cityJson)
 void WeatherService::applyConfigChange()
 {
     m_cooldownUntil.clear();
-    // 数据源/密钥变更后立即按新源重拉所有活动城市（manual 跳过过期判定与冷却）
+    // 数据源/密钥变更后立即按新源重拉：先把 weather.city 登记进活动集合
+    // （组件可能尚未 request 过；或是刚在设置页选好城市的首次拉取），
+    // 再对其余活动城市用 manual 跳过过期判定与冷却，逐个重拉
+    if (const auto city = configuredCity(); city.isValid())
+        m_activeCities.insert(city.cityId, city);
     for (auto it = m_activeCities.constBegin(); it != m_activeCities.constEnd(); ++it)
         fetchNow(it.value(), /*manual=*/true);
+    // 通知消费者重读 weatherData()：新源缺凭据（无拉取）等场景下界面也要
+    // 立刻从旧源的展示态切到 unconfigured，不能等下一次拉取或 60s 轮询
+    emit configChanged();
 }
 
 void WeatherService::testConnection()
@@ -219,6 +234,16 @@ WeatherService::CityInfo WeatherService::cityFromJson(const QString &cityJson)
     if (!city.isValid())
         return {};
     return city;
+}
+
+WeatherService::CityInfo WeatherService::configuredCity() const
+{
+    if (!m_configs)
+        return {};
+    const auto value = m_configs->value(QStringLiteral("weather.city"));
+    if (!value.has_value() || !value->isString())
+        return {};
+    return cityFromJson(value->toString());
 }
 
 QString WeatherService::configuredProviderId() const

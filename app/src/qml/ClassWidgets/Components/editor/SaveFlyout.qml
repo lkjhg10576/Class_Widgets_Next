@@ -48,7 +48,7 @@ Item {
             Button {
                 highlighted: true
                 icon.name: "ic_fluent_save_20_regular"
-                text: "Save"
+                text: qsTr("Save")
                 onClicked: {
                     let result = AppCentral.scheduleManager.save()
                     if (result) {

@@ -48,15 +48,34 @@ Widget {
         weatherInfo = (backend && cityJson.length > 0) ? backend.weatherData(cityJson) : null
     }
 
-    onCityJsonChanged: {
+    function requestFromBackend() {
         if (backend && cityJson.length > 0)
             backend.request(cityJson) // 缺数据或已过期才真正发起拉取
+    }
+
+    // backend 由 WidgetLoader 在 Loader.Ready 之后注入（晚于本项 Component.onCompleted），
+    // 且天气挂在 Loader 异步加载的小组件上：backend 注入/城市变化都可能发生在
+    // 首次 request 之前。这里补一次"注入即拉取"，保证组件挂载即有数据流；
+    // 服务启动时（WeatherService::start）已主动拉过 weather.city，命中缓存则
+    // request() 因 isFresh 短路，不会重复请求。
+    onBackendChanged: {
+        requestFromBackend()
+        reload()
+    }
+
+    onCityJsonChanged: {
+        requestFromBackend()
         reload()
     }
 
     Connections {
         target: backend
         function onWeatherUpdated(cityId) {
+            root.reload()
+        }
+        // 数据源/凭据变更：服务已按新源重拉，同时立即重读一次 weatherData()
+        // 反映解释态（如新源缺凭据 → unconfigured），不等回包
+        function onConfigChanged() {
             root.reload()
         }
     }

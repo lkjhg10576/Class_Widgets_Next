@@ -17,7 +17,7 @@ Widget {
             icon: "ic_fluent_symbols_20_regular"
         }
         Button {
-            text: "Open"
+            text: qsTr("Open")
             onClicked: backend.sayHello(settings.name)
         }
         // Title {

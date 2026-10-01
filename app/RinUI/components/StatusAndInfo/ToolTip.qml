@@ -9,7 +9,7 @@ import "../../components"
 ToolTip {
     id: tooltip
     timeout: -1  // 显示时长
-    text: "Tooltip"
+    text: qsTr("Tooltip")
 
     // 公共属性 / Common Properties
     property color backgroundColor: Theme.currentTheme.colors.backgroundAcrylicColor

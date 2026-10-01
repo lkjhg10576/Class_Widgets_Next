@@ -15,7 +15,7 @@ ColumnLayout {
 
     Text {
         typography: Typography.BodyStrong
-        text: "Dashboard"
+        text: qsTr("Dashboard")
     }
 
     Frame {
@@ -25,7 +25,7 @@ ColumnLayout {
             Layout.topMargin: 12
             Layout.bottomMargin: 12
             Text {
-                text: "Logs"
+                text: qsTr("Logs")
                 typography: Typography.BodyStrong
             }
             // 过滤栏：搜索框 + 级别下拉
@@ -46,7 +46,7 @@ ColumnLayout {
                     textRole: "text"
                     valueRole: "value"
                     model: ListModel {
-                        ListElement { text: "All Levels"; value: "" }
+                        ListElement { text: qsTr("All Levels"); value: "" }
                         ListElement { text: "DEBUG"; value: "DEBUG" }
                         ListElement { text: "INFO"; value: "INFO" }
                         ListElement { text: "WARNING"; value: "WARNING" }
@@ -160,7 +160,7 @@ ColumnLayout {
                                     }))) {
                                         floatLayer.createInfoBar({
                                             severity: Severity.Success,
-                                            text: "Copied to clipboard!",
+                                            text: qsTr("Copied to clipboard!"),
                                         })
                                     }
                                 }
@@ -222,7 +222,7 @@ ColumnLayout {
     }
 
     Expander {
-        text: "Runtime Variables"
+        text: qsTr("Runtime Variables")
         Layout.fillWidth: true
         ColumnLayout {
             Layout.fillWidth: true
@@ -242,7 +242,7 @@ ColumnLayout {
                 // }
                 // reload
                 Button {
-                    text: "Reload Schedule File"
+                    text: qsTr("Reload Schedule File")
                     onClicked: AppCentral.scheduleManager.reload()
                 }
             }
@@ -250,7 +250,7 @@ ColumnLayout {
             // ScheduleRuntime
             Text {
                 typography: Typography.BodyStrong
-                text: "ScheduleRuntime"
+                text: qsTr("ScheduleRuntime")
             }
             VarStatus {
                 Layout.fillWidth: true

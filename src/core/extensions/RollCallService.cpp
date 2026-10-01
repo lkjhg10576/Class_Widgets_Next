@@ -148,6 +148,44 @@ QVariantList RollCallService::importNamesFromUrl(const QUrl &url)
 
 // ─────────────────────────── 名单编辑 ───────────────────────────
 
+int RollCallService::mergeNames(const QVariantList &entries)
+{
+    if (!m_configs || entries.isEmpty())
+        return 0;
+
+    QVariantList names = readNames();
+    // 去重集合一次建好（含批内新名），避免每个名字对全名单做线性扫描
+    QSet<QString> existing;
+    existing.reserve(names.size() + entries.size());
+    for (const QVariant &entry : names)
+        existing.insert(entry.toMap().value(QStringLiteral("name")).toString());
+
+    int added = 0;
+    for (const QVariant &entry : entries) {
+        const QVariantMap map = entry.toMap();
+        // 兼容两种形状：importNamesFromUrl 的 {name, weight} 映射与裸字符串
+        const QString name = (map.isEmpty()
+                                  ? entry.toString()
+                                  : map.value(QStringLiteral("name")).toString())
+                                 .trimmed();
+        if (name.isEmpty() || existing.contains(name))
+            continue; // 空名与重名（含批内）跳过
+        existing.insert(name);
+
+        QVariantMap item;
+        item.insert(QStringLiteral("name"), name);
+        item.insert(QStringLiteral("weight"),
+                    qBound(-100, map.value(QStringLiteral("weight")).toInt(), 100));
+        names.append(item);
+        ++added;
+    }
+
+    // 单次写回 + 落盘 + namesChanged（无新增时不产生任何写入与信号）
+    if (added > 0)
+        writeNames(names);
+    return added;
+}
+
 bool RollCallService::addName(const QString &name)
 {
     const QString trimmed = name.trimmed();

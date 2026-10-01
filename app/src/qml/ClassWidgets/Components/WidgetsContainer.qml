@@ -289,7 +289,7 @@ Column {
                     onVisibleChanged: widgetsContainer.menuVisible = visible;
                     MenuItem {
                         icon.name: "ic_fluent_info_20_regular"
-                        text: qsTr("Edit ") + "\"" + model.name + "\""
+                        text: qsTr("Edit \"%1\"").arg(model.name)
                         onTriggered: {
                             if (model.settingsQml) {
                                 widgetsContainer.editMode = true
@@ -380,6 +380,7 @@ Column {
     // hide/anchor/偏移随 Column 总尺寸自动跟随（calcX/calcY 读的就是本 Column）。
     SchedulePeekBar {
         id: schedulePeekBar // objectName 已在组件内设置，C++ 蒙版 findChild 依赖
+        alignWidth: widgetsFlow.width // 条宽与上方小组件行对齐（宽度变化走下方 Connections 触发蒙版重算）
     }
 
     // [CWN-EXT-D3] 几何联动：速览条显隐/高宽变化（含弹出动画逐帧高度）必须驱动

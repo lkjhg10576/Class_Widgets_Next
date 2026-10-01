@@ -78,6 +78,10 @@ FluentPage {
         }))
         root.searchResults = []
         searchField.text = ""
+        // 选好城市后立即按当前数据源拉取一次（组件存在时 request 亦会触发，
+        // 服务侧 fetchNow 的在途去重保证不会重复发起）
+        if (AppCentral.weather)
+            AppCentral.weather.applyConfigChange()
     }
 
     Connections {
@@ -191,6 +195,11 @@ FluentPage {
                         Component.onCompleted: syncFromConfig()
                         onEditingFinished: {
                             Configs.set("weather.keys." + root.providerId + ".key", text)
+                            // 凭据就位后立即按当前源拉取一次（否则要等 60s 轮询
+                            // 或重启才生效）；服务侧对本源无城市活动时也会登记
+                            // weather.city，保证组件未 request 过也能拿到数据
+                            if (AppCentral.weather)
+                                AppCentral.weather.applyConfigChange()
                         }
                     }
 
@@ -203,7 +212,11 @@ FluentPage {
                             text = root.readKey("qweather", "host")
                         }
                         Component.onCompleted: syncFromConfig()
-                        onEditingFinished: Configs.set("weather.keys.qweather.host", text.trim())
+                        onEditingFinished: {
+                            Configs.set("weather.keys.qweather.host", text.trim())
+                            if (AppCentral.weather)
+                                AppCentral.weather.applyConfigChange()
+                        }
                     }
                 }
 

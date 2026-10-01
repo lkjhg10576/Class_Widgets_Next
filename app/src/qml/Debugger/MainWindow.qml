@@ -6,7 +6,7 @@ import RinUI
 
 ApplicationWindow {
     id: mainWindow
-    title: "Class Widgets Debugger"
+    title: qsTr("Class Widgets Debugger")
     // x: Screen.width/2 - width/2
     // y:600
     width: 900
@@ -43,14 +43,14 @@ ApplicationWindow {
 
     FluentPage {
         anchors.fill: parent
-        title: "Class Widgets Debugger"
+        title: qsTr("Class Widgets Debugger")
 
         ColumnLayout {
             Layout.alignment: Qt.AlignHCenter
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 typography: Typography.Subtitle
-                text: "Current Time: " + AppCentral.scheduleRuntime.currentTime
+                text: qsTr("Current Time: ") + AppCentral.scheduleRuntime.currentTime
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter
@@ -59,8 +59,8 @@ ApplicationWindow {
                 typography: Typography.Caption
                 Layout.fillWidth: true
                 text: (
-                    "Current Date: " + date.year + "-" + date.month + "-" + date.day + "\n" +
-                    "(TimeInformation from Class Widgets -> AppCentral.scheduleRuntime)"
+                    qsTr("Current Date: ") + date.year + "-" + date.month + "-" + date.day + "\n" +
+                    qsTr("(TimeInformation from Class Widgets -> AppCentral.scheduleRuntime)")
                 )
             }
         }

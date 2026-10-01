@@ -76,8 +76,8 @@ ColumnLayout {
 
             result.push({
                 kind: "icons",
-                title: "欢迎光临 Class Widgets 插件广场",
-                subtitle: "使用插件和主题让课程表如虎添翼",
+                title: qsTr("欢迎光临 Class Widgets 插件广场"),
+                subtitle: qsTr("使用插件和主题让课程表如虎添翼"),
                 plugins: picked
             })
         }
@@ -86,7 +86,7 @@ ColumnLayout {
             ? banners.slice(0, 2)
             : [{
                 image: PlazaBridge.baseUrl + "/BannerWelcome.png",
-                desc: "精选扩展与主题，提升你的使用体验。"
+                desc: qsTr("精选扩展与主题，提升你的使用体验。")
             }]
 
         for (var i = 0; i < imgs.length; i++) {

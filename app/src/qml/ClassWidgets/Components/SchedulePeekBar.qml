@@ -3,7 +3,10 @@ import RinUI
 
 // 课表速览条（扩展 classwidgets.ext.schedulePeek，见 extensions-feature-plan.md §7 阶段 D）。
 // 挂在 WidgetsContainer 根 Column 中、widgetsFlow 之后：单行显示当天课程"缩写格"，
-// 相邻两节课间隔 ≥ 阈值时插分组竖线，进行中课程橙色圆底、下一节绿色圆底。
+// 相邻两节课间隔 ≥ 阈值时插分组竖线，进行中课程橙色圆底；绿色"下一节"圆底仅在
+// 课间/活动（非上课）时段点亮，上课期间下一节保持普通样式。
+// 条宽与上方小组件行（widgetsFlow）对齐：alignWidth 由 WidgetsContainer 注入，
+// 内容本身更宽（多课节 + 少小组件）时以内容宽兜底，避免格子溢出圆角底。
 //
 // 数据来源与字段（全部现成，零新增 C++ 接口）：
 // - AppCentral.scheduleRuntime.currentDayEntries：当天全部条目（含 break/activity、
@@ -166,6 +169,8 @@ Item {
         // 进行中：currentEntry 恰为 class 条目（id 为 string，见 normalizeEntry）
         const cur = rt.currentEntry
         const currentId = (cur && cur.type === "class") ? String(cur.id || "") : ""
+        // 是否处于上课中：决定"下一节"绿底是否点亮（课间/活动时才高亮）
+        const inClassNow = currentId !== "" || rt.currentStatus === "class"
 
         let endedCount = 0
         let futureCount = 0
@@ -182,18 +187,21 @@ Item {
 
         // 竖线插在"相邻两节 class"之间：间隔 = 后节 start − 前节 end 的实际分钟数
         // （其间 break/activity 不单独成格，时间差天然包含它们）≥ 阈值才插；
-        // 普通 10 分钟课间不插（产品决策 §11-Q2）
+        // 普通 10 分钟课间不插（产品决策 §11-Q2）。sep 格必须显式 highlight:"none"：
+        // delegate 的白字判定按 highlight !== "none" 走，字段缺省（undefined）会让
+        // 竖线误入白字分支，绿圆底判定也只认显式值。
         const gap = schedulePeekBar.splitGapMinutes
         const cells = []
         for (let i = 0; i < classes.length; i++) {
             const c = classes[i]
             if (i > 0 && c.start - classes[i - 1].end >= gap)
-                cells.push({ kind: "sep" })
+                cells.push({ kind: "sep", highlight: "none" })
+            // 绿色圆底只标"课间/活动时段的下一节"；上课期间下一节正常显示
             cells.push({
                 kind: "cell",
                 text: schedulePeekBar.abbrevOf(c.entry, subjects),
                 highlight: c.id && c.id === currentId ? "current"
-                    : (c.id && c.id === nextId ? "next" : "none"),
+                    : (!inClassNow && c.id && c.id === nextId ? "next" : "none"),
             })
         }
 
@@ -202,7 +210,7 @@ Item {
             classCount: classes.length,
             endedCount: endedCount,
             futureCount: futureCount,
-            inClass: currentId !== "" || rt.currentStatus === "class",
+            inClass: inClassNow,
         }
     }
 
@@ -227,7 +235,10 @@ Item {
     // 滑出（自上方 −8px，配 clip 逐帧露出）+ 淡入
     clip: true
 
-    width: barBackground.implicitWidth
+    // 宽度与上方小组件行对齐（alignWidth 由 WidgetsContainer 绑到 widgetsFlow.width）；
+    // 取 max 是防内容溢出：课节数多而小组件少时圆角底至少包住全部格子
+    property real alignWidth: 0
+    width: Math.max(barBackground.implicitWidth, alignWidth)
     height: barBackground.implicitHeight
 
     // 视觉层：只动它自己的 y/opacity，不影响 Column 布局几何（蒙版取的是
@@ -274,9 +285,10 @@ Item {
                   width: modelData.kind === "sep" ? 1 : schedulePeekBar.cellSize
                   height: schedulePeekBar.cellSize
 
-                  // 高亮圆形底叠于单字之下
+                  // 高亮圆形底叠于单字之下（只认两种显式高亮值，字段缺失不画）
                   Rectangle {
-                      visible: cell.modelData.highlight !== "none"
+                      visible: cell.modelData.highlight === "current"
+                          || cell.modelData.highlight === "next"
                       width: schedulePeekBar.cellSize - 4
                       height: width
                       radius: width / 2

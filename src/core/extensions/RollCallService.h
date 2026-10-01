@@ -38,10 +38,20 @@ public:
     Q_INVOKABLE QVariantList draw(int count);
 
     // 读 UTF-8 txt（每行一个名字；跳过空白行、文件内去重、剥 BOM），返回解析
-    // 出的名单 [{name, weight:0}]。无副作用：导入结果由设置页合并去重后经
-    // addName 写回 —— 服务保持纯解析，避免选错文件直接污染名单。
+    // 出的名单 [{name, weight:0}]。无副作用：解析结果由设置页经下面的
+    // mergeNames 批量合并写回 —— 服务保持纯解析，避免选错文件直接污染名单。
     // QML 无法读本地文件，导入必须走 C++（§6 C1）。
     Q_INVOKABLE QVariantList importNamesFromUrl(const QUrl &url);
+
+    // 批量合并名单（TXT 导入路径的写入口：importNamesFromUrl 解析结果原样传入）。
+    // entries 元素接受 {name, weight} 映射（解析结果形状）或裸字符串；与现有名单
+    // 及批内去重（空名/重名跳过），weight 缺省 0、越界钳位 [-100,100]；
+    // added > 0 时单次写回 + 落盘 + 一次 namesChanged，返回实际新增人数。
+    // 为什么必须批量：逐名 addName 会让每次合入都触发整树 dataChanged → 设置页
+    // Repeater 全量重建（每人一张重卡片）+ 整份 configs.json 落盘，导入 N 人到
+    // 现有 M 人名单是 O(N·(M+N)) 次委托创建与 N 次全量磁盘写，大名单导入时
+    // 内存暴涨、界面假死。批量入口把写回/落盘/信号各收敛为一次。
+    Q_INVOKABLE int mergeNames(const QVariantList &entries);
 
     // 名单编辑：全部写回 extensions.roll_call.names 并立即 save()
     // （用户显式操作，对齐 ExtensionManager::setEnabled 的即时落盘语义）

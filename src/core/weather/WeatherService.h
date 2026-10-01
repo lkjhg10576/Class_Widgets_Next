@@ -47,7 +47,8 @@ public:
     // BuiltinWidgets 注册表中的 widget_id；AppCentral 以此为天气组件挂专属 backend
     static QString widgetTypeId();
 
-    // AppCentral 在 configs->load() 之后调用：启动 60s 轮询 tick
+    // AppCentral 在 configs->load() 之后调用：启动 60s 轮询 tick，并立即
+    // 按 weather.city 拉取一次（不等组件 request、不等首个 60s 唤醒）
     void start();
 
     // 停止 60s 轮询 tick（extensions-feature-plan §5 B4：天气扩展关闭时调用）。
@@ -64,7 +65,8 @@ public:
     Q_INVOKABLE void request(const QString &cityJson);   // 缺数据或已过期才拉取
     Q_INVOKABLE void refresh(const QString &cityJson);   // 忽略过期时间强制拉取
     Q_INVOKABLE QVariantMap weatherData(const QString &cityJson) const;
-    // 设置页在数据源/密钥变更后调用：清冷却并立即按新源重拉所有活动城市
+    // 设置页在数据源/密钥变更后调用：清冷却并把 weather.city 登记为活动城市后
+    // 立即按新源重拉一次（组件未 request 过也能生效）
     Q_INVOKABLE void applyConfigChange();
     // 设置页"测试连接"：对当前源发一次最小请求 → connectionTestFinished
     Q_INVOKABLE void testConnection();
@@ -72,6 +74,10 @@ public:
 signals:
     void citySearchFinished(const QVariantList &cities);
     void weatherUpdated(const QString &cityId);
+    // 数据源/密钥等配置变更后发出（applyConfigChange）：快照本身可能未变，
+    // 但 weatherData() 的解释已变（如新源缺凭据 → unconfigured）——消费者收到
+    // 即重新读取 weatherData()，不必等下一次拉取
+    void configChanged();
     void busyChanged();
     void connectionTestFinished(bool ok, const QString &errorKind);
 
@@ -93,6 +99,8 @@ private:
     };
 
     static CityInfo cityFromJson(const QString &cityJson);
+    // 读全局配置 weather.city（JSON 字符串）并解析；未配置/坏数据返回无效 CityInfo
+    CityInfo configuredCity() const;
     QString configuredProviderId() const;
     WeatherProvider *currentProvider() const;
     void fetchNow(const CityInfo &city, bool manual);

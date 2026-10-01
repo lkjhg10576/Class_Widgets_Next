@@ -7,8 +7,8 @@ import ClassWidgets.Plugins
 SettingsLayout {
     SettingCard {
         Layout.fillWidth: true
-        title: "Name"
-        description: "Enter your name"
+        title: qsTr("Name")
+        description: qsTr("Enter your name")
 
         TextField {
             id: textField

@@ -23,7 +23,7 @@ Class Widgets Next 现状：内置小组件由 `src/core/BuiltinWidgets.cpp:37-1
 
 1. **天气**（迁移）——天气小组件移入扩展功能，不再以自带组件出现，可手动开关，在「扩展功能-天气」界面配置；
 2. **随机点名**（新增）——屏幕右上角可拖动点名按钮，展开点 1/2/3 名面板，居中结果窗口，txt 导入名单、增删改与权重（-100%~+100%）；
-3. **课表速览**（新增）——小组件下方弹出/常驻的当日课表缩写条，当前课橙色圆形高亮、下一课绿色圆形高亮。
+3. **课表速览**（新增）——小组件下方弹出/常驻的当日课表缩写条（条宽与小组件行对齐），当前课橙色圆形高亮；下一课仅课间/活动等非上课时段绿色圆形高亮，上课期间保持普通样式。
 
 ## 2. 总体架构
 
@@ -228,8 +228,8 @@ Class Widgets Next 现状：内置小组件由 `src/core/BuiltinWidgets.cpp:37-1
 
 - **数据映射**（全部现成，零新增 C++ 接口）：`AppCentral.scheduleRuntime.currentDayEntries`（含 break/activity、已应用 override）过滤 `type=="class"` 按时间排序；每节缩写规则：`simplifiedName` 非空取其首字、未设置取课程全名首字（经 `subjects` 按 `subjectId` 查找；参照 `widgets/upcomingActivities.qml:73-85` 缩写先例）。
 - **分组竖线**：相邻两节课的间隔（前一节 end 到后一节 start 的实际时长，含其间课间/活动条目）≥ 阈值 → 插 `|`；阈值键 `extensions.schedule_peek.split_gap_minutes`（默认 15，设置页 5~60 可调）。普通 10 分钟课间不插。
-- **高亮**：当前进行中的课（`currentEntry.id` 命中）→ **橙色圆形背景**；下一节即将开始的课（`currentDayEntries` 中第一个 start > now 的 class 条目）→ **绿色圆形背景**。每格单字，圆形背景叠于字下。
-- 渲染：Row 单行（如「语 地 生 数 | 化 | 英 物 历 政 | 语 化」），格间距均匀，竖线为细间隔；与 Column 左对齐（细节实现时按视觉微调）。
+- **高亮**：当前进行中的课（`currentEntry.id` 命中）→ **橙色圆形背景**；下一节即将开始的课（`currentDayEntries` 中第一个 start > now 的 class 条目）→ **绿色圆形背景**，但仅在课间/活动（`currentStatus !== "class"`）时点亮——上课期间下一节保持普通样式。每格单字，圆形背景叠于字下。
+- 渲染：Row 单行（如「语 地 生 数 | 化 | 英 物 历 政 | 语 化」），格间距均匀，竖线为细间隔；条宽与 widgetsFlow 小组件行对齐、格子居中（内容更宽时以内容宽兜底，避免格子溢出圆角底）。
 
 ### D2 显隐状态机（难度 中 · 规模 S）
 
