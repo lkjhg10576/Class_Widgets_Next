@@ -7,6 +7,10 @@ import RinUI
 // 课间/活动（非上课）时段点亮，上课期间下一节保持普通样式。
 // 条宽与上方小组件行（widgetsFlow）对齐：alignWidth 由 WidgetsContainer 注入，
 // 内容本身更宽（多课节 + 少小组件）时以内容宽兜底，避免格子溢出圆角底。
+// 外观/显隐与小组件联动（2026-10-01 修复，仅本文件，无上游文件改动）：
+// - 格径/字号/间距随 preferences.scale_factor 缩放，圆角/背景不透明度跟随
+//   preferences.widget_corner_radius / opacity（键与 Widget.qml:10,26 同源）；
+// - 小组件处于隐藏态（interactions.hide.state，含浮窗模式）时整条一并隐藏。
 //
 // 数据来源与字段（全部现成，零新增 C++ 接口）：
 // - AppCentral.scheduleRuntime.currentDayEntries：当天全部条目（含 break/activity、
@@ -31,9 +35,15 @@ Item {
     id: schedulePeekBar
     objectName: "schedulePeekBar"
 
-    // ── 外观常量（单行紧凑条：约 36px 高，宽度自适应内容） ──────────────
-    readonly property real cellSize: 26   // 单格直径（圆形高亮底同径）
-    readonly property real rowSpacing: 6  // 格间距（均匀）
+    // ── 外观常量（单行条：约 44px 高，宽度自适应内容） ──────────────
+    // 2026-10-01 修复：旧值（26px 格 / 14px 字 / 约 36px 高）字太小、条过窄，
+    // 现整体加宽一档（32px 格 / 18px 字）；scaleFactor 与 WidgetsContainer 的
+    // 小组件缩放同键，用户调「小组件外观-缩放」时本条同步放大/缩小，
+    // 与上方小组件行保持同一视觉比例（缩写字号取整，QFont::pixelSize 为整型）。
+    readonly property real scaleFactor: Configs.data.preferences.scale_factor || 1.0
+    readonly property real cellSize: 32 * scaleFactor   // 单格直径（圆形高亮底同径）
+    readonly property real rowSpacing: 8 * scaleFactor  // 格间距（均匀）
+    readonly property real fontSize: Math.round(18 * scaleFactor) // 缩写字号
 
     // 橙/绿按深浅主题微调，保证白字在其上可读（配色取法照 Widget.qml 的
     // Theme.isDark() 三元式先例）
@@ -216,13 +226,21 @@ Item {
 
     // ── 显隐状态机（D2） ─────────────────────────────────────
     // 两模式在当天无 class 条目（周末/空课表）时均隐藏；扩展开关关闭整条隐藏。
+    // 小组件隐藏态（widgetsHidden）是最高优先级的一路：hide.state 由 MainInterface
+    // 点击隐藏 / 自动隐藏任务（BuiltinTasks AutoHideTask）写入，小组件移出屏幕边缘
+    // 或收成浮窗时本条一并隐藏——修复前本条作为 Column 末项，隐藏时总有一截
+    // （top_center 锚点最明显）留在屏幕边缘，与"小组件已隐藏"的状态不一致。
+    // 注：不做 editMode 豁免——编辑态下容器几何由 calcY/calcX 接管，left/right
+    // 锚点在 hide 为真时依旧贴边，豁免反而会让残留问题回来；隐藏态一律隐藏。
     // auto（产品决策 §11-Q4）：下课瞬间弹出、进入上课条目即收起、课前/放学后隐藏。
     //   "课间全程可见"要求有下一节可上：futureCount ≥ 1 —— 若不加这条，最后一节
     //   结束后 currentEntry 为空（free 态），按"至少已结束一节且不在上课"仍会
     //   命中显示，与"放学后隐藏"矛盾；futureCount≥1 即"还没到放学"。
     // always：当天有课即常驻（含上课期间）。
+    readonly property bool widgetsHidden: Configs.data.interactions.hide.state
+
     readonly property bool shouldShow: {
-        if (!extEnabled || peekData.classCount === 0)
+        if (!extEnabled || widgetsHidden || peekData.classCount === 0)
             return false
         if (peekMode === "always")
             return true
@@ -256,16 +274,25 @@ Item {
         }
 
       // 半透明圆角底：保证悬浮在桌面上时文字可读（底色取法照
-      // ClassWidgets/Theme/components/Widget.qml:11-14 深浅主题先例）
+      // ClassWidgets/Theme/components/Widget.qml:11-14 深浅主题先例）。
+      // 圆角/不透明度跟随「小组件外观」设置（与 Widget.qml:10,26 同键）：
+      //   - radius = widget_corner_radius × scaleFactor——小组件经 loader.scale
+      //     缩放后视觉圆角同样被放大，这里同乘保持比例；再按条高一半封顶
+      //     （Rectangle 半径超过短边一半本就会被渲染器钳制，显式 min 保证跨
+      //     Qt 版本行为一致），默认 22px 圆角配 44px 条高即为胶囊形；
+      //   - opacity = preferences.opacity，与小组件背景同一明暗（文字不受影响）。
       Rectangle {
           id: barBackground
           anchors.fill: parent
-          implicitWidth: peekRow.implicitWidth + 16   // 左右各 8 内边距
-          implicitHeight: peekRow.implicitHeight + 10 // 上下各 5，整条约 36px
-          radius: 10
+          implicitWidth: peekRow.implicitWidth + 20 * schedulePeekBar.scaleFactor  // 左右各 10
+          implicitHeight: peekRow.implicitHeight + 12 * schedulePeekBar.scaleFactor // 上下各 6
+          radius: Math.min(
+              (Configs.data.preferences.widget_corner_radius || 0) * schedulePeekBar.scaleFactor,
+              height / 2)
           color: Theme.isDark() ? Qt.alpha("#1E1D22", 0.65) : Qt.alpha("#FBFAFF", 0.7)
           border.width: 1
           border.color: Qt.alpha(Theme.currentTheme.colors.textColor, 0.12)
+          opacity: Configs.data.preferences.opacity
       }
 
       Row {
@@ -289,7 +316,7 @@ Item {
                   Rectangle {
                       visible: cell.modelData.highlight === "current"
                           || cell.modelData.highlight === "next"
-                      width: schedulePeekBar.cellSize - 4
+                      width: schedulePeekBar.cellSize - 4 * schedulePeekBar.scaleFactor
                       height: width
                       radius: width / 2
                       anchors.centerIn: parent
@@ -301,10 +328,12 @@ Item {
                   Text {
                       anchors.centerIn: parent
                       visible: cell.modelData.kind !== "sep"
-                      text: cell.modelData.text
+                      // sep 格无 text 字段：显式兜底空串，避免对 QString 赋 undefined
+                      // 的 QML 告警（Text 在 sep 格本就不可见，此处仅消除日志噪音）
+                      text: cell.modelData.text || ""
                       font.family: AppCentral.getQFont(
                           Configs.data.preferences.font, Utils.fontFamily).family
-                      font.pixelSize: 14
+                      font.pixelSize: schedulePeekBar.fontSize
                       font.weight: Configs.data.preferences.font_weight || 600
                       // 高亮格用白字压在圆底上；普通格与竖线跟随主题文字色
                       color: cell.modelData.highlight !== "none"
