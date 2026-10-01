@@ -1,17 +1,32 @@
 cmake_minimum_required(VERSION 3.21)
 
 # ---- 版本段（M5 发布流水线）----
-# project(VERSION) 无法被命令行覆盖，故经缓存变量中转：
-# 本地构建用默认值 2.1.0.0；CI 发版时传 -DCWN_VERSION_OVERRIDE=x[.y[.z[.w]]]
-# 覆盖 project(VERSION) 与下方 configure_file 的 Version.h（格式校验在此完成，
-# project(VERSION) 只接受 1-4 段纯数字）。
-set(CWN_VERSION "2.1.0.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]]）")
+# project(VERSION) 无法被命令行覆盖，故经缓存变量 CWN_VERSION 中转，
+# 同步覆盖 project(VERSION) 与下方 configure_file 的 Version.h。
+# 版本号的来源，按优先级：
+#   1) CWN_VERSION_OVERRIDE —— 预留的手工覆盖入口（当前 CI 未使用）
+#   2) CWN_VERSION 缓存值 —— 缺省即下方默认值
+#   3) 无
+#
+# !! 换版本号必须走 scripts\build-installer.ps1（它会显式传 -DCWN_VERSION=<新版本>）。
+#    单独改下面这行的默认值，对已存在的 build/ 无效：CWN_VERSION 是 CACHE 变量，
+#    缓存里已有值时 set(... CACHE ...) 的新默认值会被静默忽略（实测：把默认值改成
+#    2.1.0.6 后不传 -D 重新配置，产出的仍是旧版本）。要清干净只能删 build/ 重配。
+#
+# CI（.github/workflows/build.yml）以 -SkipBuild 调用打包脚本，不参与本段配置，
+# 其安装器版本号同样取自下面的缺省值 —— 改版本号只需改这一处。
+set(CWN_VERSION "2.1.0.5" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
 if(CWN_VERSION_OVERRIDE)
-    if(NOT CWN_VERSION_OVERRIDE MATCHES "^[0-9]+(\\.[0-9]+){0,3}$")
-        message(FATAL_ERROR
-            "CWN_VERSION_OVERRIDE 必须为 x[.y[.z[.w]]] 数字格式，收到: ${CWN_VERSION_OVERRIDE}")
-    endif()
     set(CWN_VERSION "${CWN_VERSION_OVERRIDE}")
+endif()
+
+# 校验「最终生效的版本号」，而非只校验覆盖值：各条来源都汇入 CWN_VERSION，
+# 在此统一把关才不会漏（早期只校验 OVERRIDE，直接传 CWN_VERSION 会绕过校验）。
+# 逐段可选而非 {0,3}：CMake 的 if(MATCHES) 正则引擎不支持 {n,m} 重复量词，
+# 写成 {0,3} 会静默不匹配任何值，于是所有 4 段版本号（如 2.1.0.4）都被判为非法。
+if(NOT CWN_VERSION MATCHES "^[0-9]+(\\.[0-9]+)?(\\.[0-9]+)?(\\.[0-9]+)?$")
+    message(FATAL_ERROR
+        "CWN_VERSION 必须为 x[.y[.z[.w]]] 数字格式（project(VERSION) 只接受 1-4 段纯数字），收到: ${CWN_VERSION}")
 endif()
 
 project(ClassWidgetsNext
