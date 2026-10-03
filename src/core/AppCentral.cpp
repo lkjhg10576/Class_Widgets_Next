@@ -9,7 +9,9 @@
 #include "TrayIcon.h"
 #include "WidgetsModel.h"
 #include "WidgetsWindow.h"
+#include "extensions/DisplayTweaksService.h"
 #include "extensions/ExtensionManager.h"
+#include "extensions/HomeworkService.h"
 #include "extensions/RollCallService.h"
 #include "notification/NotificationService.h"
 #include "schedule/ClassSwapManager.h"
@@ -72,6 +74,11 @@ void AppCentral::initialize(bool enableFirstRunGate)
     // C1（extensions-feature-plan §6）：随机点名服务（名单读写/加权抽取/txt 解析）。
     // 无网络无定时器，仅持 ConfigStore 指针，configs->load() 之后创建即可
     m_rollCallService = new RollCallService(m_configs, this);
+    // 当日作业扩展：按天文件服务（configs/homework/）+ 过期清理 + 作业布置通知。
+    // 构造内即装载当天文件；跨天检测挂 UnionTimer::tick（此处创建即可，start 在后）
+    m_homeworkService = new HomeworkService(m_configs, this);
+    // four-plugins A1：显示增强服务骨架（健康自检 + 排除科目解析；行为由 QML 绑定驱动）
+    m_displayTweaksService = new DisplayTweaksService(this);
     // B4（extensions-feature-plan §5）：天气 60s 轮询 tick 改由扩展开关控制——
     // 未启用时不唤醒网络检查。本行必须在 ExtensionManager 构造之后：构造内的
     // 一次性迁移（B3）若识别出存量天气实例会自动启用扩展，此处 isEnabled 即
@@ -150,6 +157,26 @@ void AppCentral::initialize(bool enableFirstRunGate)
         QTimer::singleShot(0, this, [this] {
             if (m_windowManager)
                 m_windowManager->openRollCallFloat();
+        });
+    }
+
+    // 当日作业：启动时扩展已启用且允许自动展示 → 此刻正值课间/放学（break/free）
+    // 则补开浮窗（对照点名扩展的启动补开；上课中不弹，避免打扰）。
+    // 同样必须 0ms 延迟到事件循环，理由见上方点名分支注释。
+    if (m_extensionManager->isEnabled(QStringLiteral("classwidgets.ext.homework"))) {
+        QTimer::singleShot(0, this, [this] {
+            if (!m_windowManager || !m_configs)
+                return;
+            const auto autoShow =
+                m_configs->value(QStringLiteral("extensions.homework.auto_show"));
+            // 缺键按 true 处理，与 QML 侧（auto_show !== false）默认语义一致；
+            // auto_show=false 的语义是「永不自动弹」，启动补开同样受限
+            if (!autoShow.value_or(QJsonValue(true)).toBool())
+                return;
+            const QString status =
+                m_scheduleRuntime ? m_scheduleRuntime->currentStatus() : QString();
+            if (status == QLatin1String("break") || status == QLatin1String("free"))
+                m_windowManager->openHomeworkFloat();
         });
     }
 
@@ -235,6 +262,25 @@ void AppCentral::connectServices()
                     }
                     if (!enabled && m_rollCallService)
                         m_rollCallService->clearSession();
+                } else if (id == QLatin1String("classwidgets.ext.homework")) {
+                    // 当日作业：开 → 若当前正值课间/放学（break/free）则立即弹出
+                    // 作业浮窗（用户显式操作，不受 auto_show 限制，便于马上录入）；
+                    // 上课/预备期间开启不再强弹，否则浮窗在整节课期间常驻，
+                    // 且 HomeworkTrigger 在无状态变迁时不会替你收起它。
+                    // 关 → 浮窗下线。自动显隐（下课弹出/上课收起/拖堂延迟）由
+                    // MainInterface 的 HomeworkTrigger 驱动，此处不参与
+                    if (m_windowManager) {
+                        if (enabled) {
+                            const QString status = m_scheduleRuntime
+                                ? m_scheduleRuntime->currentStatus()
+                                : QString();
+                            if (status == QLatin1String("break")
+                                || status == QLatin1String("free"))
+                                m_windowManager->openHomeworkFloat();
+                        } else {
+                            m_windowManager->closeHomeworkFloat();
+                        }
+                    }
                 }
                 // 课表速览（classwidgets.ext.schedulePeek）无需 C++ 接线：
                 // SchedulePeekBar.qml 经 "Extensions" 上下文属性自行观测开关
@@ -341,6 +387,11 @@ void AppCentral::setupQmlContext(QQmlEngine *engine)
     context->setContextProperty(QStringLiteral("Extensions"), m_extensionManager);
     // 随机点名服务（阶段 C1）；"RollCall" 名字经 grep 确认与既有上下文无冲突
     context->setContextProperty(QStringLiteral("RollCall"), m_rollCallService);
+    // 当日作业服务（classwidgets.ext.homework）：按天条目 + 通知播报
+    context->setContextProperty(QStringLiteral("Homework"), m_homeworkService);
+    // 显示增强服务（four-plugins A1，QML 名 "DisplayTweaks"；设置页健康黄条与
+    // WidgetsContainer 不隐藏纠正的科目解析入口）
+    context->setContextProperty(QStringLiteral("DisplayTweaks"), m_displayTweaksService);
     context->setContextProperty(QStringLiteral("UtilsBackend"), m_utilsBackend);
     context->setContextProperty(QStringLiteral("UpdaterBridge"), m_updaterBridge);
     context->setContextProperty(QStringLiteral("ThemeLoadErrorDialog"),
@@ -365,9 +416,11 @@ QObject *AppCentral::scheduleEditor() const { return m_scheduleEditor; }
 QObject *AppCentral::classSwapManager() const { return m_classSwapManager; }
 QObject *AppCentral::weather() const { return m_weatherService; }
 QObject *AppCentral::rollCall() const { return m_rollCallService; }
+QObject *AppCentral::homework() const { return m_homeworkService; }
 QObject *AppCentral::scheduleManager() const { return m_scheduleManager; }
 QObject *AppCentral::translator() const { return m_translator; }
 QObject *AppCentral::themeManager() const { return m_themeManager; }
+QObject *AppCentral::displayTweaks() const { return m_displayTweaksService; }
 
 void AppCentral::quit()
 {

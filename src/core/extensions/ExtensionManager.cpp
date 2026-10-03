@@ -5,6 +5,7 @@
 
 #include <QCoreApplication>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QVariantMap>
@@ -31,6 +32,7 @@ ExtensionManager::ExtensionManager(ConfigStore *configs, QObject *parent)
     // 一次性迁移放在构造末尾：AppCentral::initialize 在 configs->load() 之后
     // 才创建本对象，且接线（connectServices）与 QML 引擎均在其后，时序天然满足
     migrateLegacyWeatherConfig();
+    migrateMoreSettingsConfig();
 }
 
 // 静态注册表。名称/描述走 QCoreApplication::translate（context "Extensions"，
@@ -65,6 +67,24 @@ QList<ExtensionManager::ExtensionDefinition> ExtensionManager::definitions()
         "Extensions", "小组件下方的当日课表缩写条，高亮当前课与下一课");
     schedulePeek.settingsPageQml = QStringLiteral("pages/settings/Extensions/SchedulePeek.qml");
     defs.append(schedulePeek);
+
+    ExtensionDefinition displayTweaks;
+    displayTweaks.id = QStringLiteral("classwidgets.ext.displayTweaks");
+    displayTweaks.name = QCoreApplication::translate("Extensions", "显示与小组件增强");
+    displayTweaks.icon = QStringLiteral("ic_fluent_puzzle_cube_piece_20_regular");
+    displayTweaks.description = QCoreApplication::translate(
+        "Extensions", "时间/倒数日动画、隐藏深度与顶部距离、特定课程不隐藏");
+    displayTweaks.settingsPageQml = QStringLiteral("pages/settings/Extensions/DisplayTweaks.qml");
+    defs.append(displayTweaks);
+
+    ExtensionDefinition homework;
+    homework.id = QStringLiteral("classwidgets.ext.homework");
+    homework.name = QCoreApplication::translate("Extensions", "当日作业");
+    homework.icon = QStringLiteral("ic_fluent_clipboard_task_20_regular");
+    homework.description = QCoreApplication::translate(
+        "Extensions", "下课时提醒课代表填写当日作业，右侧浮窗汇总与编辑");
+    homework.settingsPageQml = QStringLiteral("pages/settings/Extensions/Homework.qml");
+    defs.append(homework);
 
     return defs;
 }
@@ -225,4 +245,118 @@ void ExtensionManager::migrateLegacyWeatherConfig()
                                      : QStringLiteral("weather.city written"),
                  alreadyEnabled ? QStringLiteral("already enabled")
                                 : QStringLiteral("auto-enabled")));
+}
+
+// four-plugins A2：More_settings 配置迁移（一次性，只提升不删除，源键保留）。
+// 幂等闸门（质检修正）：以 extensions.display_tweaks.migrated 专用标记键判定，
+// 迁移执行一次后置 true——原实现靠目标键"非默认痕迹"判定，存量用户旧插件配置
+// 为全默认（最常见的科目列表空 + 并排标题形态）时痕迹不存在，每次启动都会用
+// 源键重写目标键，把用户在设置页的调参静默回滚。标记键缺席（首次升级）才迁移。
+void ExtensionManager::migrateMoreSettingsConfig()
+{
+    if (!m_configs)
+        return;
+    const auto migrated = m_configs->value(QStringLiteral("extensions.display_tweaks.migrated"));
+    if (migrated.has_value() && migrated->toBool())
+        return; // 幂等闸门：已迁移（或用户已确认过目标态），永不回写
+    const auto srcValue = m_configs->value(QStringLiteral("plugins.configs.com.kryon.more_settings"));
+    if (!srcValue.has_value() || !srcValue->isObject()) {
+        // 无上游插件配置也置标记：目标键保持默认树值，避免每次启动重复判定
+        m_configs->set(QStringLiteral("extensions.display_tweaks.migrated"), true);
+        m_configs->save();
+        return;
+    }
+    const QJsonObject src = srcValue->toObject();
+    if (src.isEmpty()) {
+        m_configs->set(QStringLiteral("extensions.display_tweaks.migrated"), true);
+        m_configs->save();
+        return;
+    }
+    // （补充质检修正）首轮修复遗留的"目标非默认痕迹"早退分支已整体移除：
+    // 标记键是唯一闸门——痕迹判定在用户日后把目标键改回默认值时会重新放行，
+    // 留下旧插件源覆盖用户调参的窄域回滚窗口
+
+    const auto readBool = [&](const char *key, bool fallback) {
+        const QJsonValue v = src.value(QLatin1String(key));
+        if (v.isBool())
+            return v.toBool();
+        if (v.isString()) {
+            if (v.toString().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0)
+                return true;
+            if (v.toString().compare(QLatin1String("false"), Qt::CaseInsensitive) == 0)
+                return false;
+        }
+        if (v.isDouble())
+            return v.toInt() != 0;
+        return fallback;
+    };
+    const auto readInt = [&](const char *key, int fallback) {
+        const QJsonValue v = src.value(QLatin1String(key));
+        if (v.isDouble())
+            return v.toInt();
+        if (v.isString()) {
+            bool ok = false;
+            const int i = v.toString().toInt(&ok);
+            if (ok)
+                return i;
+        }
+        if (v.isBool())
+            return v.toBool() ? 1 : 0;
+        return fallback;
+    };
+
+    m_configs->set(QStringLiteral("extensions.display_tweaks.countdown_animation"),
+                   readBool("countdown_animation", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_animation"),
+                   readBool("time_animation", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_show_seconds"),
+                   readBool("time_show_seconds", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_show_date"),
+                   readBool("time_show_date", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_show_year"),
+                   readBool("time_show_year", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_show_month"),
+                   readBool("time_show_month", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_show_day"),
+                   readBool("time_show_day", true));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_show_weekday"),
+                   readBool("time_show_weekday", true));
+    const QString titleMode = src.value(QLatin1String("time_title_mode")).toString();
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_title_mode"),
+                   titleMode == QLatin1String("alternate") ? QStringLiteral("alternate")
+                                                           : QStringLiteral("side_by_side"));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_alternate_interval"),
+                   qBound(500, readInt("time_alternate_interval", 3000), 30000));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.time_alternate_animation"),
+                   readBool("time_alternate_animation", false));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.display_height"),
+                   src.value(QLatin1String("display_height")).isDouble()
+                       ? qBound(-1, int(src.value(QLatin1String("display_height")).toDouble()), 500)
+                       : readInt("display_height", -1));
+    m_configs->set(QStringLiteral("extensions.display_tweaks.hide_depth"),
+                   qBound(-1, readInt("hide_depth", -1), 200)); // -1=跟随平台默认
+    m_configs->set(QStringLiteral("extensions.display_tweaks.hide_excluded_enabled"),
+                   readBool("hide_excluded_enabled", false));
+    // 科目列表：新版 JSON 数组优先，旧版逗号分隔回退
+    QString subjects = src.value(QLatin1String("hide_excluded_subjects")).toString();
+    if (subjects.isEmpty() || subjects == QLatin1String("[]")) {
+        const QString legacy = src.value(QLatin1String("hide_excluded_lessons")).toString().trimmed();
+        if (!legacy.isEmpty()) {
+            QJsonArray arr;
+            for (const QString &part : legacy.split(QLatin1Char(','))) {
+                const QString name = part.trimmed();
+                if (!name.isEmpty())
+                    arr.append(name);
+            }
+            subjects = QString::fromUtf8(QJsonDocument(arr).toJson(QJsonDocument::Compact));
+            if (subjects.isEmpty())
+                subjects = QStringLiteral("[]");
+        } else {
+            subjects = QStringLiteral("[]");
+        }
+    }
+    m_configs->set(QStringLiteral("extensions.display_tweaks.hide_excluded_subjects"), subjects);
+    m_configs->set(QStringLiteral("extensions.display_tweaks.migrated"), true);
+    m_configs->save();
+    cwn::Log::info(QStringLiteral("ExtensionManager: more_settings migrated to display_tweaks"));
 }

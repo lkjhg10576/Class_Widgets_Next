@@ -3,15 +3,17 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 共 13 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限 + 2 处扩展功能接入（Settings 导航项 / WidgetsContainer 速览条挂载，改动 12），见下）
-> 另有 11 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
-> 倒数日小组件及其设置页（改动 9）、扩展功能 7 个 QML（改动 12）。
+## 当前状态：`app/src/qml` 共 13 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限 + 2 处扩展功能接入（Settings 导航项 / WidgetsContainer 速览条挂载，改动 12），见下；另有改动 13–17 增量与改动 18 质检修正、改动 19 点名交互修复、改动 20 当日作业见各节）
+> 另有 15 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
+> 倒数日小组件及其设置页（改动 9）、扩展功能 7 个 QML（改动 12），
+> 四插件移植新增 3 个 QML（改动 17：DisplayTweaks 页 / AddOverlayMemberDialog / LessonsBoard，RollCall/Weather/Peek 系为既有文件增量），
+> 当日作业新增 4 个 QML（改动 20：HomeworkTrigger / HomeworkFloat / HomeworkEditDialog / Homework 设置页）。
 > `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
 > 与改动 8（WidgetLoader.qml 失败恢复，属 `app/src/qml`）已偏离上游。
 
 | 目录 | 内容 | 与上游的差异 |
 |---|---|---|
-| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10、11、12）** |
+| `app/src/qml/` | 上游 `src/qml/` 全量（137 个 QML、8 个 qmldir，HEAD `1e66f09`） | **多处（见改动 3、4、6、8、9、10、11、12、17、20）** |
 | `app/src/themes/` | 上游内置主题定义 | **1 处（material Color.qml，改动 7；上游原样保留在文件外注释）** |
 | `app/assets/` | 上游资产 | **无（逐字复制）** |
 | `app/themes/` | 上游外部主题扫描目录 | **无（逐字复制）** |
@@ -307,8 +309,183 @@ GC 无从运行 —— 被替换的旧委托持续堆积，内存随导入线性
 `main.cpp` 移除 togglePanel 接线；`AppCentral` 删除 togglePanel 转发信号与
 `onTrayTogglePanel` 槽。
 
-## 修改申请流程
+## 改动 17：四插件移植到 Next 扩展（2026-10-02，four-plugins-to-extensions-plan.md A–F 全量实施）
 
+四个上游 Python 插件以官方扩展（`extensions.*`，C++/QML 原生，不加载第三方代码）重实现。
+C++ 实现全部在同步区外；本节登记**上游同步区改动 4 处**（17.1–17.4）与
+**新增 QML 文件 3 个**（17.5–17.7；17.8 为既有文件增量登记）。禁止移植 Python 补丁注入范式与 `libs/` vendored 依赖。
+
+**改动（上游同步区，4 处）**：
+
+| # | 文件 | 位置 | 改动 |
+|---|---|---|---|
+| 17.1 | `widgets/Time.qml` | 组件根属性 + `text` 绑定 + `titleTimer` + 三处 `AnimatedDigits` | 新增 `extOn` 门控 + `timeTweaks` 只读绑定（`extensions.display_tweaks.*`，缺键或扩展关闭回退上游默认）——秒显隐、年月日星期分量过滤、并排/交替标题（交替间隔可配 500–30000ms、交替淡入淡出经 `OpacityAnimator`，注：基类已有 `Behavior on opacity`，此处不再声明同属性 Behavior）、`animEnabled` 透传；标题模式补充质检修正：`isAlternate = !extOn || 键值==="alternate"`——关扩展恢复上游"3s 交替"基线（原缺省按 side_by_side 与基线不符）；不整文件替换。同步上游：增量绑定，若上游重写时间组件把同名属性手工合入 |
+| 17.2 | `widgets/eventCountdown.qml` | 根属性 + 三处 `AnimatedDigits` | 新增 `extOn` 门控 + `countdownAnim` 绑定（`display_tweaks.countdown_animation`），透传 `animEnabled`；其余不动。同步上游：单属性增量 |
+| 17.3 | `ClassWidgets/Components/WidgetsContainer.qml` | `hideMargin`、`calcY`、`Connections` 区 | `hideMargin → hideDepthOverride>=0 ? override : 平台默认（macOS 48 / 其余 24，-1=跟随平台哨兵）`，顶部三停靠 `y → displayTop>=0 ? displayTop : offset_y`；扩展开关门控 `extOn`（范式同 SchedulePeekBar，关闭回平台默认）；新增特定课程不隐藏纠正（`ScheduleRuntime` 状态变化经 `Qt.callLater` 纠正 `hide.state/mini_mode`，经 `currentEntry` 取名，`DisplayTweaks.excludedSubjects` 解析，≤20）；300ms 轮询无（现为 `hideFade` Behavior + C++ 绑定直驱）。同步上游：覆盖绑定增量，锚点为 `hideMargin`/`calcY` |
+| 17.4 | `ClassWidgets/Theme/components/AnimatedDigits.qml` | `animEnabled` 属性 + `onValueChanged` | 新增 `animEnabled` flag 门（关闭时直接切值、不启动 `progressAnimation`；`layer.enabled` 保持常开，见文件头 A3 纪律）。同步上游：单 flag 增量 |
+
+**改动（项目自有主题文件，非上游同步区，登记备查）**：`SchedulePeekBar.qml`（改动 12.7 的增量）加 `displayMode peek|full` 全量条视图（全名 + 剩余倒计时横向 `ListView`、空态 `今天还没有课程~`（常驻模式当天无条目时展示）、gap 分割渐变竖条、`computeTargetX` 左 20% 定位（delegate 实际几何登记优先）+ 400ms 动画 + 拖拽手势期间暂停、结束后 4s 恢复 + QML 本地 1s 跟随 Timer）。
+
+**新增（QML，4 个）**：
+
+| # | 文件 | 说明 |
+|---|---|---|
+| 17.5 | `ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml` | P1 显示增强配置页：组件动画/时间显示/标题布局/几何/特定课程不隐藏 5 组卡 + 健康自检黄条（只读 `DisplayTweaks.healthy`，自检由 C++ 主窗口 QML 就绪后驱动）；排除科目 ≤20 上限禁用加号、全半角逗号分隔、隐藏深度 -1=自动（SpinBox 特殊显示） |
+| 17.6 | `ClassWidgets/Components/dialogs/AddOverlayMemberDialog.qml` | P1 堆叠 overlay 二期挂载点：标成员（`settings._overlayMember`）+ presets 摆放说明；独占行/就地编辑行由二期任务接入 `overlayMember` role。计划 §4 B 二期 |
+| 17.7 | `ClassWidgets/Windows/LessonsBoard.qml` | P4 白板二期挂载点：单窗双主题（纯白/纯黑）全宽课程条 + 大字号倒计时 + 画笔工具栏挂载点；独立 `Frameless+Tool+StaysOnTop`，不进主窗口蒙版。计划 §5 E 二期 |
+| 17.8 | `ClassWidgets/Windows/RollCallFloat.qml`、`Windows/RollCallResult.qml`、`pages/settings/Extensions/RollCall.qml`、`pages/settings/Extensions/Weather.qml`、`pages/settings/Extensions/SchedulePeek.qml` 的增量（非新增文件，记于此） | 点名：悬浮窗尺寸/悬浮-实心样式/`click_hide`/上课隐藏（1h 兜底）/灵动通知播报（播前暂显、播后还原由 C++ `RollCallService::announce` 全权负责，还原 Timer 不随窗销毁）；结果窗 60ms flicker + `animation_seconds` + 提前结束 + 金色 `#FFE08A` OutBack + 可拖动 + 右下 18px 缩放 + 几何持久化（恢复尺寸钳屏幕范围、逐键 isKeyLocked、副屏负坐标可还原）；session 全点完也开结果窗兜底；设置页加悬浮窗/结果通知/数据源三选一（SecRandom 条件桩）/试抽/权重清零/DOCX 导入。天气：NMC 源 + `auto_location` + `nmcCode`（只透传 NMC 字母站号，不回填数字 cityId）。速览：`display_mode` 选择。计划 §4 C/§5 D/§5 E 一期 |
+
+配套改动（C++，同步区外，登记于此供追溯）：新增 `DisplayTweaksService.{h,cpp}`（健康自检 + 排除科目解析，`DisplayTweaks` 上下文）、`SecRandomBridge.{h,cpp}`（仅 Windows，注册表 + C–J 盘 + 版本判定 + 只读监听桩，二期接线）、`weather/providers/NmcProvider.{h,cpp}`（免 Key：站号索引 + 实况预报 + 预警 Top3 + 内部备源回退；`CityInfo.nmcCode`）；扩展 `RollCallService`（docx 经 `QZipReader`/多编码/去序号/行内分割/`#` 注释、`mergeNames` 上游权重迁移、`resetWeights`/`testDraw`/`announce` 含 hide 层播报还原）；`ExtensionManager::definitions() +1`（`classwidgets.ext.displayTweaks`）+ `migrateMoreSettingsConfig`（`migrated` 标记键幂等）；`ConfigStore`（`display_tweaks` 15 键 + `roll_call` 6 键 + `schedule_peek.display_mode/board_strokes` + `weather.auto_location`，枚举白名单与数值钳位）；`WidgetsModel`（`OverlayMemberRole` +1 role，不改既有 9 slot 签名 + `overlayEditingId/overlayListMode` + `_overlayLocked` 卸载保护）；`WeatherService`（注册 NMC + `autoLocate` IP 双源 + `auto_location` 启动消费）；`WidgetsWindow`（QML 就绪后以真实挂载点驱动健康自检）；`AppCentral`（`displayTweaks` 属性 + `DisplayTweaks` 上下文）；`AppWindowManager`（`LessonsBoard` 窗口）；`CMakeLists.txt` 注册 6 个新文件 + `Qt6::CorePrivate`（QZipReader）。
+
+配套翻译：`app/assets/locales/*.ts` 8 语种经 `lupdate` 提取 77+5 条新字符串（`DisplayTweaks`/`SchedulePeekBar`/`LessonsBoard`/`AddOverlayMemberDialog`/`RollCall`/`RollCallResult`/`Weather`/`SchedulePeek`/`Extensions` 上下文；`zh_CN`/`zh_SIMPLIFIED`/`zh_HK` 全译，`en_US` 中文源给出英文译文，`ja_JP`/`it`/`ta` 新条暂空回退源文，`lzh` 因旧文件语言标签不被 `lupdate` 6.8 识别未自动更新、新条运行时回退源文），`.qm` 已用 `lrelease` 重新生成（无 error）。
+
+**验证**（本机 Linux 条件验证，Qt 6.8；全量构建需 Qt 6.9 + MSVC，冒烟需 Windows，均未执行——见计划 §7，待有条件时按本文档已完成标记质检）：
+- `lupdate` 全量提取无 error（含本次新增/修改的 13 个 QML；`SchedulePeekBar.qml` 初版嵌套三元曾使 `lupdate` 解析失败，已改写为 `fullSubText` 语句函数后通过）；
+- `qmllint` 13 个触及文件零 error（仅隔离性 import/context 警告，与改前同类）；
+- `g++ -fsyntax-only`（Qt 6.8 头）：全部新增/修改 C++ 通过，`AppCentral.cpp` 除外——其 `TrayIcon.h → QtCore/qt_windows.h` 为预存 Windows-only 依赖（改前即有），Linux 下不可验证，`AppCentral.h` 单独通过；
+- `lrelease` 8 语种无 error。
+
+## 改动 18：四插件移植质检修正（2026-10-02，改动 17 全量质检后修复）
+
+5 路只读质检（框架层/P1 显示/P2 点名/P3 天气/P4 课程条）共产出 61 条发现，按"P1 全修 +
+高价值 P2 修 + 文档失真全修"原则落地本节；二/三期挂载点（AddOverlayMemberDialog 调用方、
+SecRandom 接线、LessonsBoard 挂载）按计划口径不在本期，仅修可运行性。全部 C++/QML 改动
+经 MSVC 全量重建 + offscreen 冒烟验证。
+
+**扩展开关与门控（P1）**：
+- `Time.qml` / `eventCountdown.qml` / `WidgetsContainer.qml`：新增 `extOn` 绑定（范式同
+  SchedulePeekBar 12.7：绑定内读 `Extensions.extensions` 建立通知依赖 + `isEnabled`），
+  displayTweaks 关闭后整体回退上游默认（此前关闭扩展不产生任何行为）。
+- `FloatingWidget.qml`：三处 `AnimatedDigits` 补 `animEnabled: countdownAnim` 透传（原浮窗
+  数字不受动画开关控制）。
+
+**显示增强（P1/P2/P3）**：
+- `SchedulePeekBar.qml` full 模式：`isNext` 判定改用独立的 items 下标 `nextItemIndex`
+  （原混用含分隔格的 cells 下标索引 items，TypeError 冻结整条绑定）；空态占位在常驻模式
+  当天无条目时可达；4s 暂停窗口自手势结束起算且 tick 避让 moving/flicking；
+  `computeTargetX` 优先用 delegate 登记的真实 contentX 并钳制首尾边界；5 类 activity
+  标题过滤按 `fullNameOf`（title 为空时查科目名）。
+- `DisplayTweaks.qml`：健康自检不再硬编码 `healthCheck(true, true)`（改由 C++ 主窗口
+  QML 就绪后以真实 findChild 结果判定，黄条分支可达）；"添加当前课"达 20 门禁用 +
+  科目名经 subjectId 回退；排除科目文本框全半角逗号均作分隔；隐藏深度 SpinBox 支持
+  -1=自动（跟随平台默认，恢复 macOS 48 语义）。
+- `ConfigStore.cpp`：`hide_depth` 钳位 `[0,200]` → `[-1,200]`，默认 24 → -1（哨兵）；
+  `ExtensionManager::migrateMoreSettingsConfig` 幂等闸门改为专用 `migrated` 标记键
+  （原"目标非默认痕迹"判定在旧插件配置全默认时每次启动重写目标键，回滚用户调参）。
+
+**点名（P1/P2/P3）**：
+- `RollCallService.cpp`：docx 解析整链路改用 `QZipReader`（`Qt6::CorePrivate`）——替换
+  手写 EOCD/中央目录解析 + `__has_include(<zlib.h>)` 门控的 raw inflate（MSVC 下 Qt 不
+  导出公共 zlib 头使 docx 静默失效；手写解析负偏移越界读；损坏流可致 GUI 死循环）；
+  `<w:tab/>` 转制表符；UTF-16BE（FE FF）BOM 字节序交换修正 + 无 BOM UTF-16 双向探测。
+- `RollCallService::announce` 收编 hide 层"播前暂显/播后还原"（还原 QTimer 挂服务对象 +
+  aboutToQuit 退出兜底；原还原 Timer 在悬浮窗 QML 内，click_hide/播报期关窗路径下窗口
+  先于触发销毁，hide 层永久展开且展开态可落盘）；`RollCallFloat.qml` 相应瘦身。
+- `RollCallResult.qml`：结果窗几何持久化真正生效（原 onVisibleChanged 无条件重居中覆盖
+  恢复值）；恢复尺寸钳屏幕范围而非 min() 到默认值（拖大可还原）；逐键 `isKeyLocked`
+  （原误检 `button_x`）；副屏负 virtualX 坐标可还原（pointOnAnyScreen 判定）；flicker
+  兜底分支二次随机修正；移除缩放期间"改宽即重居中"打架行为；session 全员点完也开结果窗
+  （clearSession 入口可达，解除功能死锁）。
+- `ConfigStore.cpp`：移除死键 `extensions.roll_call.mode`（全仓无读写方）。
+
+**天气 NMC（P1/P2/P3）**：
+- `Weather.qml` `selectCity`：`nmcCode` 只透传 NMC 字母站号（原 `|| city.cityId` 把数字
+  码污染进 nmcCode，NMC 源永远请求错误站号）；`resolveStationCode` 对 nmcCode/cityId
+  均做纯数字拒绝 + 同名县市按省消歧。
+- `NmcProvider.cpp`：索引落盘改 `AppPaths::configsRoot()` + version 字段（原
+  QDir::current 相对路径 + 开发树 hack 打包后失效）；移除指向不存在 example/ 目录的
+  迁移死代码；`/rest/weather` 数值宽容字符串（原字符串返回值全被当 9999 哨兵丢弃）；
+  快照有效性按实际解析结果判定（原恒 true 掩盖整轮失败）；findAlarm 取前 3 页（原 1 页）；
+  白色预警 rank 低于蓝色（原钳成同档）；预警标题他省省级名交叉剔除；day-cache 跨天清理；
+  info 映射表改确定性最长匹配（原 QHash 迭代序随机）。
+- 备源回退（weather.com.cn）重写：toy1/search JSONP 前缀剥离 + d1 文本页
+  `var dataSK/cityDZ` 正则解析，补温度/湿度/风/描述与今日最高最低温（原把文本响应交给
+  JSON 解析器必报 parse 且丢弃已解析 alerts）。
+- `WeatherService`：`weather.auto_location` 获得启动消费（start 时无城市且开关开 →
+  autoLocate；原开关无任何运行期效果）；ip-api 分支城市 JSON 补 `adcode/wcnKey` 键。
+
+**其他**：
+- `WidgetsModel` 不动（AddOverlayMemberDialog 经 `ComboBox.find/currentText` 公共 API
+  取值，替换 QML 不可调用的 `QAbstractItemModel::rowCount/index/data` 虚函数调用）。
+- `widgets/weather.qml`（改动 5 自有新增文件的增量，记于此）：temperature/tempMax/
+  tempMin 逐键判缺防 NaN°（补充质检修正——NMC 备源可能只补到最低温、主路径可能仅
+  weatherCode 有效；新增"最低 %1°"文案已入 8 语种 .ts/.qm）。
+- 头注释修正：`DisplayTweaksService.h`（不持有 ConfigStore）、`WeatherService.h`
+  （windScale 契约含 NMC）、`NmcProvider.h`（协议描述与实现对齐）。
+
+## 改动 19：随机点名两处交互修复（2026-10-02，用户实测反馈）
+
+**悬念收口（播报不得先于揭晓）**：
+- `RollCallFloat.qml`：`rollCall()` 移除即时 `RollCall.announce(names)` —— 原实现在点
+  「点 N 名」的同一瞬间播报，灵动通知先于结果窗滚动动画弹出，动画未放完结果已泄底；
+- `RollCallResult.qml`：新增 `announcePending` 收口，播报统一在滚动定格（`finishReveal`，
+  含自然结束、卡片点按提前结束、「停止」按钮三条路径）后由结果窗执行一次。首次点名
+  （先 draw 后开窗）与「再点 N 名」共用本收口。参考插件 rollcall-result.qml 亦在
+  `finish()` 定格后才回调 `backend.onPicked` 播报。
+
+**「再点 N 名」动画重播**：
+- `RollCallResult.qml`：卡片根 `TapHandler`（点按提前结束 flicker）此前会与按钮的自绘
+  `TapHandler` 同时收到同一次点按（Qt 指针处理器沿祖先链分发，子件不截断父件），
+  点「再点 N 名」时 `draw→startReveal` 刚点亮的滚动被同一抬手立即掐灭；现按
+  `eventPoint.position` 命中判定（`tapOnControl()`：按钮行 controlsRow / 缩放手柄
+  resizeHandle 矩形范围）跳过控制件上的点按。
+- 动画重播改由 `RollCall.drawCompleted` 信号驱动（原读 `drawn` 值变化）：single 模式
+  连续抽中同一人时 `lastDraw` 值相等，值比较可能不触发 `onDrawnChanged`，"再点"看上去
+  毫无反应；信号驱动保证每次 draw 必重播。
+
+**验证**：`_analysis/rollcall_harness/` 新增 `qmltestrunner` 回归套件（offscreen，Qt 6.10.3；
+测试副本由生产 QML 自动生成，仅替换上下文属性为 mock）。8 用例结果窗套件（悬念收口 +
+再点重播 + 提前结束 + 同名单重抽）与端到端用户旅程（悬浮窗点击 → 结果窗 → 再点 → 关闭）
+全过；同一套件对修复前副本运行失败 5+1 例（复现原缺陷），证明用例真实覆盖两个 bug。
+改动文件 `qmllint` 无新增告警类型（仅既有 C++ 上下文属性 unqualified 模式）。
+
+## 改动 20：当日作业扩展（2026-10-03，第 5 个官方扩展 `classwidgets.ext.homework`）
+
+本仓库自有模型（无上游对应），计划全文与实施增补见
+[`homework-extension-plan.md`](homework-extension-plan.md)。C++ 实现全部在同步区外；
+本节登记**上游同步区改动 4 处**（20.1–20.4）与**新增 QML 文件 4 个**（20.5–20.8）。
+作业浮窗是独立窗口，不进主窗口 `WidgetsContainer` 几何链路，也不并入
+`WidgetsWindow` 的窗口 mask（点名悬浮窗/结果窗同理），因此本扩展**不含**
+`WidgetsContainer.qml` / `WidgetsWindow.cpp` 类的容器与蒙版增量。
+
+**改动（上游同步区，4 处）**：
+
+| # | 文件 | 位置 | 改动 |
+|---|---|---|---|
+| 20.1 | `ClassWidgets/pages/editor/Subjects.qml` | `openEditDialog` 形参 + delegate 绑定 + 编辑对话框 `:159-171` / `:198-211` | 科目编辑对话框新增「需要布置作业」开关（`Switch` + `?` 说明 `Flyout`，照抄 `Held in homeroom` 行式样，`openEditDialog` 增 `needsHomework` 形参并回写 `ScheduleEditor.updateSubject` 尾参）；`subjectNeedsHomework.checked = needsHomework !== false`（缺省开）。同步上游：单开关增量 + 形参增尾参 |
+| 20.2 | `ClassWidgets/Components/editor/SubjectClip.qml` | `editRequested` 信号 + 属性区 | 信号增 `bool needsHomework` 形参并透传；新增 `property bool subjectNeedsHomework: modelData.needsHomework !== false`。同步上游：单属性增量 |
+| 20.3 | `src/qml/MainInterface.qml` | `Component.onCompleted` 前的子项区 | 新增常驻 `HomeworkTrigger{}`。触发逻辑必须挂主窗口（作业浮窗关闭即销毁，不能在浮窗内做触发）；扩展开关关闭时组件内所有路径早退。同步上游：新增单组件 |
+| 20.4 | `ClassWidgets/Components/qmldir` | 模块注册区 | 注册 `HomeworkTrigger 1.0` 与 `dialogs/HomeworkEditDialog 1.0` 两行。同步上游：纯增量 |
+
+**新增（QML，4 个）**：
+
+| # | 文件 | 说明 |
+|---|---|---|
+| 20.5 | `ClassWidgets/Components/HomeworkTrigger.qml` | 下课自动显隐触发器（F1/F3）。常驻挂 `MainInterface`；状态源只读 `AppCentral.scheduleRuntime`，零自开秒级 `QTimer`（延迟与 600ms 通知均为单发业务定时器）。下课判定：`currentStatus` 从 `class` 切到 `break/free`（`activity`/`preparation` 不算下课沿、也不取消已排期延迟）；延迟 `delay_minutes ∈ [0,10]` 单发 `Timer`（触发沿快照 `pendingDelayMs`），期间切回上课/预备 → `stop()` 并收起浮窗；到期复核状态，漂移（调休/切课表/休眠唤醒）按取消。上课/预备**一律**收起浮窗、不区分自动/手动打开（否则启动补开、开关开启、设置页手动打开的窗口永不隐藏即「常驻显示」）。通知去重指纹「日期\|上节课id\|endTime」**只作用于通知**，浮窗触发不套指纹（否则拖堂后再次下课会吞掉浮窗） |
+| 20.6 | `ClassWidgets/Windows/HomeworkFloat.qml` | 右侧作业浮窗（F2/F6/F7）。`Frameless\|StaysOnTop\|Tool`，首启右侧垂直居中，选屏同 `MainInterface`/`RollCallFloat`。**拖动收窄到标题栏而非整卡**——卡片主体是 `ListView`（`Flickable`），祖先级 `DragHandler` 会与滚动手势抢指针（整卡拖动会让列表滚不动）；右下 18px 缩放手柄（min 240x200，钳屏），`persistGeometry` 逐键 `isKeyLocked` 双检，多屏负坐标照 `RollCallResult`。`locked` 默认 `true` 禁拖动并隐藏手柄。内容：标题栏 + 当日作业 `ListView`（`Text.Wrap`，优先级整行字体变色 orange/blue/green）+ 底部 `+` 行；选中行浮现编辑/删除二键（编辑态隐藏缩放手柄，避开热区）。`onClosing` 拦截转 `WindowManager.closeHomeworkFloat()` |
+| 20.7 | `ClassWidgets/Components/dialogs/HomeworkEditDialog.qml` | 编辑对话框（F5/F7）。科目下拉（首项「不指定」+ 过滤 `needsHomework === false`，**打开时刷新快照**避免编辑期间课表推送重建模型打断选择）、正文必填（Ok 门槛唯一驱动是 `onTextChanged`，回填同值不触发故 `openFor` 末尾显式 `syncOkEnabled`）、优先级四选一。入口统一 `openFor(itemId, subjectId, content, priority)`：`itemId` 空即新建，其余回填，科目已删/被过滤则回退「不指定」 |
+| 20.8 | `ClassWidgets/pages/settings/Extensions/Homework.qml` | 配置页（F4），`SchedulePeek.qml` 三件套范式：受锁约束 / 用户操作回写 / 初始化读取。锁定、延迟 0–10、自动展示、灵动通知、保留 1/3/7 天 + 「打开作业浮窗」入口（**必须受总开关约束**，否则禁用扩展后仍可从本页打开并使用完整编辑功能）。全部 `enabled:!isKeyLocked` 并在 `refresh()` 内显式刷新（`isKeyLocked` 是 `Q_INVOKABLE`、无通知依赖，插件锁键不会自动重算绑定） |
+
+配套改动（C++，同步区外，登记于此供追溯）：新增 `extensions/HomeworkService.{h,cpp}`
+（按天文件读写 + `retention_days` 过期清理 + `UnionTimer::tick` 跨天检测 + 作业布置通知，
+QML 上下文名 `Homework`；**读/写双路**：`readDayFile` 的 `Corrupt` 态不得静默覆写，
+`loadDayForWrite` 先备份 `corrupt-*` 再按空处理、留底失败必须放弃本次写入；
+`sanitizeItems` 字段级自愈补缺失 `id`，`displayOnly` 额外剔除空正文）；
+`ExtensionManager::definitions() +1`（`classwidgets.ext.homework`）；
+`ConfigStore`（`extensions.homework` 9 键白名单 + 默认树，`window_x/y` 为 `OptInt`
+允许 null 即「从未拖动」哨兵，`delay_minutes` 钳 0–10）；
+`ScheduleModel.{h,cpp}`（`subject.needsHomework` 默认 `true` + 存量归一化补齐）、
+`ScheduleEditor.{h,cpp}`（`addSubject`/`updateSubject` 尾参 `needsHomework=true`）、
+`ScheduleConverter.cpp`（`defaultSubjects` 与导入路径同步）；
+`AppCentral.{h,cpp}`（`homework` 属性 + `Homework` 上下文 + 启动补开 +
+`extensionToggled` 开关接线：开启时正值课间/放学则立即弹出，上课期间不强弹；
+关闭即下线）；`AppWindowManager.{h,cpp}`（`WindowId::HomeworkFloat` +
+`open/closeHomeworkFloat` + `windowQmlPath`/`windowName`/`notInitializedMessage`）；
+`CMakeLists.txt` 注册 `HomeworkService.{h,cpp}`。
+
+**验证**：MSVC 全量重建（`build/Release/ClassWidgetsNext.exe`）通过。
+
+## 修改申请流程
 1. 尽量不动 QML：能由 C++ 宿主、部署脚本或 vendored 副本解决的，不改上游文件；
 2. 确需修改 `app/src/qml/**` 时：在本文件追加条目（文件、原因、与上游的 diff 要点）；
 3. 同步上游时：仅对本文档列出的改动点做三方合并。

@@ -62,6 +62,9 @@ Item {
         return peekCfg.mode === "always" ? "always" : "auto"
     }
     readonly property int splitGapMinutes: Math.max(1, peekCfg.split_gap_minutes || 15)
+    // four-plugins E 一期：展示形态 peek|full（非法回退 peek）；full 显示
+    // class/activity/preparation（仍隐藏 break + 上游 5 类 activity 标题）
+    readonly property string displayMode: peekCfg.display_mode === "full" ? "full" : "peek"
 
     // isEnabled() 是 Q_INVOKABLE 函数，QML 绑定不会对函数调用建立通知依赖；
     // 显式在绑定内读取 Extensions.extensions 属性（NOTIFY extensionsChanged，
@@ -224,6 +227,110 @@ Item {
         }
     }
 
+    // ── 全量条数据（four-plugins E 一期约 +800-1000 行中的模型部分） ──
+    // full 显示 class/activity/preparation，仍隐藏 break + 上游 5 类 activity 标题
+    // （大课间/升旗/晚读晚练/备考/进考场）；全名展开 + remaining 倒计时；
+    // gap>=阈值插 separator 渐变竖条。
+    readonly property var hiddenActivityTitles: ["大课间", "升旗", "晚读晚练", "备考", "进考场"]
+    function fullNameOf(entry, subjects) {
+        if (entry.title) return String(entry.title)
+        if (!entry.subjectId) return ""
+        for (let i = 0; i < subjects.length; i++) {
+            if (subjects[i].id === entry.subjectId)
+                return subjects[i].name || ""
+        }
+        return ""
+    }
+    function remainingText(endMinutes, nowMinutes) {
+        const rest = endMinutes - nowMinutes
+        if (rest < 0)
+            return ""
+        if (rest < 60)
+            return qsTr("还剩 %1 分钟").arg(rest)
+        const h = Math.floor(rest / 60)
+        const m = rest % 60
+        if (m === 0)
+            return qsTr("还剩 %1 小时").arg(h)
+        return qsTr("还剩 %1 小时 %2 分").arg(h).arg(m)
+    }
+    function fullSubText(startMinutes, endMinutes, isCurrent, nowMinutes) {
+        const hh = String(Math.floor(startMinutes / 60)).padStart(2, "0")
+        const mm = String(startMinutes % 60).padStart(2, "0")
+        if (!isCurrent)
+            return hh + ":" + mm
+        const rest = schedulePeekBar.remainingText(endMinutes, nowMinutes)
+        if (rest === "")
+            return hh + ":" + mm
+        return hh + ":" + mm + " · " + rest
+    }
+    readonly property var fullData: {
+        schedulePeekBar.statusTick
+        const rt = AppCentral.scheduleRuntime
+        const dayEntries = rt.currentDayEntries || []
+        const subjects = rt.subjects || []
+        const items = []
+        for (let i = 0; i < dayEntries.length; i++) {
+            const e = dayEntries[i]
+            if (e.type !== "class" && e.type !== "activity" && e.type !== "preparation")
+                continue
+            if (e.type === "activity") {
+                // 标题为空的 activity 条目按科目名过滤（fullNameOf 已含 title 优先，
+                // 质检修正：只查 e.title 会漏掉名称挂在 subjectId 上的 5 类标题）
+                const t = String(schedulePeekBar.fullNameOf(e, subjects) || "")
+                let hidden = false
+                for (let k = 0; k < schedulePeekBar.hiddenActivityTitles.length; k++) {
+                    if (t.indexOf(schedulePeekBar.hiddenActivityTitles[k]) >= 0) {
+                        hidden = true
+                        break
+                    }
+                }
+                if (hidden) continue
+            }
+            const start = hmToMinutes(e.startTime)
+            const end = hmToMinutes(e.endTime)
+            if (start < 0) continue
+            items.push({ id: String(e.id || ""), type: e.type, start: start,
+                         end: end < 0 ? start : end, entry: e,
+                         name: schedulePeekBar.fullNameOf(e, subjects) || qsTr("未命名") })
+        }
+        items.sort(function (a, b) { return a.start - b.start })
+        const nowMinutes = schedulePeekBar.currentMinute + Math.round((rt.timeOffset || 0) / 60)
+        const cur = rt.currentEntry
+        const currentId = cur ? String(cur.id || "") : ""
+        const gap = schedulePeekBar.splitGapMinutes
+        const cells = []
+        let targetIndex = -1
+        let nextItemIndex = -1
+        for (let i = 0; i < items.length; i++) {
+            const c = items[i]
+            if (i > 0 && c.start - items[i - 1].end >= gap)
+                cells.push({ kind: "sep", highlight: "none" })
+            const isCurrent = c.id && c.id === currentId
+            // isNext 比较用 items 下标（nextItemIndex），滚动定位 targetIndex 用
+            // cells 下标（含分隔格）——质检修正：原实现拿 cells 下标去索引 items，
+            // 有分隔格时 items[targetIndex] 错位/越界，TypeError 冻结整个绑定
+            const isNext = !isCurrent && c.start > nowMinutes
+                && (nextItemIndex < 0 || c.start < items[nextItemIndex].start)
+            if (isNext && nextItemIndex < 0)
+                nextItemIndex = i
+            const cellIndex = cells.length
+            if (isCurrent || (targetIndex < 0 && isNext))
+                targetIndex = cellIndex
+            let cellHighlight = "none"
+            if (isCurrent)
+                cellHighlight = "current"
+            else if (c.id && targetIndex === cellIndex && !schedulePeekBar.peekData.inClass)
+                cellHighlight = "next"
+            cells.push({
+                kind: "cell",
+                text: c.name,
+                sub: schedulePeekBar.fullSubText(c.start, c.end, isCurrent, nowMinutes),
+                highlight: cellHighlight,
+            })
+        }
+        return { cells: cells, count: items.length, targetIndex: targetIndex }
+    }
+
     // ── 显隐状态机（D2） ─────────────────────────────────────
     // 两模式在当天无 class 条目（周末/空课表）时均隐藏；扩展开关关闭整条隐藏。
     // 小组件隐藏态（widgetsHidden）是最高优先级的一路：hide.state 由 MainInterface
@@ -240,7 +347,16 @@ Item {
     readonly property bool widgetsHidden: Configs.data.interactions.hide.state
 
     readonly property bool shouldShow: {
-        if (!extEnabled || widgetsHidden || peekData.classCount === 0)
+        if (!extEnabled || widgetsHidden)
+            return false
+        // full 模式空态占位（four-plugins §5.2"今天还没有课程~"，质检修正：
+        // 原 count===0 直接隐藏整条使占位不可达）：常驻模式下当天无任何
+        // 可显条目也显示空态条；auto 模式无课无"下一节"可上，维持隐藏
+        if (displayMode === "full" && fullData.count === 0)
+            return peekMode === "always"
+        const count = displayMode === "full"
+            ? fullData.count : peekData.classCount
+        if (count === 0)
             return false
         if (peekMode === "always")
             return true
@@ -254,7 +370,8 @@ Item {
     clip: true
 
     // 宽度与上方小组件行对齐（alignWidth 由 WidgetsContainer 绑到 widgetsFlow.width）；
-    // 取 max 是防内容溢出：课节数多而小组件少时圆角底至少包住全部格子
+    // 取 max 是防内容溢出：课节数多而小组件少时圆角底至少包住全部格子；
+    // full 模式内容更宽，以内容宽兜底（hide 联动下可点击，蒙版取根矩形）。
     property real alignWidth: 0
     width: Math.max(barBackground.implicitWidth, alignWidth)
     height: barBackground.implicitHeight
@@ -284,8 +401,12 @@ Item {
       Rectangle {
           id: barBackground
           anchors.fill: parent
-          implicitWidth: peekRow.implicitWidth + 20 * schedulePeekBar.scaleFactor  // 左右各 10
-          implicitHeight: peekRow.implicitHeight + 12 * schedulePeekBar.scaleFactor // 上下各 6
+          implicitWidth: (schedulePeekBar.displayMode === "full"
+                          ? fullView.implicitWidth : peekRow.implicitWidth)
+                         + 20 * schedulePeekBar.scaleFactor  // 左右各 10
+          implicitHeight: (schedulePeekBar.displayMode === "full"
+                           ? fullView.implicitHeight : peekRow.implicitHeight)
+                          + 12 * schedulePeekBar.scaleFactor // 上下各 6
           radius: Math.min(
               (Configs.data.preferences.widget_corner_radius || 0) * schedulePeekBar.scaleFactor,
               height / 2)
@@ -297,6 +418,7 @@ Item {
 
       Row {
           id: peekRow
+          visible: schedulePeekBar.displayMode === "peek"
           anchors.centerIn: parent
           spacing: schedulePeekBar.rowSpacing
 
@@ -347,6 +469,171 @@ Item {
                       width: 1
                       height: schedulePeekBar.cellSize * 0.55
                       color: Qt.alpha(Theme.currentTheme.colors.textColor, 0.45)
+                  }
+              }
+          }
+      }
+
+      // ── 全量条视图（four-plugins E 一期）：全名 + 剩余倒计时横向 ListView ──
+      // 空态 placeholder（"今天还没有课程~"）；gap>=阈值插 separator 渐变竖条；
+      // computeTargetX 左 20% 定位 + 400ms 动画 + 用户拖拽暂停 4s + 后端 1s scrollRequested。
+      Item {
+          id: fullView
+          visible: schedulePeekBar.displayMode === "full"
+          anchors.centerIn: parent
+          implicitWidth: Math.min(fullList.contentWidth, Math.max(schedulePeekBar.alignWidth - 20, 320))
+          implicitHeight: 56 * schedulePeekBar.scaleFactor
+          width: implicitWidth
+          height: implicitHeight
+          clip: true
+
+          property bool userPaused: false
+          // 代理实际几何登记（质检修正）：delegate 宽度随全名长短变化，
+          // contentWidth/count 平均格宽估算在长短不一时定位漂移；delegate
+          // 完成后登记真实 contentX，computeTargetX 优先取登记值
+          property var cellXMap: ({})
+
+          function noteCellX(i, x) {
+              fullView.cellXMap[i] = x
+          }
+
+          // 后端 1s scrollRequested：每秒跟随当前课重定位（暂停/手势进行中跳过）
+          Timer {
+              id: fullScrollTick
+              interval: 1000
+              running: schedulePeekBar.displayMode === "full" && schedulePeekBar.shouldShow
+              repeat: true
+              onTriggered: {
+                  if (!fullView.userPaused && !fullList.moving && !fullList.flicking)
+                      fullView.positionToTarget(false)
+              }
+          }
+          Timer {
+              id: pauseTimer
+              interval: 4000
+              repeat: false
+              onTriggered: fullView.userPaused = false
+          }
+
+          function computeTargetX() {
+              const target = schedulePeekBar.fullData.targetIndex
+              if (target < 0 || fullList.count === 0) return 0
+              const knownX = fullView.cellXMap[target]
+              const targetX = (knownX !== undefined)
+                  ? knownX
+                  : target * (fullList.contentWidth / Math.max(1, fullList.count))
+              // 左 20% 定位 + 首尾边界钳制（防动画目标越出 contentRange）
+              const maxX = Math.max(0, fullList.contentWidth - fullView.width)
+              return Math.max(0, Math.min(targetX - fullView.width * 0.2, maxX))
+          }
+          function positionToTarget(animated) {
+              const x = fullView.computeTargetX()
+              if (animated) {
+                  scrollAnim.to = x
+                  scrollAnim.restart()
+              } else {
+                  fullList.contentX = x
+              }
+          }
+          NumberAnimation {
+              id: scrollAnim
+              target: fullList
+              property: "contentX"
+              duration: 400
+              easing.type: Easing.OutCubic
+          }
+
+          Connections {
+              target: schedulePeekBar
+              function onShouldShowChanged() {
+                  if (schedulePeekBar.shouldShow && schedulePeekBar.displayMode === "full")
+                      fullView.positionToTarget(true)
+              }
+          }
+
+          Text {
+              anchors.centerIn: parent
+              visible: schedulePeekBar.fullData.count === 0
+              text: qsTr("今天还没有课程~")
+              color: Theme.currentTheme.colors.textSecondaryColor
+              font.pixelSize: 15 * schedulePeekBar.scaleFactor
+          }
+
+          ListView {
+              id: fullList
+              anchors.fill: parent
+              visible: schedulePeekBar.fullData.count > 0
+              orientation: ListView.Horizontal
+              model: schedulePeekBar.fullData.cells
+              spacing: 10 * schedulePeekBar.scaleFactor
+              interactive: true
+              onModelChanged: fullView.cellXMap = ({})
+              onMovementStarted: {
+                  // 拖拽期间整段暂停；4s 暂停窗口自手势结束起算（质检修正：
+                  // 原在 movementStarted 就 restart，长拖 >4s 时 1s tick 会在
+                  // 拖拽进行中强行回位打断手势）
+                  fullView.userPaused = true
+                  pauseTimer.stop()
+              }
+              onMovementEnded: pauseTimer.restart()
+              Component.onCompleted: fullView.positionToTarget(false)
+
+              delegate: Item {
+                  id: fullCell
+                  required property int index
+                  required property var modelData
+                  width: modelData.kind === "sep" ? 2 : fullText.implicitWidth + 24 * schedulePeekBar.scaleFactor
+                  height: fullView.height
+                  Component.onCompleted: fullView.noteCellX(index, x)
+                  onXChanged: fullView.noteCellX(index, x)
+
+                  // separator 渐变竖条
+                  Rectangle {
+                      visible: fullCell.modelData.kind === "sep"
+                      anchors.verticalCenter: parent.verticalCenter
+                      width: 2
+                      height: parent.height * 0.6
+                      gradient: Gradient {
+                          orientation: Gradient.Vertical
+                          GradientStop { position: 0.0; color: Qt.alpha(Theme.currentTheme.colors.textColor, 0.0) }
+                          GradientStop { position: 0.5; color: Qt.alpha(Theme.currentTheme.colors.textColor, 0.45) }
+                          GradientStop { position: 1.0; color: Qt.alpha(Theme.currentTheme.colors.textColor, 0.0) }
+                      }
+                  }
+
+                  Rectangle {
+                      visible: fullCell.modelData.kind !== "sep"
+                      anchors.fill: parent
+                      anchors.margins: 2 * schedulePeekBar.scaleFactor
+                      radius: 10 * schedulePeekBar.scaleFactor
+                      color: fullCell.modelData.highlight === "current"
+                             ? Qt.alpha(schedulePeekBar.currentColor, 0.9)
+                             : (fullCell.modelData.highlight === "next"
+                                ? Qt.alpha(schedulePeekBar.nextColor, 0.85)
+                                : Qt.alpha(Theme.currentTheme.colors.textColor, 0.08))
+                  }
+                  Column {
+                      id: fullText
+                      visible: fullCell.modelData.kind !== "sep"
+                      anchors.centerIn: parent
+                      spacing: 0
+                      Text {
+                          anchors.horizontalCenter: parent.horizontalCenter
+                          text: fullCell.modelData.text || ""
+                          font.pixelSize: 15 * schedulePeekBar.scaleFactor
+                          font.weight: 600
+                          color: fullCell.modelData.highlight !== "none"
+                                 ? "white" : Theme.currentTheme.colors.textColor
+                      }
+                      Text {
+                          anchors.horizontalCenter: parent.horizontalCenter
+                          visible: (fullCell.modelData.sub || "") !== ""
+                          text: fullCell.modelData.sub || ""
+                          font.pixelSize: 11 * schedulePeekBar.scaleFactor
+                          color: fullCell.modelData.highlight !== "none"
+                                 ? Qt.rgba(1, 1, 1, 0.85)
+                                 : Theme.currentTheme.colors.textSecondaryColor
+                      }
                   }
               }
           }

@@ -281,6 +281,10 @@ QJsonObject normalizeSubject(QJsonObject subject)
         subject.insert(QLatin1String("isLocalClassroom"),
                        legacy.isBool() ? QJsonValue(legacy.toBool()) : QJsonValue(true));
     }
+    if (!subject.value(QLatin1String("needsHomework")).isBool()) {
+        // 当日作业扩展：科目是否需要布置作业（缺省 True，存量幂等补齐）
+        subject.insert(QLatin1String("needsHomework"), QJsonValue(true));
+    }
     return subject;
 }
 
@@ -457,6 +461,7 @@ QJsonArray defaultSubjects()
         subject.insert(QLatin1String("color"), QString::fromLatin1(s.color));
         subject.insert(QLatin1String("location"), QJsonValue(QJsonValue::Null));
         subject.insert(QLatin1String("isLocalClassroom"), s.local);
+        subject.insert(QLatin1String("needsHomework"), true); // 默认全科目需要布置作业
         result.append(subject);
     }
     return result;

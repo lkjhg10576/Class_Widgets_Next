@@ -26,7 +26,8 @@ class QNetworkAccessManager;
 // QML 数值契约（weatherData() 返回，Provider 归一后语义稳定）：
 //   { status: "empty"|"unconfigured"|"stale"|"ok", cityName, lastFetchAt,
 //     current: { temperature, weatherCode, feelsLike?, humidity, windSpeed?,
-//                windScale?(高德：风力等级文本), pm25?, aqi?(仅小米), icon },
+//                windScale?(高德/NMC：风力等级文本，NMC 为风向+风级直拼), pm25?,
+//                aqi?(仅小米), icon },
 //     today:   { tempMax, tempMin, dayCode, nightCode, precipProb?, sunrise?, sunset? },
 //     alerts:  [ { alertId, type, level("B"|"Y"|"O"|"R"), levelRaw, title, pubTime } ] }
 // status 语义：empty=未配置城市；unconfigured=已选城市但当前源缺凭据；
@@ -70,10 +71,14 @@ public:
     Q_INVOKABLE void applyConfigChange();
     // 设置页"测试连接"：对当前源发一次最小请求 → connectionTestFinished
     Q_INVOKABLE void testConnection();
+    // four-plugins §5.1：IP 自动定位（双源 api.vore.top → ip-api.com，超时 8s×2，
+    // 失败回退上次城市）。成功即写全局 weather.city 并 applyConfigChange 重拉。
+    Q_INVOKABLE void autoLocate();
 
 signals:
     void citySearchFinished(const QVariantList &cities);
     void weatherUpdated(const QString &cityId);
+    void autoLocateFinished(bool ok, const QString &cityName);
     // 数据源/密钥等配置变更后发出（applyConfigChange）：快照本身可能未变，
     // 但 weatherData() 的解释已变（如新源缺凭据 → unconfigured）——消费者收到
     // 即重新读取 weatherData()，不必等下一次拉取

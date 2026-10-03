@@ -8,12 +8,15 @@
 #include "WeatherCodes.h"
 #include "providers/AmapProvider.h"
 #include "providers/CaiyunProvider.h"
+#include "providers/NmcProvider.h"
 #include "providers/QweatherProvider.h"
 #include "providers/WeathercnProvider.h"
 #include "providers/XiaomiProvider.h"
 
 #include <QDateTime>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 namespace Log = cwn::Log; // 命名空间别名：MSVC 拒绝 using cwn::Log;（C2873）
 
@@ -70,6 +73,7 @@ WeatherService::WeatherService(ConfigStore *configs, NotificationService *notifi
     add(new QweatherProvider(m_configs, m_nam, this));
     add(new WeathercnProvider(m_configs, m_nam, this));
     add(new CaiyunProvider(m_configs, m_nam, this));
+    add(new NmcProvider(m_configs, m_nam, this));
 
     // 气象预警通知来源：注册进灵动通知（通知设置页可开关/改走系统通知）
     if (m_notifications) {
@@ -97,6 +101,15 @@ void WeatherService::start()
     if (const auto city = configuredCity(); city.isValid()) {
         m_activeCities.insert(city.cityId, city);
         fetchNow(city, /*manual=*/false);
+    } else if (m_configs) {
+        // weather.auto_location 启动消费（质检修正：原实现只有声明与设置页
+        // 开关，重启后并不会自动定位）——未配置城市且开关打开时自动 IP 定位；
+        // 已有城市不重定位（尊重用户手动选择；定位失败 autoLocateFinished
+        // 亦不写空，回退语义即"保持现状"）
+        if (const auto v = m_configs->value(QStringLiteral("weather.auto_location"));
+            v.has_value() && v->toBool()) {
+            autoLocate();
+        }
     }
 }
 
@@ -178,6 +191,134 @@ void WeatherService::testConnection()
         p->testConnection();
 }
 
+void WeatherService::autoLocate()
+{
+    // IP 双源：api.vore.top（国内）→ ip-api.com（国外），各 8s 超时，失败回退上次城市（不写空）。
+    // 定位出城市名后走当前源 searchCity 取首结果写全局 weather.city（免重选三级城市）。
+    QNetworkRequest req1(QUrl(QStringLiteral("https://api.vore.top/api/IPdata")));
+    req1.setTransferTimeout(8000);
+    QNetworkReply *reply = m_nam->get(req1);
+    connect(reply, &QNetworkReply::finished, this, [this, reply] {
+        reply->deleteLater();
+        QString city;
+        if (reply->error() == QNetworkReply::NoError) {
+            const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+            // vore 形状：{code:200, ipdata:{info1,info2,info3}}，取 info2/info3 作城市
+            const QJsonObject ipdata = doc.object().value(QLatin1String("ipdata")).toObject();
+            city = ipdata.value(QLatin1String("info3")).toString();
+            if (city.isEmpty() || city == QLatin1String("0"))
+                city = ipdata.value(QLatin1String("info2")).toString();
+        }
+        if (!city.isEmpty()) {
+            // 用当前源搜索城市名，首结果即定位城市
+            WeatherProvider *p = currentProvider();
+            if (!p || !p->supportsCitySearch())
+                p = m_providers.value(QStringLiteral("xiaomi"));
+            if (!p) {
+                emit autoLocateFinished(false, QString());
+                return;
+            }
+            // 一次性连接：搜索回包即写全局城市
+            connect(p, &WeatherProvider::citySearchFinished, this,
+                    [this](const QVariantList &cities) {
+                        if (cities.isEmpty()) {
+                            emit autoLocateFinished(false, QString());
+                            return;
+                        }
+                        const QVariantMap first = cities.first().toMap();
+                        QJsonObject obj;
+                        obj.insert(QStringLiteral("cityId"),
+                                   first.value(QStringLiteral("cityId")).toString());
+                        obj.insert(QStringLiteral("name"),
+                                   first.value(QStringLiteral("name")).toString());
+                        obj.insert(QStringLiteral("lat"),
+                                   first.value(QStringLiteral("lat")).toDouble());
+                        obj.insert(QStringLiteral("lon"),
+                                   first.value(QStringLiteral("lon")).toDouble());
+                        obj.insert(QStringLiteral("province"),
+                                   first.value(QStringLiteral("province")).toString());
+                        obj.insert(QStringLiteral("adcode"),
+                                   first.value(QStringLiteral("adcode")).toString());
+                        obj.insert(QStringLiteral("wcnKey"),
+                                   first.value(QStringLiteral("wcnKey")).toString());
+                        obj.insert(QStringLiteral("nmcCode"),
+                                   first.value(QStringLiteral("nmcCode")).toString());
+                        if (m_configs) {
+                            m_configs->set(QStringLiteral("weather.city"),
+                                           QString::fromUtf8(
+                                               QJsonDocument(obj).toJson(QJsonDocument::Compact)));
+                            m_configs->save();
+                        }
+                        applyConfigChange();
+                        emit autoLocateFinished(true,
+                                                first.value(QStringLiteral("name")).toString());
+                    },
+                    Qt::SingleShotConnection);
+            p->searchCity(city);
+            return;
+        }
+        // 回退源 ip-api.com
+        QNetworkRequest req2(QUrl(QStringLiteral("http://ip-api.com/json/?lang=zh-CN")));
+        req2.setTransferTimeout(8000);
+        QNetworkReply *reply2 = m_nam->get(req2);
+        connect(reply2, &QNetworkReply::finished, this, [this, reply2] {
+            reply2->deleteLater();
+            QString city2;
+            if (reply2->error() == QNetworkReply::NoError) {
+                const QJsonDocument doc = QJsonDocument::fromJson(reply2->readAll());
+                city2 = doc.object().value(QLatin1String("city")).toString();
+            }
+            if (city2.isEmpty()) {
+                emit autoLocateFinished(false, QString());
+                return;
+            }
+            WeatherProvider *p = currentProvider();
+            if (!p || !p->supportsCitySearch())
+                p = m_providers.value(QStringLiteral("xiaomi"));
+            if (!p) {
+                emit autoLocateFinished(false, QString());
+                return;
+            }
+            connect(p, &WeatherProvider::citySearchFinished, this,
+                    [this](const QVariantList &cities) {
+                        if (cities.isEmpty()) {
+                            emit autoLocateFinished(false, QString());
+                            return;
+                        }
+                        const QVariantMap first = cities.first().toMap();
+                        QJsonObject obj;
+                        obj.insert(QStringLiteral("cityId"),
+                                   first.value(QStringLiteral("cityId")).toString());
+                        obj.insert(QStringLiteral("name"),
+                                   first.value(QStringLiteral("name")).toString());
+                        obj.insert(QStringLiteral("lat"),
+                                   first.value(QStringLiteral("lat")).toDouble());
+                        obj.insert(QStringLiteral("lon"),
+                                   first.value(QStringLiteral("lon")).toDouble());
+                        obj.insert(QStringLiteral("province"),
+                                   first.value(QStringLiteral("province")).toString());
+                        obj.insert(QStringLiteral("adcode"),
+                                   first.value(QStringLiteral("adcode")).toString());
+                        obj.insert(QStringLiteral("wcnKey"),
+                                   first.value(QStringLiteral("wcnKey")).toString());
+                        obj.insert(QStringLiteral("nmcCode"),
+                                   first.value(QStringLiteral("nmcCode")).toString());
+                        if (m_configs) {
+                            m_configs->set(QStringLiteral("weather.city"),
+                                           QString::fromUtf8(
+                                               QJsonDocument(obj).toJson(QJsonDocument::Compact)));
+                            m_configs->save();
+                        }
+                        applyConfigChange();
+                        emit autoLocateFinished(true,
+                                                first.value(QStringLiteral("name")).toString());
+                    },
+                    Qt::SingleShotConnection);
+            p->searchCity(city2);
+        });
+    });
+}
+
 QVariantMap WeatherService::weatherData(const QString &cityJson) const
 {
     QVariantMap result;
@@ -228,9 +369,10 @@ WeatherService::CityInfo WeatherService::cityFromJson(const QString &cityJson)
     city.province = obj.value(QLatin1String("province")).toString();
     city.latitude = obj.value(QLatin1String("lat")).toDouble();
     city.longitude = obj.value(QLatin1String("lon")).toDouble();
-    // 数据源扩展键（只增不改）：高德 adcode / 华风 Location Key
+    // 数据源扩展键（只增不改）：高德 adcode / 华风 Location Key / NMC 站号
     city.adcode = obj.value(QLatin1String("adcode")).toString();
     city.wcnKey = obj.value(QLatin1String("wcnKey")).toString();
+    city.nmcCode = obj.value(QLatin1String("nmcCode")).toString();
     if (!city.isValid())
         return {};
     return city;

@@ -52,6 +52,9 @@ public:
         SettingsRole = Qt::UserRole + 7,
         SettingsQmlRole = Qt::UserRole + 8,
         WidgetIdRole = Qt::UserRole + 9,
+        // four-plugins B（P1 堆叠 overlay 二期）：新增 1 role，不改既有 9 slot 签名。
+        // 含义：该实例是否为 overlay 堆叠成员（settings._overlayMember 真值）。
+        OverlayMemberRole = Qt::UserRole + 10,
     };
     Q_ENUM(Roles)
 
@@ -102,9 +105,21 @@ public:
     // 当前预设（m_instances）中指定 typeId 的实例数；供 QML 侧做数量上限判断。
     Q_INVOKABLE int instanceCount(const QString &typeId) const;
 
+    // four-plugins B（P1 堆叠 overlay 二期挂载点）：选中态 + 就地编辑行状态。
+    // overlayEditingId：正在就地编辑的 overlay 成员 instanceId（空=无编辑）；
+    // overlayListMode：overlay 列表模式（独占行展示开关）。QML 侧右键拦截与
+    // presets 摆放经 settings._overlayMember 读写，本类只存选中态，不持久化。
+    Q_PROPERTY(QString overlayEditingId READ overlayEditingId NOTIFY overlayStateChanged)
+    Q_PROPERTY(bool overlayListMode READ overlayListMode NOTIFY overlayStateChanged)
+    QString overlayEditingId() const { return m_overlayEditingId; }
+    bool overlayListMode() const { return m_overlayListMode; }
+    Q_INVOKABLE void setOverlayEditingId(const QString &instanceId);
+    Q_INVOKABLE void setOverlayListMode(bool enabled);
+
 signals:
     void modelChanged();
     void definitionChanged();
+    void overlayStateChanged();
 
 private slots:
     // model.py:55 modelChanged.connect(save_config)
@@ -128,4 +143,7 @@ private:
     ConfigStore *m_configStore = nullptr;
     ExtensionManager *m_extensionManager = nullptr;
     int m_instancesRevision = 0;
+    // overlay 选中态（运行期，不落盘）
+    QString m_overlayEditingId;
+    bool m_overlayListMode = false;
 };

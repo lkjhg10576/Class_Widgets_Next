@@ -6,6 +6,7 @@
 #include "ConfigStore.h"
 #include "Logger.h"
 #include "WidgetsModel.h"
+#include "extensions/DisplayTweaksService.h" // four-plugins B 健康自检（QML 就绪后判定）
 
 #include <QCursor>
 #include <QQuickItem>
@@ -169,13 +170,25 @@ void WidgetsWindow::onQmlReady(QObject *obj, const QUrl &objUrl)
     // 显隐切换与弹出动画会逐帧改变其 width/height/visible，需与 floatingWidgetContainer
     // 同样接入蒙版重算节拍（scheduleMaskUpdate 自带 pending 合并，逐帧连接不放大开销）。
     // 找不到（扩展关闭时组件仍在 Column 里，正常应总能命中）只记日志，不影响既有链路。
-    if (QObject *schedulePeekBar =
-            obj->findChild<QObject *>(QStringLiteral("schedulePeekBar"))) {
-        // widthChanged/heightChanged 实参签名为 (qreal)，字符串连接必须写全
-        connect(schedulePeekBar, SIGNAL(widthChanged(qreal)), this, SLOT(scheduleMaskUpdate()));
-        connect(schedulePeekBar, SIGNAL(heightChanged(qreal)), this, SLOT(scheduleMaskUpdate()));
+    QObject *schedulePeekBar = obj->findChild<QObject *>(QStringLiteral("schedulePeekBar"));
+    if (schedulePeekBar) {
+        // QQuickItem 的 widthChanged/heightChanged 信号无参（补充质检修正：原
+        // SIGNAL(widthChanged(qreal)) 签名不匹配致连接失败仅余日志告警；显隐/
+        // 宽高另有 WidgetsContainer.qml 内 Connections → contentGeometryChanged
+        // 链路兜底，此处为冗余直连）
+        connect(schedulePeekBar, SIGNAL(widthChanged()), this, SLOT(scheduleMaskUpdate()));
+        connect(schedulePeekBar, SIGNAL(heightChanged()), this, SLOT(scheduleMaskUpdate()));
         connect(schedulePeekBar, SIGNAL(visibleChanged()), this, SLOT(scheduleMaskUpdate()));
         cwn::Log::info(QStringLiteral("Schedule peek bar connected for mask updates"));
+    }
+
+    // four-plugins B 健康自检（质检修正）：以真实挂载点存在性驱动
+    // DisplayTweaksService——原实现由设置页传 healthCheck(true, true) 硬编码
+    // 恒过，黄条分支不可达；现改由主窗口在 QML 就绪后判定并记日志/置黄条。
+    if (auto *service = qobject_cast<DisplayTweaksService *>(m_central->displayTweaks())) {
+        service->healthCheck(
+            widgetsLoader->findChild<QObject *>(QStringLiteral("widgetsFlow")) != nullptr,
+            schedulePeekBar != nullptr);
     }
 
     scheduleMaskUpdate();

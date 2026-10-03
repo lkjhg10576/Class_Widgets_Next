@@ -50,7 +50,8 @@ class WeatherProvider : public QObject
 public:
     // widget settings.city 的原值键为 {"cityId","name","lat","lon","province"}；
     // 数据源扩展键只增不改（向后兼容旧数据）：adcode（高德行政区划码）、
-    // wcnKey（华风爱科 Location Key）。经纬度为各源通用锚点。
+    // wcnKey（华风爱科 Location Key）、nmcCode（NMC 站号字母码，four-plugins §5.1）。
+    // 经纬度为各源通用锚点。
     struct CityInfo
     {
         QString cityId;
@@ -60,6 +61,7 @@ public:
         double longitude = 0;
         QString adcode;
         QString wcnKey;
+        QString nmcCode;
         bool isValid() const { return !cityId.isEmpty() && !name.isEmpty(); }
     };
 

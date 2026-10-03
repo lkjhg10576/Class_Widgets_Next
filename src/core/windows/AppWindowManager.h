@@ -79,6 +79,14 @@ public slots:
     Q_INVOKABLE void closeRollCallFloat();
     Q_INVOKABLE void openRollCallResult();
     Q_INVOKABLE void closeRollCallResult();
+    // 当日作业扩展浮窗（classwidgets.ext.homework，本仓库自有窗口，上游无对应）：
+    // 右侧作业面板；open 单例 show/raise，close 走 releaseWindow（关闭即销毁重建），
+    // 自动显隐由 MainInterface 内的 HomeworkTrigger 驱动
+    Q_INVOKABLE void openHomeworkFloat();
+    Q_INVOKABLE void closeHomeworkFloat();
+    // four-plugins E（二期白板挂载点）：全屏课程白板单例，语义同上
+    Q_INVOKABLE void openLessonsBoard();
+    Q_INVOKABLE void closeLessonsBoard();
 
 public:
     // 对应 manager.py:161-178 open_theme_load_error —— 主题恢复流程入口。
@@ -102,6 +110,10 @@ private:
         // 随机点名扩展（阶段 C5，本仓库自有，无 manager.py 对应键）
         RollCallFloat,
         RollCallResult,
+        // 当日作业扩展浮窗（本仓库自有）
+        HomeworkFloat,
+        // four-plugins E（二期白板挂载点）
+        LessonsBoard,
     };
 
     RinUiWindowBase *ensure(WindowId id);           // manager.py:198-204 ensure

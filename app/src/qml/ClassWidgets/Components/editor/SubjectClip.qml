@@ -9,10 +9,11 @@ Clip {
     width: subjectsGrid.cellWidth - 8
     height: subjectsGrid.cellHeight - 6
     signal editRequested(string subjectId, string name, string simplifiedName, string teacher,
-                         string icon, string color, string location, bool isLocalClassroom)
+                         string icon, string color, string location, bool isLocalClassroom,
+                         bool needsHomework)
     onClicked: editRequested(
         subjectId, subjectNameText, subjectSimplifiedNameText, subjectTeacherText,
-        subjectIcon, subjectColorText, subjectLocationText, subjectIsLocal
+        subjectIcon, subjectColorText, subjectLocationText, subjectIsLocal, subjectNeedsHomework
     )
 
     property string subjectId: modelData.id
@@ -23,6 +24,8 @@ Clip {
     property string subjectLocationText: modelData.location || ""
     property string subjectColorText: modelData.color || ""
     property bool subjectIsLocal: modelData.isLocalClassroom !== false
+    // 当日作业扩展：是否需要布置作业（缺省 true，过滤作业科目下拉）
+    property bool subjectNeedsHomework: modelData.needsHomework !== false
 
     ColumnLayout {
         anchors.fill: parent

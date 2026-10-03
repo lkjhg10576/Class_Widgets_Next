@@ -203,6 +203,24 @@ MITライセンスに基づいて許諾されています</translation>
     </message>
 </context>
 <context>
+    <name>AddOverlayMemberDialog</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddOverlayMemberDialog.qml" line="15" />
+        <source>添加堆叠成员</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddOverlayMemberDialog.qml" line="28" />
+        <source>将某个小组件实例标为堆叠成员（独占行）。二期完整版将支持就地编辑行与摆放预设。</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/AddOverlayMemberDialog.qml" line="47" />
+        <source>presets 摆放：成员标记经 settings._overlayMember 持久化，随预设保存。</source>
+        <translation type="unfinished" />
+    </message>
+</context>
+<context>
     <name>AddSubjectExpander</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/Components/editor/AddSubjectExpander.qml" line="87" />
@@ -277,14 +295,6 @@ MITライセンスに基づいて許諾されています</translation>
     </message>
 </context>
 <context>
-    <name>AutoSuggestBox</name>
-    <message>
-        <location filename="../../RinUI/components/Text/AutoSuggestBox.qml" line="41" />
-        <source>No results found</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
     <name>BannerCarousel</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/Components/plaza/BannerCarousel.qml" line="79" />
@@ -300,67 +310,6 @@ MITライセンスに基づいて許諾されています</translation>
         <location filename="../../src/qml/ClassWidgets/Components/plaza/BannerCarousel.qml" line="89" />
         <source>精选扩展与主题，提升你的使用体验。</source>
         <translation>厳選された拡張機能とテーマで体験を向上。</translation>
-    </message>
-</context>
-<context>
-    <name>Calendar</name>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="328" />
-        <source>Today</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="336" />
-        <source>Range</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="337" />
-        <source>Single</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>Su</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>Mo</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>Tu</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>We</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>Th</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>Fr</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/Calendar.qml" line="409" />
-        <source>Sa</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
-    <name>CalendarDatePicker</name>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/CalendarDatePicker.qml" line="22" />
-        <source>Pick a date</source>
-        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -522,49 +471,8 @@ Do you want to continue using them, or discard and restore the original schedule
 <context>
     <name>ColorPicker</name>
     <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="346" />
-        <source>More</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="346" />
-        <source>Less</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="392" />
-        <source>Red</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="392" />
-        <source>Green</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="392" />
-        <source>Blue</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="393" />
-        <source>Hue</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="393" />
-        <source>Saturation</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="393" />
-        <source>Value</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/ColorPicker.qml" line="442" />
         <source>Opacity</source>
-        <translation type="unfinished">不透明度</translation>
+        <translation type="obsolete">不透明度</translation>
     </message>
 </context>
 <context>
@@ -587,7 +495,7 @@ Do you want to continue using them, or discard and restore the original schedule
         <translation type="vanished">デフォルト</translation>
     </message>
     <message>
-        <location filename="../../../src/core/ConfigStore.cpp" line="575" />
+        <location filename="../../../src/core/ConfigStore.cpp" line="628" />
         <source>New Schedule 1</source>
         <translation type="unfinished">新規スケジュール 1</translation>
     </message>
@@ -595,24 +503,8 @@ Do you want to continue using them, or discard and restore the original schedule
 <context>
     <name>CtrlBtn</name>
     <message>
-        <location filename="../../RinUI/windows/CtrlBtn.qml" line="29" />
         <source>Unknown</source>
-        <translation type="unfinished">不明</translation>
-    </message>
-    <message>
-        <location filename="../../RinUI/windows/CtrlBtn.qml" line="29" />
-        <source>Maximize</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/windows/CtrlBtn.qml" line="29" />
-        <source>Minimize</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/windows/CtrlBtn.qml" line="29" />
-        <source>Close</source>
-        <translation type="unfinished" />
+        <translation type="obsolete">不明</translation>
     </message>
 </context>
 <context>
@@ -660,24 +552,6 @@ Do you want to continue using them, or discard and restore the original schedule
     <message>
         <location filename="../../src/qml/Debugger/contents/Dashboard.qml" line="253" />
         <source>ScheduleRuntime</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
-    <name>DatePicker</name>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/DatePicker.qml" line="122" />
-        <source>year</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/DatePicker.qml" line="123" />
-        <source>month</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/DatePicker.qml" line="124" />
-        <source>day</source>
         <translation type="unfinished" />
     </message>
 </context>
@@ -973,6 +847,160 @@ Do you want to continue using them, or discard and restore the original schedule
         <location filename="../../src/qml/ClassWidgets/Components/editor/DayListView.qml" line="190" />
         <source>Duplicate</source>
         <translation>複製</translation>
+    </message>
+</context>
+<context>
+    <name>DisplayTweaks</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="17" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="45" />
+        <source>显示与小组件增强</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="63" />
+        <source>显示增强自检未通过，功能可能部分失效</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="72" />
+        <source>组件动画</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="73" />
+        <source>时间与倒数日数字滚动动画总开关</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="80" />
+        <source>时间动画</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="86" />
+        <source>倒数日动画</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="98" />
+        <source>时间显示</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="99" />
+        <source>秒、日期各分量与星期显隐</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="104" />
+        <source>秒</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="110" />
+        <source>日期</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="116" />
+        <source>年</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="122" />
+        <source>月</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="128" />
+        <source>日</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="134" />
+        <source>星期</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="145" />
+        <source>标题布局</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="146" />
+        <source>日期与星期并排或交替显示</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="153" />
+        <source>并排显示</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="154" />
+        <source>交替显示</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="168" />
+        <source> 秒</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="174" />
+        <source>交替淡入淡出</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="185" />
+        <source>几何</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="186" />
+        <source>顶部距离（-1 跟随默认）与隐藏保留深度</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="190" />
+        <source>顶部距离</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="198" />
+        <source>隐藏深度</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="204" />
+        <source>自动</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="216" />
+        <source>特定课程不隐藏</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="217" />
+        <source>命中排除科目时纠正隐藏态（最多 20 门，逗号分隔）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="222" />
+        <source>启用</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="232" />
+        <source>如：自习,体育（≤20，加号达上限禁用）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/DisplayTweaks.qml" line="250" />
+        <source>添加当前课</source>
+        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -1492,27 +1520,8 @@ Do you want to continue using them, or discard and restore the original schedule
 <context>
     <name>ErrorPage</name>
     <message>
-        <location filename="../../RinUI/components/Navigation/ErrorPage.qml" line="21" />
-        <source>Sorry, something went wrong!</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/Navigation/ErrorPage.qml" line="30" />
-        <source> load failed! 
-
- Because of </source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/Navigation/ErrorPage.qml" line="30" />
-        <source>
-Please try again later.</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/Navigation/ErrorPage.qml" line="41" />
         <source>Retry</source>
-        <translation type="unfinished">再試</translation>
+        <translation type="obsolete">再試</translation>
     </message>
 </context>
 <context>
@@ -1554,34 +1563,54 @@ Please try again later.</source>
 <context>
     <name>Extensions</name>
     <message>
-        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="44" />
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="46" />
         <source>天气</source>
         <translation>天気</translation>
     </message>
     <message>
-        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="47" />
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="49" />
         <source>城市天气与恶劣天气预警，配置收敛到本扩展页</source>
         <translation>都市の天気と悪天候警報。設定はこの拡張ページに集約</translation>
     </message>
     <message>
-        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="53" />
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="55" />
         <source>随机点名</source>
         <translation>ランダム指名</translation>
     </message>
     <message>
-        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="56" />
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="58" />
         <source>屏幕悬浮点名按钮，按名单与权重随机抽取学生</source>
         <translation>画面に浮かぶ指名ボタン。名簿と重みに応じて生徒をランダムに抽選</translation>
     </message>
     <message>
-        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="62" />
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="64" />
         <source>课表速览</source>
         <translation>時間割クイックビュー</translation>
     </message>
     <message>
-        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="64" />
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="66" />
         <source>小组件下方的当日课表缩写条，高亮当前课与下一课</source>
         <translation>ウィジェットの下に出る当日時間割の略称バー。現在の授業と次の授業を強調表示</translation>
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="73" />
+        <source>显示与小组件增强</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="75" />
+        <source>时间/倒数日动画、隐藏深度与顶部距离、特定课程不隐藏</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="82" />
+        <source>当日作业</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/ExtensionManager.cpp" line="84" />
+        <source>下课时提醒课代表填写当日作业，右侧浮窗汇总与编辑</source>
+        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -1631,32 +1660,32 @@ Please try again later.</source>
 <context>
     <name>FloatingWidget</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="160" />
+        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="172" />
         <source>Class</source>
         <translation type="unfinished">Class</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="162" />
+        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="174" />
         <source>Activity</source>
         <translation type="unfinished">活動</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="164" />
+        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="176" />
         <source>Take a break</source>
         <translation type="unfinished">休息一下</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="165" />
+        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="177" />
         <source>Nothing right now</source>
         <translation type="unfinished">当前无内容</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="179" />
+        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="191" />
         <source>&lt; </source>
         <translation type="unfinished">&lt; </translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="190" />
+        <location filename="../../src/qml/ClassWidgets/Theme/components/FloatingWidget.qml" line="203" />
         <source> min</source>
         <translation type="unfinished"> 分</translation>
     </message>
@@ -1919,6 +1948,234 @@ Please try again later.</source>
     </message>
 </context>
 <context>
+    <name>Homework</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="17" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="51" />
+        <source>当日作业</source>
+        <translation>当日の宿題</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="57" />
+        <source>启用当日作业</source>
+        <translation>当日の宿題を有効化</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="58" />
+        <source>下课时弹出右侧作业浮窗并提醒课代表填写；数据按天保存在本地</source>
+        <translation>休み時間に右側の宿題ウィンドウを表示し、課題係に記入を促します。データは日ごとにローカル保存されます</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="70" />
+        <source>锁定位置与大小</source>
+        <translation>位置とサイズをロック</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="71" />
+        <source>锁定后浮窗不可拖动、不显示缩放手柄；解锁后可自由拖动与调整大小</source>
+        <translation>ロック中はウィンドウのドラッグとサイズ変更ハンドルが無効になります。ロック解除すると自由に移動・サイズ変更できます</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="83" />
+        <source>拖堂延迟</source>
+        <translation>表示までの遅延</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="84" />
+        <source>下课铃后延迟该分钟数再弹出；期间切回上课或预备则本次不弹</source>
+        <translation>チャイム後、指定した分数待ってから表示します。待機中に授業または予備ベルに戻った場合は表示されません</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="96" />
+        <source>%1 分钟</source>
+        <translation>%1 分</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="108" />
+        <source>自动展示</source>
+        <translation>自動表示</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="109" />
+        <source>下课时自动弹出作业浮窗；关闭后仅能从此页或浮窗内手动打开</source>
+        <translation>休み時間に宿題ウィンドウを自動表示します。オフにするとこのページから手動で開くときだけ表示されます</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="121" />
+        <source>灵动通知</source>
+        <translation>スマート通知</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="122" />
+        <source>下课时播报“作业布置”通知；标记为不需要布置作业的科目不提醒</source>
+        <translation>休み時間に「宿題連絡」の通知を表示します。宿題不要の科目は通知されません</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="134" />
+        <source>保留时长</source>
+        <translation>保持期間</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="135" />
+        <source>作业文件保留最近 N 天，超期自动删除</source>
+        <translation>宿題ファイルは直近 N 日分を保持し、期限を過ぎると自動的に削除されます</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="141" />
+        <source>1 天</source>
+        <translation>1 日</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="142" />
+        <source>3 天</source>
+        <translation>3 日</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="143" />
+        <source>7 天</source>
+        <translation>7 日</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="156" />
+        <source>作业管理</source>
+        <translation>宿題の管理</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="157" />
+        <source>打开右侧作业浮窗，添加、编辑或删除当日作业</source>
+        <translation>右側の宿題ウィンドウを開いて、当日の宿題を追加・編集・削除します</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Homework.qml" line="160" />
+        <source>打开作业浮窗</source>
+        <translation>宿題ウィンドウを開く</translation>
+    </message>
+</context>
+<context>
+    <name>HomeworkEditDialog</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="21" />
+        <source>编辑作业</source>
+        <translation>宿題を編集</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="21" />
+        <source>添加作业</source>
+        <translation>宿題を追加</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="43" />
+        <source>不指定</source>
+        <translation>指定しない</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="77" />
+        <source>科目</source>
+        <translation>科目</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="95" />
+        <source>内容</source>
+        <translation>内容</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="105" />
+        <source>如：练习册 P4~P6</source>
+        <translation>例：ワークブック P4～P6</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="115" />
+        <source>优先级</source>
+        <translation>優先度</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="124" />
+        <source>无</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="125" />
+        <source>橙色</source>
+        <translation>オレンジ</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="126" />
+        <source>蓝色</source>
+        <translation>青</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/HomeworkEditDialog.qml" line="127" />
+        <source>绿色</source>
+        <translation>緑</translation>
+    </message>
+</context>
+<context>
+    <name>HomeworkFloat</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="274" />
+        <source>当日作业</source>
+        <translation>当日の宿題</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="290" />
+        <source>已锁定位置与大小，可在扩展设置中解锁</source>
+        <translation>位置とサイズはロックされています。拡張機能設定でロック解除できます</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="329" />
+        <source>今日还没有作业，点击“+”添加</source>
+        <translation>今日の宿題はまだありません。「+」をタップして追加</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="389" />
+        <source>添加作业</source>
+        <translation>宿題を追加</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="430" />
+        <source>编辑</source>
+        <translation>編集</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="439" />
+        <source>删除</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="522" />
+        <source>删除作业</source>
+        <translation>宿題を削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/HomeworkFloat.qml" line="530" />
+        <source>即将删除一条作业，此操作不可撤销，是否继续？</source>
+        <translation>宿題を 1 件削除します。この操作は元に戻せません。続行しますか？</translation>
+    </message>
+</context>
+<context>
+    <name>HomeworkService</name>
+    <message>
+        <location filename="../../../src/core/extensions/HomeworkService.cpp" line="50" />
+        <source>Homework</source>
+        <translation>宿題</translation>
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/HomeworkService.cpp" line="174" />
+        <source>请各科课代表填写当日作业</source>
+        <translation>各教科の課題係は当日の宿題を記入してください</translation>
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/HomeworkService.cpp" line="175" />
+        <source>请%1课代表填写当日作业</source>
+        <translation>%1の課題係は当日の宿題を記入してください</translation>
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/HomeworkService.cpp" line="177" />
+        <source>作业布置</source>
+        <translation>宿題連絡</translation>
+    </message>
+</context>
+<context>
     <name>IconPicker</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/Components/editor/dialogs/IconPicker.qml" line="34" />
@@ -2108,14 +2365,6 @@ Please try again later.</source>
     </message>
 </context>
 <context>
-    <name>InfoBar</name>
-    <message>
-        <location filename="../../RinUI/components/StatusAndInfo/InfoBar.qml" line="176" />
-        <source>Close</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
     <name>Interactions</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/pages/settings/General/Interactions.qml" line="11" />
@@ -2295,9 +2544,32 @@ Please try again later.</source>
     </message>
 </context>
 <context>
+    <name>LessonsBoard</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/LessonsBoard.qml" line="46" />
+        <source>今日课程</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/LessonsBoard.qml" line="57" />
+        <source>纯黑</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/LessonsBoard.qml" line="57" />
+        <source>纯白</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/LessonsBoard.qml" line="67" />
+        <source>关闭</source>
+        <translation type="unfinished">閉じる</translation>
+    </message>
+</context>
+<context>
     <name>MainInterface</name>
     <message>
-        <location filename="../../src/qml/MainInterface.qml" line="129" />
+        <location filename="../../src/qml/MainInterface.qml" line="114" />
         <source>Reschedule Day</source>
         <translation type="unfinished">振替日</translation>
     </message>
@@ -2323,24 +2595,6 @@ Please try again later.</source>
     <message>
         <location filename="../../src/qml/Debugger/MainWindow.qml" line="63" />
         <source>(TimeInformation from Class Widgets -&gt; AppCentral.scheduleRuntime)</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
-    <name>NavigationBar</name>
-    <message>
-        <location filename="../../RinUI/components/Navigation/NavigationBar.qml" line="341" />
-        <source>Back</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/Navigation/NavigationBar.qml" line="382" />
-        <source>Open Navigation</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/Navigation/NavigationBar.qml" line="382" />
-        <source>Close Navigation</source>
         <translation type="unfinished" />
     </message>
 </context>
@@ -2709,19 +2963,6 @@ Applying an incompatible theme may cause serious errors, crashes, or unexpected 
         <location filename="../../src/qml/ClassWidgets/pages/settings/Personalization.qml" line="147" />
         <source>Incompatible</source>
         <translation type="unfinished">非対応</translation>
-    </message>
-</context>
-<context>
-    <name>PickerView</name>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/PickerView.qml" line="55" />
-        <source>AM</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/PickerView.qml" line="55" />
-        <source>PM</source>
-        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -3733,142 +3974,263 @@ It's incompatible and may cause unexpected issues.</source>
 <context>
     <name>RollCall</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="118" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="119" />
         <source>从 TXT 导入</source>
         <translation>TXT からインポート</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="175" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="181" />
         <source>会话内不重复</source>
         <translation>セッション中は重複なし</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="111" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="207" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="112" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="333" />
         <source>共 %1 人</source>
         <translation>全 %1 人</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="294" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="420" />
         <source>删除</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="174" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="180" />
         <source>单次内不重复</source>
         <translation>1 回の指名で重複なし</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="168" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="174" />
         <source>单次内不重复：每次点名从全体重抽；会话内不重复：本会话点过的人排除，关闭结果窗口后重置</source>
         <translation>1 回の指名：毎回全員から抽選します。セッション中：このセッションで指名済みの人は除外され、結果ウィンドウを閉じるとリセットされます</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="108" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="196" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="109" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="322" />
         <source>名单</source>
         <translation>名簿</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="112" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="216" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="113" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="342" />
         <source>名单为空：从 TXT 导入（每行一个名字，UTF-8）或手动添加</source>
         <translation>名簿が空です：TXT からインポート（1 行 1 名、UTF-8）するか手動で追加してください</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="128" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="124" />
+        <source>从 DOCX 导入</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="134" />
         <source>名单已清空</source>
         <translation>名簿を消去しました</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="319" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="199" />
+        <source>悬浮窗</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="200" />
+        <source>按钮尺寸 40–160 × 30–100，样式即时生效</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="206" />
+        <source>宽</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="213" />
+        <source>高</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="223" />
+        <source>悬浮</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="224" />
+        <source>实心</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="235" />
+        <source>点名后隐藏悬浮窗</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="248" />
+        <source>结果与通知</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="249" />
+        <source>滚动时长 1–10 秒，通知停留 2–15 秒</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="255" />
+        <source>动画</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="262" />
+        <source>通知停留</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="270" />
+        <source>试抽 1 名</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="274" />
+        <source>无人可抽</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="275" />
+        <source>试抽：%1（不影响会话）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="279" />
+        <source>权重清零</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="283" />
+        <source>权重已清零</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="295" />
+        <source>数据源</source>
+        <translation type="unfinished">データソース</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="296" />
+        <source>内置名单 / 希悦二代 / 希悦三代（后两者仅 Windows 可用，不可用时回退内置）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="301" />
+        <source>内置名单</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="302" />
+        <source>希悦二代</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="303" />
+        <source>希悦三代</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="445" />
         <source>导入名单（TXT，每行一个名字）</source>
         <translation>名簿をインポート（TXT、1 行 1 名）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="68" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="452" />
+        <source>导入名单（DOCX，提取正文名字）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="453" />
+        <source>Word 文档 (*.docx)</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="69" />
         <source>导入失败：文件为空、无法读取或不含有效名字</source>
         <translation>インポート失敗：ファイルが空、読み込めない、または有効な名前がありません</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="72" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="73" />
         <source>导入完成：新增 %1 人，跳过重名 %2 人</source>
         <translation>インポート完了：%1 人追加、重複 %2 人をスキップ</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="299" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="425" />
         <source>已删除「%1」</source>
         <translation>「%1」を削除しました</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="83" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="84" />
         <source>已添加「%1」</source>
         <translation>「%1」を追加しました</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="320" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="446" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="453" />
         <source>所有文件 (*)</source>
         <translation>すべてのファイル (*)</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="140" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="146" />
         <source>手动添加</source>
         <translation>手動追加</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="251" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="377" />
         <source>改名失败：姓名为空或与其他行重名</source>
         <translation>名前変更失敗：名前が空または他の行と重複しています</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="232" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="358" />
         <source>权重 %1（-100% 永不抽中，+100% 概率翻倍）</source>
         <translation>重み %1（-100% で抽選されず、+100% で確率 2 倍）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="277" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="403" />
         <source>权重提交失败：名字可能已被改名</source>
         <translation>重みの保存失敗：名前が変更された可能性があります</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="155" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="161" />
         <source>添加</source>
         <translation>追加</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="85" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="86" />
         <source>添加失败：姓名为空或与现有名单重复</source>
         <translation>追加失敗：名前が空または既存の名簿と重複しています</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="123" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="129" />
         <source>清空名单</source>
         <translation>名簿を消去</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="320" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="446" />
         <source>纯文本文件 (*.txt)</source>
         <translation>プレーンテキスト (*.txt)</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="149" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="241" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="155" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="367" />
         <source>输入姓名</source>
         <translation>名前を入力</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="141" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="147" />
         <source>重名会被拒绝并提示</source>
         <translation>重複した名前は拒否されます</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="167" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="173" />
         <source>重复策略</source>
         <translation>重複ポリシー</translation>
     </message>
     <message>
         <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="27" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="95" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/RollCall.qml" line="96" />
         <source>随机点名</source>
         <translation>ランダム指名</translation>
     </message>
@@ -3876,32 +4238,32 @@ It's incompatible and may cause unexpected issues.</source>
 <context>
     <name>RollCallFloat</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="243" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="285" />
         <source>取消</source>
         <translation>キャンセル</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="240" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="282" />
         <source>点 1 名</source>
         <translation>1 人指名</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="241" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="283" />
         <source>点 2 名</source>
         <translation>2 人指名</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="242" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="284" />
         <source>点 3 名</source>
         <translation>3 人指名</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="159" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="200" />
         <source>点名</source>
         <translation>指名</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="251" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallFloat.qml" line="293" />
         <source>请先在设置中导入名单</source>
         <translation>まず設定で名簿をインポートしてください</translation>
     </message>
@@ -3909,39 +4271,57 @@ It's incompatible and may cause unexpected issues.</source>
 <context>
     <name>RollCallResult</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="145" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="338" />
         <source>关闭</source>
         <translation>閉じる</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="142" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="335" />
         <source>再点 1 名</source>
         <translation>あと 1 人</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="143" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="336" />
         <source>再点 2 名</source>
         <translation>あと 2 人</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="144" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="337" />
         <source>再点 3 名</source>
         <translation>あと 3 人</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="131" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="338" />
+        <source>停止</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="323" />
         <source>名单人数不足，已抽出全部 %1 人</source>
         <translation>名簿の人数が足りず、%1 人全員を選びました</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="119" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="311" />
         <source>没有可点的人：请在设置中导入名单，或关闭窗口开始新会话</source>
         <translation>指名できる人がいません：設定で名簿をインポートするか、ウィンドウを閉じて新しいセッションを開始してください</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="95" />
+        <location filename="../../src/qml/ClassWidgets/Windows/RollCallResult.qml" line="286" />
         <source>随机点名</source>
         <translation>ランダム指名</translation>
+    </message>
+</context>
+<context>
+    <name>RollCallService</name>
+    <message>
+        <location filename="../../../src/core/extensions/RollCallService.cpp" line="222" />
+        <source>Roll Call</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../../src/core/extensions/RollCallService.cpp" line="546" />
+        <source>Roll call result</source>
+        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -3996,17 +4376,17 @@ It's incompatible and may cause unexpected issues.</source>
         <translation type="vanished">科目の即時追加</translation>
     </message>
     <message>
-        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1312" />
+        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1313" />
         <source>All Weeks</source>
         <translation type="unfinished">すべての週</translation>
     </message>
     <message>
-        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1314" />
+        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1315" />
         <source>Odd Weeks</source>
         <translation type="unfinished">奇数週</translation>
     </message>
     <message>
-        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1316" />
+        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1317" />
         <source>Even Weeks</source>
         <translation type="unfinished">偶数週</translation>
     </message>
@@ -4145,7 +4525,7 @@ It's incompatible and may cause unexpected issues.</source>
 <context>
     <name>ScheduleConverter</name>
     <message>
-        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1715" />
+        <location filename="../../../src/core/convertor/ScheduleConverter.cpp" line="1717" />
         <source>Class</source>
         <translation type="unfinished">Class</translation>
     </message>
@@ -4186,12 +4566,12 @@ It's incompatible and may cause unexpected issues.</source>
 <context>
     <name>SchedulePeek</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="70" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="91" />
         <source>%1 分钟</source>
         <translation>%1 分</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="57" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="78" />
         <source>分组间隔阈值</source>
         <translation>グループ間隔しきい値</translation>
     </message>
@@ -4206,7 +4586,27 @@ It's incompatible and may cause unexpected issues.</source>
         <translation>表示モード</translation>
     </message>
     <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="57" />
+        <source>展示形态</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
         <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="58" />
+        <source>缩写格：单行首字格；全量条：全名 + 剩余倒计时 + 横向滚动</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="63" />
+        <source>缩写格</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="64" />
+        <source>全量条</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="79" />
         <source>相邻两节课间隔达到该分钟数时，速览条中插入分组竖线；普通课间不插</source>
         <translation>隣の授業との間隔がこの分数以上になると、バーにグループ区切りの縦線を表示します（通常の休み時間は非表示）</translation>
     </message>
@@ -4225,6 +4625,34 @@ It's incompatible and may cause unexpected issues.</source>
         <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/SchedulePeek.qml" line="26" />
         <source>课表速览</source>
         <translation>時間割クイックビュー</translation>
+    </message>
+</context>
+<context>
+    <name>SchedulePeekBar</name>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/SchedulePeekBar.qml" line="249" />
+        <source>还剩 %1 分钟</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/SchedulePeekBar.qml" line="253" />
+        <source>还剩 %1 小时</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/SchedulePeekBar.qml" line="254" />
+        <source>还剩 %1 小时 %2 分</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/SchedulePeekBar.qml" line="294" />
+        <source>未命名</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/Components/SchedulePeekBar.qml" line="557" />
+        <source>今天还没有课程~</source>
+        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -4527,12 +4955,12 @@ It's incompatible and may cause unexpected issues.</source>
 <context>
     <name>SubjectClip</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/editor/SubjectClip.qml" line="92" />
+        <location filename="../../src/qml/ClassWidgets/Components/editor/SubjectClip.qml" line="95" />
         <source>Teacher: </source>
         <translation>先生: </translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/editor/SubjectClip.qml" line="92" />
+        <location filename="../../src/qml/ClassWidgets/Components/editor/SubjectClip.qml" line="95" />
         <source>Location: </source>
         <translation>場所: </translation>
     </message>
@@ -4594,87 +5022,99 @@ If it takes place in another location, such as a sport field, lab, or another cl
 <context>
     <name>Subjects</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="38" />
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="45" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="39" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="46" />
         <source>Restore Defaults</source>
         <translation>デフォルトに戻す</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="48" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="49" />
         <source>Are you sure you want to restore the default subjects?</source>
         <translation>デフォルトの科目に戻すことを確認しますか？</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="64" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="65" />
         <source>Add Subject</source>
         <translation>科目を追加する</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="67" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="68" />
         <source>Subject</source>
         <translation>科目</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="101" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="102" />
         <source>Edit Subject</source>
         <translation type="unfinished">科目の編集</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="114" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="115" />
         <source>ID</source>
         <translation type="unfinished">ID</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="119" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="120" />
         <source>Simplified Name</source>
         <translation type="unfinished">略称</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="125" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="126" />
         <source>Subject Name</source>
         <translation type="unfinished">科目名</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="126" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="127" />
         <source>e.g. Science</source>
         <translation type="unfinished">例: 理科</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="130" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="131" />
         <source>Teacher</source>
         <translation type="unfinished">担当教員</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="135" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="136" />
         <source>Location</source>
         <translation type="unfinished">場所</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="136" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="137" />
         <source>e.g. Room 7813</source>
         <translation type="unfinished">例: 7813教室</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="140" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="141" />
         <source>Color</source>
         <translation type="unfinished">カラー</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="150" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="151" />
         <source>Held in homeroom</source>
         <translation type="unfinished">自教室で実施</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="162" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="163" />
+        <source>需要布置作业</source>
+        <translation>宿題の割り当て</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="175" />
         <source>Icon</source>
         <translation type="unfinished">アイコン</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="182" />
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="195" />
         <source>Enable if the subject is taught in your homeroom classroom.  
 If it takes place in another location, such as a sport field, lab, or another classroom, leave it off.</source>
-        <translation type="unfinished">自教室（ホームルーム）で授業が行われる場合に有効にしてください。  
-グラウンド、実験室、他の教室など別の場所で行われる場合はオフのままにしてください。</translation>
+        <translation>その教科が学級教室で行われる場合はオンにしてください。
+グラウンド、実験室、別の教室など他の場所で行われる場合はオフのままにしてください。</translation>
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/editor/Subjects.qml" line="205" />
+        <source>Enable if the subject assigns homework.  
+When disabled, the end-of-class notification will not remind the representative for this subject.</source>
+        <translation>その教科で宿題を出す場合はオンにしてください。
+オフにすると、休み時間の通知でその教科の課題係は呼び出されません。</translation>
     </message>
     <message>
         <source>Chinese</source>
@@ -4953,22 +5393,9 @@ If it takes place in another location, such as a sport field, lab, or another cl
     </message>
 </context>
 <context>
-    <name>Switch</name>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/Switch.qml" line="15" />
-        <source>On</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/BasicInput/Switch.qml" line="16" />
-        <source>Off</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
     <name>SwitchScheduleDialog</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/dialogs/SwitchScheduleDialog.qml" line="13" />
+        <location filename="../../src/qml/ClassWidgets/Components/dialogs/SwitchScheduleDialog.qml" line="12" />
         <source>Switch Schedule</source>
         <translation type="unfinished">スケジュールの切り替え</translation>
     </message>
@@ -5030,29 +5457,6 @@ If it takes place in another location, such as a sport field, lab, or another cl
         <location filename="../../src/qml/widgets/settings/Text.qml" line="50" />
         <source>Custom Text</source>
         <translation type="unfinished">カスタムテキスト</translation>
-    </message>
-</context>
-<context>
-    <name>TextInputMenu</name>
-    <message>
-        <location filename="../../RinUI/components/MenusAndToolbars/TextInputMenu.qml" line="27" />
-        <source>Cut</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/MenusAndToolbars/TextInputMenu.qml" line="38" />
-        <source>Copy</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/MenusAndToolbars/TextInputMenu.qml" line="49" />
-        <source>Paste</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/MenusAndToolbars/TextInputMenu.qml" line="60" />
-        <source>Select All</source>
-        <translation type="unfinished" />
     </message>
 </context>
 <context>
@@ -5179,29 +5583,6 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
     </message>
 </context>
 <context>
-    <name>TimePicker</name>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/TimePicker.qml" line="10" />
-        <source>AM</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/TimePicker.qml" line="11" />
-        <source>PM</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/TimePicker.qml" line="12" />
-        <source>hour</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <location filename="../../RinUI/components/DateAndTime/TimePicker.qml" line="13" />
-        <source>minute</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
     <name>Timeline</name>
     <message>
         <location filename="../../src/qml/ClassWidgets/pages/editor/Timeline.qml" line="25" />
@@ -5276,58 +5657,34 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
     </message>
 </context>
 <context>
-    <name>TitleBar</name>
-    <message>
-        <location filename="../../RinUI/windows/TitleBar.qml" line="199" />
-        <source>Fluent TitleBar</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
-    <name>Toast</name>
-    <message>
-        <location filename="../../RinUI/components/StatusAndInfo/Toast.qml" line="156" />
-        <source>Close</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
-    <name>ToolTip</name>
-    <message>
-        <location filename="../../RinUI/components/StatusAndInfo/ToolTip.qml" line="12" />
-        <source>Tooltip</source>
-        <translation type="unfinished" />
-    </message>
-</context>
-<context>
     <name>TrayIcon</name>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="247" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="243" />
         <source>Open Settings</source>
         <translation>設定を開く</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="249" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="245" />
         <source>Schedule Editor</source>
         <translation>時間割エディター</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="253" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="249" />
         <source>Class Swap</source>
         <translation>授業の振替</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="257" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="253" />
         <source>Mini Mode</source>
         <translation>ミニモード</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="258" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="254" />
         <source>Toggle Edit Mode</source>
         <translation>編集モードの切り替え</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="260" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="256" />
         <source>Tutorial</source>
         <translation>チュートリアル</translation>
     </message>
@@ -5336,22 +5693,22 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
         <translation type="vanished">情報</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="263" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="259" />
         <source>Quit</source>
         <translation>終了</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="251" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="247" />
         <source>Reschedule Day</source>
         <translation>振替日</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="255" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="251" />
         <source>Switch Schedule</source>
         <translation>スケジュールの切り替え</translation>
     </message>
     <message>
-        <location filename="../../../src/core/TrayIcon.cpp" line="262" />
+        <location filename="../../../src/core/TrayIcon.cpp" line="258" />
         <source>Restart</source>
         <translation>再起動</translation>
     </message>
@@ -5359,9 +5716,8 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
 <context>
     <name>TrayPanel</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="67" />
         <source>What's New</source>
-        <translation type="unfinished">更新情報</translation>
+        <translation type="obsolete">更新情報</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -5412,84 +5768,67 @@ Class Widgets はデフォルトテーマを復元しました。</translation>
         <translation type="vanished">プラグインを発見しダウンロードする</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="10" />
         <source>Quick Access Panel</source>
-        <translation>クイックパネル</translation>
+        <translation type="vanished">クイックパネル</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="87" />
         <source>Switch your schedule</source>
-        <translation>スケジュールを切り替える</translation>
+        <translation type="vanished">スケジュールを切り替える</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="143" />
         <source>Debugger</source>
-        <translation>Debugger</translation>
+        <translation type="vanished">Debugger</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="155" />
         <source>Restart</source>
-        <translation>再起動</translation>
+        <translation type="vanished">再起動</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="163" />
         <source>Restart required</source>
-        <translation type="unfinished">再起動が必要です</translation>
+        <translation type="obsolete">再起動が必要です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Windows/TrayPanel.qml" line="170" />
         <source>Exit</source>
-        <translation>終了</translation>
+        <translation type="vanished">終了</translation>
     </message>
 </context>
 <context>
     <name>TrayShortcuts</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="26" />
         <source>Shortcuts</source>
-        <translation type="unfinished">ショートカット</translation>
+        <translation type="obsolete">ショートカット</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="38" />
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="315" />
         <source>Add</source>
-        <translation type="unfinished">追加</translation>
+        <translation type="obsolete">追加</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="48" />
         <source>Done</source>
-        <translation type="unfinished">完了</translation>
+        <translation type="obsolete">完了</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="48" />
         <source>Edit</source>
-        <translation type="unfinished">編集</translation>
+        <translation type="obsolete">編集</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="56" />
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="207" />
         <source>All Shortcuts</source>
-        <translation type="unfinished">すべてのショートカット</translation>
+        <translation type="obsolete">すべてのショートカット</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="64" />
         <source>No shortcuts yet</source>
-        <translation type="unfinished">ショートカットはまだありません</translation>
+        <translation type="obsolete">ショートカットはまだありません</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="65" />
         <source>Click "+" to add shortcuts.</source>
-        <translation type="unfinished">「+」をクリックしてショートカットを追加します。</translation>
+        <translation type="obsolete">「+」をクリックしてショートカットを追加します。</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="173" />
         <source>Remove</source>
-        <translation type="unfinished">削除</translation>
+        <translation type="obsolete">削除</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/TrayShortcuts.qml" line="264" />
         <source>Add Shortcuts</source>
-        <translation type="unfinished">ショートカットを追加</translation>
+        <translation type="obsolete">ショートカットを追加</translation>
     </message>
 </context>
 <context>
@@ -5856,208 +6195,249 @@ Go to "Settings" → "Update" for more details.</source>
 <context>
     <name>Weather</name>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="303" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="345" />
         <source> 分钟</source>
         <translation> 分</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="210" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="224" />
         <source>API Host</source>
         <translation>API Host</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="96" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="43" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="156" />
+        <source>NMC（免Key）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="44" />
+        <source>中央气象台，免 Key；首建索引约 30 请求，后台进行</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="102" />
+        <source>已定位：%1</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="103" />
+        <source>定位失败，已保留上次城市</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="109" />
         <source>API Key 无效</source>
         <translation>API キーが無効です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="171" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="185" />
         <source>API 凭据</source>
         <translation>API 認証情報</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="174" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="188" />
         <source>仅保存在本地 configs.json</source>
         <translation>ローカルの configs.json にのみ保存されます</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="39" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="42" />
         <source>内置，无需配置</source>
         <translation>内蔵、設定不要</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="296" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="338" />
         <source>刷新间隔</source>
         <translation>更新間隔</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="189" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="203" />
         <source>华风爱科 Key</source>
         <translation>WeatherCN キー</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="44" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="145" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="49" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="159" />
         <source>华风爱科（付费）</source>
         <translation>WeatherCN（有料）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="188" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="202" />
         <source>和风天气 Key</source>
         <translation>QWeather キー</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="42" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="144" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="47" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="158" />
         <source>和风天气（付费）</source>
         <translation>QWeather（有料）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="102" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="115" />
         <source>响应异常</source>
         <translation>応答が異常です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="246" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="260" />
         <source>城市</source>
         <translation>都市</translation>
     </message>
     <message>
         <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="19" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="115" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="128" />
         <source>天气</source>
         <translation>天気</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="297" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="277" />
+        <source>自动定位</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="279" />
+        <source>定位中…</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="288" />
+        <source>启动时自动定位（IP 双源，失败回退上次城市）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="339" />
         <source>天气数据拉取频率（30–180 分钟）</source>
         <translation>天気データの取得頻度（30〜180 分）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="326" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="364" />
+        <source>天气数据来自中央气象台（NMC）</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="370" />
         <source>天气数据来自华风爱科</source>
         <translation>天気データ提供元：WeatherCN</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="324" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="368" />
         <source>天气数据来自和风天气</source>
         <translation>天気データ提供元：QWeather</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="329" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="373" />
         <source>天气数据来自小米天气 (wtr-v3)</source>
         <translation>天気データ提供元：Xiaomi 天気 (wtr-v3)</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="328" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="372" />
         <source>天气数据来自彩云天气</source>
         <translation>天気データ提供元：Caiyun 天気</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="322" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="366" />
         <source>天气数据来自高德地图</source>
         <translation>天気データ提供元：AMap</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="38" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="142" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="41" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="155" />
         <source>小米天气（免费）</source>
         <translation>Xiaomi 天気（無料）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="190" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="204" />
         <source>彩云天气 Token</source>
         <translation>Caiyun トークン</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="46" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="146" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="51" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="160" />
         <source>彩云天气（付费）</source>
         <translation>Caiyun 天気（有料）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="255" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="273" />
         <source>搜索城市</source>
         <translation>都市を検索</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="250" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="264" />
         <source>搜索并选择城市以启用天气</source>
         <translation>都市を検索して選択すると天気が有効になります</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="319" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="361" />
         <source>数据来源</source>
         <translation>データ提供元</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="127" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="140" />
         <source>数据源</source>
         <translation>データソース</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="228" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="242" />
         <source>显示</source>
         <translation>表示</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="234" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="248" />
         <source>测试中…</source>
         <translation>テスト中…</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="232" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="246" />
         <source>测试连接</source>
         <translation>接続テスト</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="100" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="113" />
         <source>网络错误</source>
         <translation>ネットワークエラー</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="94" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="107" />
         <source>连接成功</source>
         <translation>接続に成功しました</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="98" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="111" />
         <source>配额已用尽</source>
         <translation>割り当てを使い切りました</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="45" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="50" />
         <source>需要华风爱科 API Key</source>
         <translation>WeatherCN の API キーが必要です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="43" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="48" />
         <source>需要和风天气 API Key 与专属 API Host</source>
         <translation>QWeather の API キーと専用 API ホストが必要です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="47" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="52" />
         <source>需要彩云天气 Token</source>
         <translation>Caiyun のトークンが必要です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="41" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="46" />
         <source>需要高德开放平台 Web 服务 Key</source>
         <translation>AMap オープンプラットフォームの Web サービスキーが必要です</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="187" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="201" />
         <source>高德 Key</source>
         <translation>AMap キー</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="40" />
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="143" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="45" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="157" />
         <source>高德天气（付费）</source>
         <translation>AMap 天気（有料）</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="135" />
+        <location filename="../../src/qml/ClassWidgets/pages/settings/Extensions/Weather.qml" line="148" />
         <source>高德暂不支持恶劣天气预警</source>
         <translation>AMap は現在、悪天候警報に対応していません</translation>
     </message>
@@ -6065,7 +6445,7 @@ Go to "Settings" → "Update" for more details.</source>
 <context>
     <name>WeatherService</name>
     <message>
-        <location filename="../../../src/core/weather/WeatherService.cpp" line="76" />
+        <location filename="../../../src/core/weather/WeatherService.cpp" line="80" />
         <source>Weather Alerts</source>
         <translation type="unfinished" />
     </message>
@@ -6531,22 +6911,22 @@ then tap "Edit Widget Screen" in the menu to experience it.</source>
         <translation type="vanished">編集 </translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="292" />
+        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="315" />
         <source>Edit "%1"</source>
         <translation type="unfinished" />
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="308" />
+        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="331" />
         <source>Delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="317" />
+        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="340" />
         <source>Edit Widgets Screen</source>
         <translation>ウィジェット編集画面</translation>
     </message>
     <message>
-        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="412" />
+        <location filename="../../src/qml/ClassWidgets/Components/WidgetsContainer.qml" line="478" />
         <source>Add</source>
         <translation>追加</translation>
     </message>
@@ -6696,7 +7076,7 @@ then tap "Edit Widget Screen" in the menu to experience it.</source>
         <translation>剩余</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/eventCountdown.qml" line="51" />
+        <location filename="../../src/qml/widgets/eventCountdown.qml" line="62" />
         <source> min</source>
         <translation type="unfinished"> 分</translation>
     </message>
@@ -6779,18 +7159,23 @@ then tap "Edit Widget Screen" in the menu to experience it.</source>
 <context>
     <name>weather</name>
     <message>
-        <location filename="../../src/qml/widgets/weather.qml" line="117" />
+        <location filename="../../src/qml/widgets/weather.qml" line="119" />
         <source>Set a city in Extensions - Weather settings</source>
         <translation>「拡張機能 - 天気」で都市を設定してください</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/weather.qml" line="119" />
+        <location filename="../../src/qml/widgets/weather.qml" line="121" />
         <source>Set API key in Extensions - Weather settings</source>
         <translation>「拡張機能 - 天気」で API キーを設定してください</translation>
     </message>
     <message>
-        <location filename="../../src/qml/widgets/weather.qml" line="121" />
+        <location filename="../../src/qml/widgets/weather.qml" line="123" />
         <source>Loading…</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../../src/qml/widgets/weather.qml" line="135" />
+        <source>最低 %1°</source>
         <translation type="unfinished" />
     </message>
     <message>

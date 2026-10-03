@@ -20,10 +20,16 @@ QQW.Window {
     }
 
     // ─────────────────────────── 几何与状态 ───────────────────────────
-    // 尺寸方案选「窗口宽度增长、按钮原位不动」（任务二选一）：面板展开时
-    // 窗口 width += panelWidth；若向左展开，窗口 x 同步左移 panelWidth，
-    // 按钮锚定窗口相应侧，屏幕坐标始终等于 (buttonX, buttonY)。透明背景 +
-    // 无边框下改 width/x 不影响按钮 hit area（按钮是窗口内独立 Item）。
+    // four-plugins C 一期：尺寸/样式/点击隐藏/课时隐藏全部经 extensions.roll_call.* 绑定
+    // （ConfigStore 已钳位：w 40-160/h 30-100/animation 1-10/notify 2-15）。
+    readonly property var rollCfg: (Configs.data.extensions && Configs.data.extensions.roll_call)
+        ? Configs.data.extensions.roll_call : {}
+    readonly property real buttonW: Math.min(160, Math.max(40, rollCfg.button_w || 60))
+    readonly property real buttonH: Math.min(100, Math.max(30, rollCfg.button_h || 60))
+    readonly property bool solidStyle: rollCfg.float_mode === "solid"
+    readonly property bool clickHide: !!rollCfg.click_hide
+    // （notify_duration 的停留时长与钳位已随播报还原一并移入 RollCallService::
+    // announce，QML 侧不再需要本地副本）
     readonly property real buttonSize: 60
     readonly property real panelWidth: 340
     readonly property real edgeMargin: 24
@@ -54,8 +60,8 @@ QQW.Window {
                                    && Configs.data.extensions.roll_call
                                    && Configs.data.extensions.roll_call.names) || []
 
-    width: floatWindow.buttonSize + (floatWindow.panelOpen ? floatWindow.panelWidth : 0)
-    height: floatWindow.buttonSize
+    width: floatWindow.buttonW + (floatWindow.panelOpen ? floatWindow.panelWidth : 0)
+    height: Math.max(floatWindow.buttonH, floatWindow.buttonSize)
     x: floatWindow.targetScreen
        ? floatWindow.targetScreen.virtualX + floatWindow.buttonX
          - (floatWindow.panelOpen && floatWindow.expandLeft ? floatWindow.panelWidth : 0)
@@ -71,7 +77,7 @@ QQW.Window {
         if (!s)
             return value
         return Math.max(floatWindow.edgeMargin,
-                        Math.min(s.width - floatWindow.buttonSize - floatWindow.edgeMargin, value))
+                        Math.min(s.width - floatWindow.buttonW - floatWindow.edgeMargin, value))
     }
 
     function clampY(value) {
@@ -79,7 +85,7 @@ QQW.Window {
         if (!s)
             return value
         return Math.max(floatWindow.edgeMargin,
-                        Math.min(s.height - floatWindow.buttonSize - floatWindow.edgeMargin, value))
+                        Math.min(s.height - floatWindow.buttonH - floatWindow.edgeMargin, value))
     }
 
     function ensurePosition() {
@@ -90,7 +96,7 @@ QQW.Window {
         const savedY = rc && rc.button_y != null ? rc.button_y : -1
         // -1 = 从未拖过：首显落所选屏幕右上角（产品定义，§1.3）
         floatWindow.buttonX = floatWindow.clampX(savedX >= 0 ? savedX
-                                                              : floatWindow.targetScreen.width - floatWindow.buttonSize - floatWindow.edgeMargin)
+                                                              : floatWindow.targetScreen.width - floatWindow.buttonW - floatWindow.edgeMargin)
         floatWindow.buttonY = floatWindow.clampY(savedY >= 0 ? savedY : floatWindow.edgeMargin)
         floatWindow.positionInitialized = true
     }
@@ -130,26 +136,61 @@ QQW.Window {
         floatWindow.panelOpen = false
         if (!RollCall)
             return
-        const result = RollCall.draw(count)
-        // 空结果（名单为空/会话内已点完）不开结果窗口：面板内已有提示文案，
-        // 结果窗口重复提示反而打断；session 全点完的情况由结果窗口兜底说明
-        if (result.length > 0)
-            WindowManager.openRollCallResult()
+        // 播报（RollCall.announce）不在此处：点名结果由结果窗在滚动动画定格后
+        // 统一播报，否则灵动通知先于揭晓弹出、"悬念"被提前泄底。窗口流程照旧：
+        // 开结果窗 → click_hide 时隐藏悬浮按钮
+        RollCall.draw(count)
+        // 结果窗口无条件打开（质检修正：session 模式全员点完后原实现不开窗，
+        // 而 clearSession 入口只存在结果窗内 → 按钮静默无反应的功能死锁；
+        // 空结果由结果窗自行提示）
+        WindowManager.openRollCallResult()
+        // click_hide：点名后悬浮按钮一并隐藏（结果窗独立，不受影响）
+        if (floatWindow.clickHide)
+            WindowManager.closeRollCallFloat()
+    }
+
+    // 本节隐藏：上课期间悬浮窗隐藏，下课恢复；1h 兜底恢复（信号丢失时不永久消失）
+    property bool classHidden: false
+    Connections {
+        target: AppCentral.scheduleRuntime
+        function onCurrentStatusChanged() { floatWindow.updateClassHide() }
+        function onCurrentEntryChanged() { floatWindow.updateClassHide() }
+    }
+    function updateClassHide() {
+        const st = AppCentral.scheduleRuntime.currentStatus
+        const hide = (st === "class")
+        if (hide === floatWindow.classHidden) return
+        floatWindow.classHidden = hide
+        floatWindow.visible = !hide
+        if (hide) classHideFallback.restart()
+        else classHideFallback.stop()
+    }
+    Timer {
+        id: classHideFallback
+        interval: 3600000
+        repeat: false
+        onTriggered: {
+            floatWindow.classHidden = false
+            floatWindow.visible = true
+        }
     }
 
     // 圆形点名按钮
     Rectangle {
         id: callButton
-        width: floatWindow.buttonSize
-        height: floatWindow.buttonSize
-        radius: floatWindow.buttonSize / 2
+        width: floatWindow.buttonW
+        height: floatWindow.buttonH
+        radius: floatWindow.solidStyle ? 12 : floatWindow.buttonW / 2
         // 按钮始终保持在屏幕坐标 buttonX/buttonY：向右展开锚窗口左侧、
         // 向左展开时窗口整体左移了 panelWidth，按钮锚右侧
         x: floatWindow.panelOpen && floatWindow.expandLeft
-           ? floatWindow.width - floatWindow.buttonSize : 0
+           ? floatWindow.width - floatWindow.buttonW : 0
         y: 0
-        color: hoverEngine.hovered ? Qt.rgba(0.16, 0.24, 0.42, 0.92)
-                                   : Qt.rgba(0.12, 0.16, 0.30, 0.72)
+        // float=悬浮半透明 / solid=实心不透明（RollCall.qml 样式切换即时生效）
+        color: floatWindow.solidStyle
+               ? (hoverEngine.hovered ? Qt.rgba(0.10, 0.16, 0.32, 1) : Qt.rgba(0.07, 0.11, 0.24, 1))
+               : (hoverEngine.hovered ? Qt.rgba(0.16, 0.24, 0.42, 0.92)
+                                     : Qt.rgba(0.12, 0.16, 0.30, 0.72))
         scale: hoverEngine.hovered ? 1.06 : 1.0
         Behavior on color { ColorAnimation { duration: 120 } }
         Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
@@ -226,11 +267,12 @@ QQW.Window {
         id: panel
         visible: floatWindow.panelOpen
         width: floatWindow.panelWidth
-        height: floatWindow.buttonSize
-        x: floatWindow.expandLeft ? 0 : floatWindow.buttonSize
+        height: Math.max(floatWindow.buttonH, floatWindow.buttonSize)
+        x: floatWindow.expandLeft ? 0 : floatWindow.buttonW
         y: 0
         radius: 14
-        color: Qt.rgba(0.10, 0.11, 0.16, 0.92)
+        color: floatWindow.solidStyle ? Qt.rgba(0.07, 0.08, 0.12, 1)
+                                      : Qt.rgba(0.10, 0.11, 0.16, 0.92)
 
         Row {
             anchors.centerIn: parent
@@ -254,7 +296,12 @@ QQW.Window {
         }
     }
 
-    Component.onCompleted: floatWindow.ensurePosition()
+    Component.onCompleted: {
+        floatWindow.ensurePosition()
+        // 上课中途开扩展/切屏：立即按当前状态评估本节隐藏（质检修正：原实现
+        // 要等下一次 status/entry 变化才生效）
+        floatWindow.updateClassHide()
+    }
 
     // 面板/结果窗共用的扁平小按钮：自绘 Rectangle 而非 QQC/RinUI Button，
     // 悬浮窗只有这一处交互面，自绘避免为两个轻量窗口拉入整套控件样式

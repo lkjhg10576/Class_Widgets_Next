@@ -9,28 +9,46 @@ Python (PySide6) 编写的 Windows 桌面课程表小组件；本仓库将其宿
 C++ + Qt Quick，目标是把安装体积从 ~226 MB 压到 **40–50 MB**、常驻内存压到
 **≤140 MB**，同时 **100% 复用上游 21,650 行 QML**（零修改）。
 
-> 当前状态：**M1 骨架点亮** —— C++ 宿主加载未修改的 `MainInterface.qml`，
-> 7 个内置小组件（6 个上游对齐 + 天气）经 C++ 注册表显示，托盘可退出。
-> 设置窗口/编辑器/主题切换在 M2–M3 陆续落地；**本版本暂不支持外部插件**
-> （插件系统推迟到 Phase 2，见下）。
+> 当前状态：**2.1.2.0** —— 设置窗口、课表编辑器、主题切换、托盘菜单与
+> 5 个官方扩展全部落地；7 个内置小组件（6 个上游对齐 + 倒数日）经 C++ 注册表显示。
+> **本版本暂不支持外部插件**（插件系统推迟到 Phase 2，见下）。
 
 ## 扩展功能
 
 除小组件外，内置「扩展功能」模块（设置窗口 → 扩展功能）：不绑定小组件的
-官方功能单元，独立开关与配置页，配置键统一在 `extensions.*`。当前三项
-（实施计划与记录见 [extensions-feature-plan.md](extensions-feature-plan.md)）：
+官方功能单元，独立开关与配置页，配置键统一在 `extensions.*`。当前五项
+（实施计划与记录见 [extensions-feature-plan.md](extensions-feature-plan.md)；
+四插件移植见 [four-plugins-to-extensions-plan.md](four-plugins-to-extensions-plan.md)；
+当日作业见 [homework-extension-plan.md](homework-extension-plan.md)）：
 
-- **天气**（迁入）：天气小组件不再以自由添加的内置组件出现，改由扩展开关
+- **天气**（迁入 + 第 6 数据源 NMC）：天气小组件不再以自由添加的内置组件出现，改由扩展开关
   控制——开启自动添加、关闭移除；城市/数据源/API 凭据/刷新间隔等配置收敛
   到「扩展功能-天气」页，写全局 `weather.*` 键，存量实例的 `settings.city`
-  自动迁移，无损。
-- **随机点名**（新增）：屏幕悬浮可拖动的「点名」按钮（位置记忆），点击展开
-  点 1/2/3 名面板，居中结果窗展示抽中名单；名单在扩展页管理（TXT 导入、
-  增删改名、权重 -100%~+100%、单次/会话内不重复策略），键
-  `extensions.roll_call.*`。
-- **课表速览**（新增）：小组件组下方的当日课表缩写条，当前课橙色、下一课
-  绿色圆形高亮，自动（下课弹出、上课收起）或常驻显示，键
-  `extensions.schedule_peek.*`。
+  自动迁移，无损。数据源新增 **NMC（中央气象台，免 Key）**，默认仍为小米；
+  另有 IP 双源自动定位（`weather.auto_location`，失败回退上次城市）。
+- **随机点名**（新增，一期增强）：屏幕悬浮可拖动的「点名」按钮（位置记忆），点击展开
+  点 1/2/3 名面板，居中结果窗展示抽中名单；名单在扩展页管理（TXT/DOCX 导入、
+  去序号、行内分割、`#` 注释、多编码，增删改名、权重 -100%~+100%、
+  单次/会话内不重复策略），键
+  `extensions.roll_call.*`。悬浮窗尺寸/悬浮-实心样式/点名后隐藏/上课隐藏结果窗
+  60ms 滚动 + 金色回弹 + 可拖动/缩放 + 灵动通知播报（**定格后才播**，不泄底）；
+  SecRandom 二代/三代为 Windows 条件桩（设置页三选一，不可用时回退内置）。
+- **课表速览**（新增，全量一期）：小组件组下方的当日课表条，缩写格（首字格、
+  当前课橙色、下一课绿色）与**全量条**（`display_mode`：全名 + 剩余倒计时 +
+  横向滚动，左 20% 定位）两种形态，自动（下课弹出、上课收起）或常驻显示，键
+  `extensions.schedule_peek.*`。全屏白板（`LessonsBoard` 双主题）为二期挂载点，
+  画笔套件另立项。
+- **显示与小组件增强**（新增，P1 去补丁化）：时间/倒数日数字动画开关、秒与
+  日期分量显隐、日期-星期并排/交替、顶部距离与隐藏深度覆盖、特定课程不隐藏
+  （≤20 门），键 `extensions.display_tweaks.*`（由旧插件配置
+  `plugins.configs.com.kryon.more_settings` 一次性迁移）；堆叠 overlay 为二期
+  挂载点（`AddOverlayMemberDialog` + `WidgetsModel.overlayMember` role）。
+- **当日作业**（新增，本仓库自有模型）：下课时自动弹出右侧作业浮窗 + 「作业布置」
+  灵动通知提醒课代表填写；浮窗可拖动/缩放（标题栏拖动，避免与列表滚动手势冲突），
+  底部 `+` 与列表选中双入口编辑/删除，优先级整行变色（橙/蓝/绿），按天文件存储
+  （`configs/homework/YYYY-MM-DD.json`，保留最近 1/3/7 天，损坏文件先留底再开新）。
+  拖堂延迟 0–10 分钟、锁定、通知与自动展示均可关；科目侧可逐门关闭「需要布置作业」
+  （只抑制通知，不抑制浮窗），键 `extensions.homework.*`。
 
 与插件（Phase 2）的区别：扩展是**官方功能模块**，随程序构建，**不加载任何
 第三方代码**；配置键空间 `extensions.*` 与插件的 `plugins.*` 严格分离，
@@ -47,10 +65,10 @@ Class_Widgets_Next/
 │  └─ core/
 │     ├─ AppPaths.*        # PathManager 等价物（纯 URI 拼接）
 │     ├─ ConfigStore.*     # Configs（configs.json 读写 + 点分 set/isKeyLocked）
-│     ├─ WidgetsModel.*    # WidgetListModel 移植（9 role + 9 slot 一字不改）
+│     ├─ WidgetsModel.*    # WidgetListModel 移植（上游 9 role + 9 slot 一字不改）
 │     ├─ BuiltinWidgets.*  # IWidgetProvider + 内置 7 个小组件注册表 + backend
-│     ├─ weather/          # WeatherService：天气组件数据源（小米天气 wtr-v3）
-│     ├─ extensions/       # ExtensionManager 扩展注册表/开关；RollCallService 点名
+│     ├─ weather/          # WeatherService：天气数据门面（小米/高德/和风/华风爱科/彩云/NMC）
+│     ├─ extensions/       # 扩展注册表/开关 + 各扩展服务（点名 / 显示增强 / 当日作业）
 │     ├─ CWThemeManager.*  # 主题扫描/查询/切换信号面（M3 补拦截器）
 │     ├─ AppCentral.*      # 聚合门面 + QML 上下文注册（名字与上游逐字一致）
 │     ├─ RinUiWindowBase.* # pip RinUI 的 Python 层等价物（每窗口引擎 + release 语义）
@@ -64,15 +82,31 @@ Class_Widgets_Next/
    ├─ RinUI/               # vendored RinUI QML 库（含上游覆盖补丁）
    ├─ assets/              # 图标 / 音频 / 翻译
    ├─ themes/              # 外部主题扫描目录
-   ├─ configs/             # 用户配置（运行时生成 configs.json）
+   ├─ configs/             # 用户配置（configs.json / schedules/ / homework/，运行时生成）
    └─ examples/            # 示例课表
 ```
+
+## 计划与记录文档
+
+| 文档 | 内容 |
+|---|---|
+| [extensions-feature-plan.md](extensions-feature-plan.md) | 「扩展功能」框架 + 天气/点名/速览三项扩展的实施计划与验收 |
+| [four-plugins-to-extensions-plan.md](four-plugins-to-extensions-plan.md) | 四个上游 Python 插件移植为官方扩展（显示增强/点名增强/NMC/课程全量） |
+| [homework-extension-plan.md](homework-extension-plan.md) | 当日作业扩展的详细计划、数据安全约定与实施增补 |
+| [weather-multi-provider-plan.md](weather-multi-provider-plan.md) | 天气多数据源设计 |
+| [upcoming-activities-abbreviation-and-autosize.md](upcoming-activities-abbreviation-and-autosize.md) | 即将上课组件缩写与宽度自适应 |
+| [QML_MODIFICATIONS.md](QML_MODIFICATIONS.md) | **上游同步区纪律**：`app/src/qml` 每一处改动与新增文件的登记簿 |
 
 ## 构建（Windows）
 
 依赖：**CMake ≥ 3.21**、**MSVC 2022**（或 MinGW-w64）、**Qt ≥ 6.9**
 （建议 6.10，与上游 PySide6 版本对齐），模块需含 **qt5compat**
 （`Qt5Compat.GraphicalEffects`）。
+
+> ⚠️ 随机点名的 DOCX 名单导入走 QtCore 私有 API `QZipReader`，因此还要求
+> **Qt6CorePrivate** 开发组件（`Qt6::CorePrivate` 目标）。缺失时 CMake **配置阶段**
+> 即报 `FATAL_ERROR` 而非编译期。私有头随 Qt 小版本变化——CI 与本机同钉
+> **Qt 6.10.3**（见 `.github/workflows/build.yml`），升级 Qt 小版本需回归 DOCX 导入路径。
 
 ```powershell
 # 1. 让程序找到运行时根（指向仓库的 app/ 目录；部署模式下可省略）
@@ -126,13 +160,16 @@ zip 与安装器两个 artifact。
 
 ## 契约纪律（移植方案的硬约束）
 
-- `WidgetsModel` 的 9 个 role 名（`instanceId/typeId/name/icon/qmlPath/backendObj/`
-  `settings/settingsQml/widget_id`）与 9 个 slot 签名**一字不改** —— 这是将来插件
-  系统把小组件注册回应用的唯一接口；
+- 上游 9 个 role 名（`instanceId/typeId/name/icon/qmlPath/backendObj/` `settings/` `settingsQml/widget_id`）
+  与 9 个 slot 签名**一字不改** —— 这是将来插件系统把小组件注册回应用的唯一接口；
+  堆叠 overlay 需求以**新增**第 10 个 role（`overlayMember`，二期）承接，不动既有 9 个；
 - 小组件注册收敛在 `IWidgetProvider` 接口，当前只有内置实现（6 个上游对齐组件
-  + 新增天气组件），Phase 2 挂 QML/JS 或 Python Sidecar 实现时零重构；
+  + 新增倒数日组件；天气已迁入扩展功能），Phase 2 挂 QML/JS 或 Python Sidecar
+  实现时零重构；
 - QML 上下文属性名（`Configs` / `AppCentral` / `CWThemeManager` / `WidgetsModel` /
-  `PathManager` / `WindowManager` / ...）与上游逐字一致，137 个 QML 零改动；
+  `PathManager` / `WindowManager` / ...）与上游逐字一致；本仓库新增的上下文
+  （`Extensions` / `RollCall` / `Homework` / `DisplayTweaks`）一律带扩展前缀语义，
+  不与上游命名冲突；
 - `app/src/qml` 是上游同步区：**改动必须记录在 [QML_MODIFICATIONS.md](QML_MODIFICATIONS.md)**。
 
 ## 许可

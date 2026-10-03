@@ -59,6 +59,15 @@ constexpr const char *kTapAction[] = { "hide", "mini_mode", "floating_widget", n
 constexpr const char *kRollCallAvoidRepeat[] = { "single", "session", nullptr };
 // 速览显示模式：auto=下课弹出、上课收起；always=当天有课常驻
 constexpr const char *kSchedulePeekMode[] = { "auto", "always", nullptr };
+// four-plugins-to-extensions-plan §4.1/§6：displayTweaks 时间标题布局
+constexpr const char *kDisplayTitleMode[] = { "side_by_side", "alternate", nullptr };
+// P2 点名一期：悬浮窗样式 float=悬浮半透明 / solid=实心不透明
+constexpr const char *kRollCallFloatMode[] = { "float", "solid", nullptr };
+// （质检修正）死键 extensions.roll_call.mode 的枚举 kRollCallMode 已随键移除
+// P2 二期 SecRandom 数据源三选一：builtin=内置名单 / secrandom2=希悦二代 / secrandom3=希悦三代
+constexpr const char *kRollCallService[] = { "builtin", "secrandom2", "secrandom3", nullptr };
+// P4 一期：速览条展示形态 peek=缩写格 / full=全量条
+constexpr const char *kSchedulePeekDisplayMode[] = { "peek", "full", nullptr };
 
 // 各分区注释标注对应 model.py 的模型类与行号
 const ScalarSpec kScalarSpecs[] = {
@@ -123,14 +132,58 @@ const ScalarSpec kScalarSpecs[] = {
     { "extensions.roll_call.avoid_repeat", ScalarKind::Enum, kRollCallAvoidRepeat },
     { "extensions.roll_call.button_x", ScalarKind::Int },
     { "extensions.roll_call.button_y", ScalarKind::Int },
+    { "extensions.roll_call.button_w", ScalarKind::Int },
+    { "extensions.roll_call.button_h", ScalarKind::Int },
+    { "extensions.roll_call.float_mode", ScalarKind::Enum, kRollCallFloatMode },
+    { "extensions.roll_call.click_hide", ScalarKind::Bool },
+    { "extensions.roll_call.animation_seconds", ScalarKind::Int },
+    // （质检修正）extensions.roll_call.mode 死键移除：全仓无读写方，"上游兼容
+    // 别名"同步从未实现；上游语义由 avoid_repeat 承担
+    { "extensions.roll_call.notify_duration", ScalarKind::Int },
+    { "extensions.roll_call.service", ScalarKind::Enum, kRollCallService },
     { "extensions.schedule_peek.mode", ScalarKind::Enum, kSchedulePeekMode },
     { "extensions.schedule_peek.split_gap_minutes", ScalarKind::Int },
+    { "extensions.schedule_peek.display_mode", ScalarKind::Enum, kSchedulePeekDisplayMode },
+    { "extensions.schedule_peek.board_strokes", ScalarKind::Str },
+    // P1 displayTweaks（four-plugins §4.1 15 键，由 plugins.configs.com.kryon.more_settings 迁移）：
+    // time_title_mode 仅 side_by_side|alternate；其余 bool/int/str 见 MoreSettingsConfig 默认
+    { "extensions.display_tweaks.countdown_animation", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_animation", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_show_seconds", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_show_date", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_show_year", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_show_month", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_show_day", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_show_weekday", ScalarKind::Bool },
+    { "extensions.display_tweaks.time_title_mode", ScalarKind::Enum, kDisplayTitleMode },
+    { "extensions.display_tweaks.time_alternate_interval", ScalarKind::Int },
+    { "extensions.display_tweaks.time_alternate_animation", ScalarKind::Bool },
+    { "extensions.display_tweaks.display_height", ScalarKind::Int },
+    { "extensions.display_tweaks.hide_depth", ScalarKind::Int },
+    { "extensions.display_tweaks.hide_excluded_enabled", ScalarKind::Bool },
+    { "extensions.display_tweaks.hide_excluded_subjects", ScalarKind::Str },
+    // （质检修正）More_settings 迁移一次性标记：migrateMoreSettingsConfig 的幂等
+    // 闸门（内部键，无 UI）
+    { "extensions.display_tweaks.migrated", ScalarKind::Bool },
+    // 当日作业扩展（extensions-feature-plan 后续，本仓库自有模型）：按天文件 +
+    // 浮窗几何/锁定/延迟/通知/保留时长。window_x/y 允许 null（从未拖动哨兵）
+    { "extensions.homework.delay_minutes", ScalarKind::Int },
+    { "extensions.homework.locked", ScalarKind::Bool },
+    { "extensions.homework.window_x", ScalarKind::OptInt },
+    { "extensions.homework.window_y", ScalarKind::OptInt },
+    { "extensions.homework.window_w", ScalarKind::Int },
+    { "extensions.homework.window_h", ScalarKind::Int },
+    { "extensions.homework.notify_enabled", ScalarKind::Bool },
+    { "extensions.homework.auto_show", ScalarKind::Bool },
+    { "extensions.homework.retention_days", ScalarKind::Int },
     // 天气全局城市（extensions-feature-plan §5 B3 天气迁移的收敛键）：JSON 字符
     // 串 {cityId,name,lat,lon,province,adcode,wcnKey}，"" = 未配置。声明为 Str
     // 后 sanitize 会在 load 时补默认空串，QML 侧 Configs.data.weather.city
     // 恒可读。其余 weather.* 键（provider/poll_interval/keys.*）沿用
     // weather-multi-provider-plan 惯例不落声明表（读取方自带兜底），保持不动。
+    // four-plugins §5.1 增补：weather.auto_location（IP 自动定位总开关）落表收紧。
     { "weather.city", ScalarKind::Str },
+    { "weather.auto_location", ScalarKind::Bool },
 };
 
 const ScalarSpec *findScalarSpec(const QString &dottedKey)
@@ -675,23 +728,77 @@ QJsonObject ConfigStore::defaultConfig()
     rollCall.insert(QStringLiteral("avoid_repeat"), QStringLiteral("single"));
     rollCall.insert(QStringLiteral("button_x"), -1); // -1 = 从未拖动，首显落默认屏幕右上角
     rollCall.insert(QStringLiteral("button_y"), -1);
+    // four-plugins §4.2 一期新增（只增不删，存量缺键由 mergeDefaults 幂等补齐）：
+    // button_w/h 悬浮窗尺寸、float_mode 样式、click_hide 点击隐藏、animation_seconds 结果动画时长、
+    // mode 上游兼容别名、notify_duration 灵动通知停留、service 数据源三选一
+    rollCall.insert(QStringLiteral("button_w"), 60);
+    rollCall.insert(QStringLiteral("button_h"), 60);
+    rollCall.insert(QStringLiteral("float_mode"), QStringLiteral("float"));
+    rollCall.insert(QStringLiteral("click_hide"), false);
+    rollCall.insert(QStringLiteral("animation_seconds"), 3);
+    // （质检修正）死键 extensions.roll_call.mode 已移除，见 kScalarSpecs 注释
+    rollCall.insert(QStringLiteral("notify_duration"), 5);
+    rollCall.insert(QStringLiteral("service"), QStringLiteral("builtin"));
 
     QJsonObject schedulePeek; // 课表速览扩展
     schedulePeek.insert(QStringLiteral("mode"), QStringLiteral("auto"));
     schedulePeek.insert(QStringLiteral("split_gap_minutes"), 15);
+    // four-plugins §5.2 一期：display_mode peek|full；board_strokes 为三期画笔落盘路径预留（本期仅占位）
+    schedulePeek.insert(QStringLiteral("display_mode"), QStringLiteral("peek"));
+    schedulePeek.insert(QStringLiteral("board_strokes"), QString());
+
+    // P1 displayTweaks（four-plugins §4.1 15 键；默认值对齐上游 MoreSettingsConfig）：
+    // display_height -1=跟随默认偏移；hide_depth -1=跟随平台默认（24/macOS 48，
+    // 质检修正：原默认恒 24 使平台分支不可达，且 [0,200] 钳位封死 -1 哨兵）；
+    // 排除科目 JSON "[]"；交替间隔 3000ms
+    QJsonObject displayTweaks;
+    displayTweaks.insert(QStringLiteral("countdown_animation"), true);
+    displayTweaks.insert(QStringLiteral("time_animation"), true);
+    displayTweaks.insert(QStringLiteral("time_show_seconds"), true);
+    displayTweaks.insert(QStringLiteral("time_show_date"), true);
+    displayTweaks.insert(QStringLiteral("time_show_year"), true);
+    displayTweaks.insert(QStringLiteral("time_show_month"), true);
+    displayTweaks.insert(QStringLiteral("time_show_day"), true);
+    displayTweaks.insert(QStringLiteral("time_show_weekday"), true);
+    displayTweaks.insert(QStringLiteral("time_title_mode"), QStringLiteral("side_by_side"));
+    displayTweaks.insert(QStringLiteral("time_alternate_interval"), 3000);
+    displayTweaks.insert(QStringLiteral("time_alternate_animation"), false);
+    displayTweaks.insert(QStringLiteral("display_height"), -1);
+    displayTweaks.insert(QStringLiteral("hide_depth"), -1);
+    displayTweaks.insert(QStringLiteral("hide_excluded_enabled"), false);
+    displayTweaks.insert(QStringLiteral("hide_excluded_subjects"), QStringLiteral("[]"));
+    displayTweaks.insert(QStringLiteral("migrated"), false);
+
+    // 当日作业扩展（classwidgets.ext.homework）：默认锁定（true）避免误拖，
+    // 延迟 0 分钟（下课即弹），窗口默认 320x400，几何 null=从未保存，
+    // 保留最近 7 天作业文件（1/3/7 由设置页 ComboBox 调）
+    QJsonObject homework;
+    homework.insert(QStringLiteral("delay_minutes"), 0);
+    homework.insert(QStringLiteral("locked"), true);
+    homework.insert(QStringLiteral("window_x"), QJsonValue::Null);
+    homework.insert(QStringLiteral("window_y"), QJsonValue::Null);
+    homework.insert(QStringLiteral("window_w"), 320);
+    homework.insert(QStringLiteral("window_h"), 400);
+    homework.insert(QStringLiteral("notify_enabled"), true);
+    homework.insert(QStringLiteral("auto_show"), true);
+    homework.insert(QStringLiteral("retention_days"), 7);
 
     QJsonObject extensions;
     extensions.insert(QStringLiteral("enabled"), QJsonArray()); // 启用中的扩展 id 列表
     extensions.insert(QStringLiteral("roll_call"), rollCall);
     extensions.insert(QStringLiteral("schedule_peek"), schedulePeek);
+    extensions.insert(QStringLiteral("display_tweaks"), displayTweaks);
+    extensions.insert(QStringLiteral("homework"), homework);
 
     // 天气分区（本仓库自有模型，weather-multi-provider-plan / extensions-feature-plan
     // §5 B3）：仅声明全局城市 weather.city（JSON 字符串，"" = 未配置）。
     // provider/poll_interval/keys.* 由设置页经 Configs.set 动态路径写入、读取方
     // 自带兜底，历来不在默认树中，维持现状不补，避免 mergeDefaults 对存量用户
     // 产生无意义的结构回退。
+    // four-plugins §5.1：auto_location（IP 自动定位总开关，默认关）补入默认树。
     QJsonObject weather;
     weather.insert(QStringLiteral("city"), QString());
+    weather.insert(QStringLiteral("auto_location"), false);
 
     QJsonObject root; // manager.py:18-26 RootConfig
     root.insert(QStringLiteral("app"), app);
@@ -782,6 +889,55 @@ void ConfigStore::sanitize()
         ++fixed;
     if (normalizeRollCallNames(m_json, QStringLiteral("extensions.roll_call.names"), defaults))
         ++fixed;
+
+    // 3) four-plugins 数值钳位（范围语义见各设置页；非法值钳到合法区间而非回退默认，
+    // 保留用户意图；display_height -1 为哨兵“跟随默认”，不参与下限钳制）
+    const auto clampInt = [&](const QString &path, int lo, int hi) {
+        const QJsonValue cur = jsonGetAt(m_json, path);
+        if (!cur.isDouble())
+            return;
+        const int v = cur.toInt();
+        const int clamped = qBound(lo, v, hi);
+        if (clamped != v) {
+            jsonSetAt(m_json, path, clamped);
+            ++fixed;
+        }
+    };
+    clampInt(QStringLiteral("extensions.roll_call.button_w"), 40, 160);
+    clampInt(QStringLiteral("extensions.roll_call.button_h"), 30, 100);
+    clampInt(QStringLiteral("extensions.roll_call.animation_seconds"), 1, 10);
+    clampInt(QStringLiteral("extensions.roll_call.notify_duration"), 2, 15);
+    clampInt(QStringLiteral("extensions.schedule_peek.split_gap_minutes"), 5, 60);
+    // hide_depth：-1 哨兵（跟随平台默认 24/macOS 48）保留，其余钳到 [0,200]
+    clampInt(QStringLiteral("extensions.display_tweaks.hide_depth"), -1, 200);
+    clampInt(QStringLiteral("extensions.display_tweaks.time_alternate_interval"), 500, 30000);
+    // display_height：-1 哨兵保留，其余钳到 [0,500]
+    {
+        const QJsonValue cur = jsonGetAt(m_json, QStringLiteral("extensions.display_tweaks.display_height"));
+        if (cur.isDouble() && cur.toInt() != -1) {
+            const int clamped = qBound(0, cur.toInt(), 500);
+            if (clamped != cur.toInt()) {
+                jsonSetAt(m_json, QStringLiteral("extensions.display_tweaks.display_height"), clamped);
+                ++fixed;
+            }
+        }
+    }
+    // 当日作业：拖堂延迟 0~10 分钟；浮窗尺寸下限与 QML 缩放手柄一致
+    // （240x200，防手改配置绕过手柄钳位）；保留时长白名单 1/3/7，非法回退 7
+    clampInt(QStringLiteral("extensions.homework.delay_minutes"), 0, 10);
+    clampInt(QStringLiteral("extensions.homework.window_w"), 240, 4096);
+    clampInt(QStringLiteral("extensions.homework.window_h"), 200, 4096);
+    {
+        const QJsonValue cur =
+            jsonGetAt(m_json, QStringLiteral("extensions.homework.retention_days"));
+        if (cur.isDouble()) {
+            const int v = cur.toInt();
+            if (v != 1 && v != 3 && v != 7) {
+                jsonSetAt(m_json, QStringLiteral("extensions.homework.retention_days"), 7);
+                ++fixed;
+            }
+        }
+    }
 
     if (fixed > 0)
         cwn::Log::warn(QStringLiteral("Config sanitized: %1 field(s) corrected").arg(fixed));
@@ -936,19 +1092,27 @@ bool ConfigStore::isKeyLocked(const QString &key) const
 
 void ConfigStore::lock(const QStringList &keys)
 {
-    // manager.py:140-145 lock()：仅更新内存集合，不落盘
+    // manager.py:140-145 lock()：仅更新内存集合，不落盘。
+    // 末尾补发 dataChanged：依赖 Configs.data 的绑定与订阅方（各设置页的
+    // refresh()）借此重读。已知边界：纯 `enabled: !isKeyLocked(...)` 绑定
+    // 走 Q_INVOKABLE 调用、不建立通知依赖，dataChanged 推不动它们——这是
+    // QML 方法调用的固有语义，需在页面里用 refresh() 显式刷新（Homework.qml）
     for (const QString &k : keys)
         m_lockedKeys.insert(k);
     cwn::Log::info(QStringLiteral("Locked config keys: %1").arg(keys.join(QStringLiteral(", "))));
+    if (!keys.isEmpty())
+        emit dataChanged();
 }
 
 void ConfigStore::unlock(const QStringList &keys)
 {
-    // manager.py:147-152 unlock()
+    // manager.py:147-152 unlock()（dataChanged 理由与已知边界同 lock）
     for (const QString &k : keys)
         m_lockedKeys.remove(k);
     cwn::Log::info(
         QStringLiteral("Unlocked config keys: %1").arg(keys.join(QStringLiteral(", "))));
+    if (!keys.isEmpty())
+        emit dataChanged();
 }
 
 void ConfigStore::lock(const QString &key)

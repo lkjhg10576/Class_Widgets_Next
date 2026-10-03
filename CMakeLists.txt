@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.21)
 #
 # CI（.github/workflows/build.yml）以 -SkipBuild 调用打包脚本，不参与本段配置，
 # 其安装器版本号同样取自下面的缺省值 —— 改版本号只需改这一处。
-set(CWN_VERSION "2.1.0.6" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
+set(CWN_VERSION "2.1.2.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
 if(CWN_VERSION_OVERRIDE)
     set(CWN_VERSION "${CWN_VERSION_OVERRIDE}")
 endif()
@@ -46,6 +46,15 @@ set(CMAKE_AUTOMOC ON)
 # Windows 产物由 windows-latest runner 产出）。
 find_package(Qt6 6.9 REQUIRED COMPONENTS
     Core Gui Qml Quick QuickControls2 Network Svg)
+# RollCallService docx 导入用 QtCore 私有 API QZipReader（Qt6::CorePrivate 目标）。
+# 私有头随 Qt 小版本变化：本项目 CI 与本机同钉 Qt 6.10.3（见 .github/workflows/build.yml），
+# 升级 Qt 小版本时需回归 docx 导入路径
+find_package(Qt6 COMPONENTS CorePrivate QUIET)
+if(NOT TARGET Qt6::CorePrivate)
+    message(FATAL_ERROR
+        "Qt6CorePrivate 未找到：docx 名单导入依赖 QtCore 私有 API QZipReader"
+        "（CI 与本机均为 Qt 6.10.3，请检查 Qt 安装完整性）")
+endif()
 
 qt_standard_project_setup()
 
@@ -65,6 +74,15 @@ set(CWN_SOURCES
     # 随机点名扩展服务（阶段 C1：名单存储 + 加权抽取 + txt 解析）
     src/core/extensions/RollCallService.cpp
     src/core/extensions/RollCallService.h
+    # 当日作业扩展服务（按天文件读写 + 过期清理 + 作业布置通知）
+    src/core/extensions/HomeworkService.cpp
+    src/core/extensions/HomeworkService.h
+    # 显示增强扩展服务（four-plugins A1：健康自检 + 排除科目解析）
+    src/core/extensions/DisplayTweaksService.cpp
+    src/core/extensions/DisplayTweaksService.h
+    # P2 二期 SecRandom 桥（仅 Windows 编译，见文件内 #ifdef；Linux 为空桩）
+    src/core/extensions/SecRandomBridge.cpp
+    src/core/extensions/SecRandomBridge.h
     src/core/RinUiWindowBase.cpp
     src/core/WidgetsWindow.cpp
     src/core/TrayIcon.cpp
@@ -105,7 +123,7 @@ set(CWN_SOURCES
     src/core/automations/AutomationManager.cpp
     src/core/automations/BuiltinTasks.cpp
     src/core/automations/UpdateCheckTask.cpp
-    # 天气小组件数据门面 + 多数据源 Provider（小米/高德/和风/华风爱科/彩云）
+    # 天气小组件数据门面 + 多数据源 Provider（小米/高德/和风/华风爱科/彩云/NMC）
     src/core/weather/WeatherService.cpp
     src/core/weather/WeatherProvider.cpp
     src/core/weather/WeatherCodes.cpp
@@ -114,6 +132,8 @@ set(CWN_SOURCES
     src/core/weather/providers/QweatherProvider.cpp
     src/core/weather/providers/WeathercnProvider.cpp
     src/core/weather/providers/CaiyunProvider.cpp
+    src/core/weather/providers/NmcProvider.cpp
+    src/core/weather/providers/NmcProvider.h
 )
 
 qt_add_executable(ClassWidgetsNext WIN32 ${CWN_SOURCES})
@@ -125,6 +145,7 @@ target_include_directories(ClassWidgetsNext PRIVATE
 
 target_link_libraries(ClassWidgetsNext PRIVATE
     Qt6::Core
+    Qt6::CorePrivate  # RollCallService docx 导入的 QZipReader（Qt 内置 zip 解析）
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick

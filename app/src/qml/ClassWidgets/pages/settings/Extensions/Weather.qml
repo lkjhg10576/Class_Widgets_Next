@@ -31,12 +31,17 @@ FluentPage {
     property var searchResults: []
     // "测试连接"结果文案（AppCentral.weather.connectionTestFinished 回填）
     property string testStatus: ""
+    // IP 自动定位状态（autoLocateFinished 回填）
+    property string locateStatus: ""
 
     // 数据源注册表：weather.provider 配置值；label 覆盖"收费"标注（产品决策：
     // 选中即视为知情，无额外计费提示）；note 展示在卡片描述
+    // four-plugins D：新增 NMC（免Key）+ auto_location（IP 双源定位），不抢默认源（默认仍小米）
     readonly property var sources: [
         { id: "xiaomi", label: qsTr("小米天气（免费）"),
           note: qsTr("内置，无需配置") },
+        { id: "nmc", label: qsTr("NMC（免Key）"),
+          note: qsTr("中央气象台，免 Key；首建索引约 30 请求，后台进行") },
         { id: "amap", label: qsTr("高德天气（付费）"),
           note: qsTr("需要高德开放平台 Web 服务 Key") },
         { id: "qweather", label: qsTr("和风天气（付费）"),
@@ -52,8 +57,8 @@ FluentPage {
             if (sources[i].id === saved) return saved
         return "xiaomi"
     }
-    // 各源凭据已存的键（凭据卡按当前源动态显示对应字段）
-    readonly property bool needsCredentials: providerId !== "xiaomi"
+    // 各源凭据已存的键（凭据卡按当前源动态显示对应字段；小米/NMC 免 Key 不显示）
+    readonly property bool needsCredentials: providerId !== "xiaomi" && providerId !== "nmc"
 
     function readKey(sourceId, field) {
         const w = Configs.data.weather
@@ -65,8 +70,11 @@ FluentPage {
     function selectCity(city) {
         // 阶段 B 收敛：城市写全局 weather.city（不再经实例 settings）。落盘触发
         // Configs.dataChanged → 组件侧 cityJson 绑定重算 → 组件自动按新城市拉取，
-        // 页面无需手动通知服务。城市携带数据源扩展键（adcode/wcnKey），换数据源
+        // 页面无需手动通知服务。城市携带数据源扩展键（adcode/wcnKey/nmcCode），换数据源
         // 时免重选城市（契约同 WeatherService::cityFromJson）。
+        // nmcCode 只透传 NMC 搜索结果携带的字母站号（质检修正：原 `|| city.cityId`
+        // 把小米/高德等源的数字码污染进 nmcCode，NmcProvider 采信后永远请求错误
+        // 站号；数字码本就非 NMC 站号，宁缺勿错——缺省由索引按城市名重建）
         Configs.set("weather.city", JSON.stringify({
             cityId: city.cityId,
             name: city.name,
@@ -74,7 +82,8 @@ FluentPage {
             lon: city.lon,
             province: city.province || "",
             adcode: city.adcode || "",
-            wcnKey: city.wcnKey || ""
+            wcnKey: city.wcnKey || "",
+            nmcCode: city.nmcCode || ""
         }))
         root.searchResults = []
         searchField.text = ""
@@ -88,6 +97,10 @@ FluentPage {
         target: AppCentral.weather
         function onCitySearchFinished(cities) {
             root.searchResults = cities
+        }
+        function onAutoLocateFinished(ok, cityName) {
+            root.locateStatus = ok ? qsTr("已定位：%1").arg(cityName)
+                                   : qsTr("定位失败，已保留上次城市")
         }
         function onConnectionTestFinished(ok, errorKind) {
             if (ok)
@@ -137,9 +150,10 @@ FluentPage {
             }
 
             ComboBox {
-                property var values: ["xiaomi", "amap", "qweather", "weathercn", "caiyun"]
+                property var values: ["xiaomi", "nmc", "amap", "qweather", "weathercn", "caiyun"]
                 model: ListModel {
                     ListElement { text: qsTr("小米天气（免费）") }
+                    ListElement { text: qsTr("NMC（免Key）") }
                     ListElement { text: qsTr("高德天气（付费）") }
                     ListElement { text: qsTr("和风天气（付费）") }
                     ListElement { text: qsTr("华风爱科（付费）") }
@@ -249,11 +263,39 @@ FluentPage {
                   + (root.cityValue.province ? " · " + root.cityValue.province : "")
                 : qsTr("搜索并选择城市以启用天气")
 
-            TextField {
-                id: searchField
-                Layout.preferredWidth: 180
-                placeholderText: qsTr("搜索城市")
-                onTextChanged: searchTimer.restart()
+            ColumnLayout {
+                spacing: 6
+                RowLayout {
+                    spacing: 6
+                    TextField {
+                        id: searchField
+                        Layout.preferredWidth: 180
+                        placeholderText: qsTr("搜索城市")
+                        onTextChanged: searchTimer.restart()
+                    }
+                    Button {
+                        text: qsTr("自动定位")
+                        onClicked: {
+                            root.locateStatus = qsTr("定位中…")
+                            if (AppCentral.weather)
+                                AppCentral.weather.autoLocate()
+                        }
+                    }
+                }
+                RowLayout {
+                    spacing: 8
+                    CheckBox {
+                        text: qsTr("启动时自动定位（IP 双源，失败回退上次城市）")
+                        checked: !!(Configs.data.weather && Configs.data.weather.auto_location)
+                        enabled: !Configs.isKeyLocked("weather.auto_location")
+                        onToggled: Configs.set("weather.auto_location", checked)
+                    }
+                    Text {
+                        visible: root.locateStatus.length > 0
+                        text: root.locateStatus
+                        color: Theme.currentTheme.colors.textSecondaryColor
+                    }
+                }
             }
         }
 
@@ -318,6 +360,8 @@ FluentPage {
             icon.name: "ic_fluent_info_20_regular"
             title: qsTr("数据来源")
             description: {
+                if (root.providerId === "nmc")
+                    return qsTr("天气数据来自中央气象台（NMC）")
                 if (root.providerId === "amap")
                     return qsTr("天气数据来自高德地图")
                 if (root.providerId === "qweather")

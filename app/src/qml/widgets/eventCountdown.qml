@@ -11,6 +11,16 @@ Widget {
         AppCentral.translator.language
         return qsTr("Remaining")
     }
+    // four-plugins B（P1 倒数日动画开关，去补丁化：只加 flag 门，不替换文件）
+    // 扩展开关门控（质检修正）：范式同 SchedulePeekBar.qml:73-76，关闭扩展后
+    // 回到上游默认（动画开）
+    readonly property bool countdownAnim: {
+        Extensions.extensions
+        if (!Extensions.isEnabled("classwidgets.ext.displayTweaks"))
+            return true
+        const t = Configs.data.extensions ? Configs.data.extensions.display_tweaks : null
+        return t && t.countdown_animation !== undefined ? !!t.countdown_animation : true
+    }
     property var countdown: AppCentral.scheduleRuntime.remainingTime || { "minute": 0, "second": 0 }
 
     // 统一布局，用 RowLayout 并根据 miniMode 控制内部排列
@@ -45,6 +55,7 @@ Widget {
                     id: fuzzyMinute
                     visible: Configs.data.preferences.countdown_precision === "minute"
                     value: String(Math.ceil((countdown.minute * 60 + countdown.second) / 60))
+                    animEnabled: root.countdownAnim
                 }
                 Title {
                     visible: Configs.data.preferences.countdown_precision === "minute"
@@ -55,6 +66,7 @@ Widget {
                     id: minute
                     visible: Configs.data.preferences.countdown_precision !== "minute"
                     value: countdown.minute || "00"
+                    animEnabled: root.countdownAnim
                 }
                 Title {
                     visible: Configs.data.preferences.countdown_precision !== "minute"
@@ -65,6 +77,7 @@ Widget {
                     id: second
                     visible: Configs.data.preferences.countdown_precision !== "minute"
                     value: (countdown.second + "").padStart(2, "0") || "00"
+                    animEnabled: root.countdownAnim
                 }
             }
 

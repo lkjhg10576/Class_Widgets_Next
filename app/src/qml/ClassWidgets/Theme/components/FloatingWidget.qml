@@ -21,6 +21,18 @@ Widget {
     property int notificationLevel: -1
     property int notificationDuration: Configs.data.notifications.default_duration || 8000
 
+    // four-plugins B（质检修正）：浮窗数字动画随 displayTweaks.countdown_animation
+    // 透传（原三处 AnimatedDigits 未接 animEnabled，关动画后浮窗仍滚动）。
+    // 范式同 eventCountdown.qml：先读 Extensions.extensions 建立通知依赖，
+    // 扩展关闭回上游默认（动画开）
+    readonly property bool countdownAnim: {
+        Extensions.extensions
+        if (!Extensions.isEnabled("classwidgets.ext.displayTweaks"))
+            return true
+        const t = Configs.data.extensions ? Configs.data.extensions.display_tweaks : null
+        return t && t.countdown_animation !== undefined ? !!t.countdown_animation : true
+    }
+
     readonly property int notificationTextLimit: 20
 
     function limitedText(value) {
@@ -184,6 +196,7 @@ Widget {
                         visible: Configs.data.preferences.countdown_precision === "minute"
                         font.pixelSize: 16
                         value: String(Math.ceil((countdown.minute * 60 + countdown.second) / 60))
+                        animEnabled: root.countdownAnim
                     }
                     Text {
                         visible: Configs.data.preferences.countdown_precision === "minute"
@@ -197,6 +210,7 @@ Widget {
                         visible: Configs.data.preferences.countdown_precision !== "minute"
                         font.pixelSize: 16
                         value: String(countdown.minute || "00")
+                        animEnabled: root.countdownAnim
                     }
                     Title {
                         visible: Configs.data.preferences.countdown_precision !== "minute"
@@ -209,6 +223,7 @@ Widget {
                         id: second
                         visible: Configs.data.preferences.countdown_precision !== "minute"
                         value: String(countdown.second).padStart(2, "0")
+                        animEnabled: root.countdownAnim
                     }
                 }
             }

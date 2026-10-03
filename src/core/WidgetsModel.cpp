@@ -36,7 +36,7 @@ WidgetsModel::WidgetsModel(QObject *parent)
 
 QHash<int, QByteArray> WidgetsModel::roleNames() const
 {
-    // model.py:57-68 role 名逐字对齐
+    // model.py:57-68 role 名逐字对齐（+ overlayMember：four-plugins B 新增，不改既有 9 个）
     return {
         { InstanceIdRole, "instanceId" },
         { TypeIdRole, "typeId" },
@@ -47,6 +47,7 @@ QHash<int, QByteArray> WidgetsModel::roleNames() const
         { SettingsRole, "settings" },
         { SettingsQmlRole, "settingsQml" },
         { WidgetIdRole, "widget_id" },
+        { OverlayMemberRole, "overlayMember" },
     };
 }
 
@@ -89,6 +90,9 @@ QVariant WidgetsModel::data(const QModelIndex &index, int role) const
     case WidgetIdRole:
         // model.py: w.get("id", w.get("type_id")) —— definition.id 恒等于 type_id
         return w.typeId;
+    case OverlayMemberRole:
+        // overlay 堆叠成员标记：settings._overlayMember 真值（presets 摆放同样经该键持久化）
+        return w.settings.value(QStringLiteral("_overlayMember")).toBool();
     default:
         return {};
     }
@@ -320,6 +324,13 @@ void WidgetsModel::removeInstance(const QString &instanceId)
 {
     for (int i = 0; i < m_instances.size(); ++i) {
         if (m_instances.at(i).instanceId == instanceId) {
+            // four-plugins B 卸载保护：overlay 锁定成员（settings._overlayLocked）拒绝删除，
+            // 由调用方（右键菜单/就地编辑行）提示；避免堆叠态误删导致布局断裂。
+            if (m_instances.at(i).settings.value(QStringLiteral("_overlayLocked")).toBool()) {
+                cwn::Log::warn(QStringLiteral("WidgetsModel: refuse to remove overlay-locked %1")
+                                   .arg(instanceId));
+                return;
+            }
             beginRemoveRows(QModelIndex(), i, i);
             m_instances.removeAt(i);
             endRemoveRows();
@@ -375,10 +386,26 @@ void WidgetsModel::updateSettings(const QString &instanceId, const QVariantMap &
             m_instances[i].settings = merged;
 
             const QModelIndex ix = index(i);
-            Q_EMIT dataChanged(ix, ix, { SettingsRole });
+            Q_EMIT dataChanged(ix, ix, { SettingsRole, OverlayMemberRole });
             syncCurrentPreset();
             emit modelChanged();
             return;
         }
     }
+}
+
+void WidgetsModel::setOverlayEditingId(const QString &instanceId)
+{
+    if (m_overlayEditingId == instanceId)
+        return;
+    m_overlayEditingId = instanceId;
+    emit overlayStateChanged();
+}
+
+void WidgetsModel::setOverlayListMode(bool enabled)
+{
+    if (m_overlayListMode == enabled)
+        return;
+    m_overlayListMode = enabled;
+    emit overlayStateChanged();
 }

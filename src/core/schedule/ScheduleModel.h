@@ -14,7 +14,8 @@
 // 上游用 pydantic 模型（core/schedule/model.py）承载课表：ScheduleData
 // = {meta, subjects[], days[], overrides[]}，其中
 //   meta      = {id, version, maxWeekCycle, startDate}
-//   subject   = {id, name, simplifiedName, teacher, icon, color, location, isLocalClassroom}
+//   subject   = {id, name, simplifiedName, teacher, icon, color, location,
+//                isLocalClassroom, needsHomework}
 //   timeline  = {id, entries[], dayOfWeek(int|list|null), weeks("all"|int|list|null), date}
 //   entry     = {id, type, startTime, endTime, subjectId, title}
 //   override  = {id, entryId, dayOfWeek, weeks, subjectId, title, startTime, endTime}

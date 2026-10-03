@@ -49,10 +49,12 @@ public:
 
     // ── Subject 操作（editor.py:153-215）───────────────────────
     // editor.py:153 addSubject(name, teacher, icon, color, location, isLocal) → id
+    // 尾参 needsHomework（当日作业扩展）：科目是否需要布置作业，默认 true
     Q_INVOKABLE QString addSubject(const QString &name, const QString &teacher = QString(),
                                    const QString &icon = QString(), const QString &color = QString(),
                                    const QString &location = QString(),
-                                   bool isLocalClassroom = true);
+                                   bool isLocalClassroom = true,
+                                   bool needsHomework = true);
     // editor.py:171-194 updateSubject：空串字段语义见实现（name/simplified 保留旧值，
     // 其余清空），与上游 `x or None` 完全一致
     Q_INVOKABLE void updateSubject(const QString &subjectId, const QString &name = QString(),
@@ -60,7 +62,8 @@ public:
                                    const QString &teacher = QString(),
                                    const QString &icon = QString(), const QString &color = QString(),
                                    const QString &location = QString(),
-                                   bool isLocalClassroom = true);
+                                   bool isLocalClassroom = true,
+                                   bool needsHomework = true);
     // editor.py:196-210 removeSubject：同时删除相关课程条目
     Q_INVOKABLE void removeSubject(const QString &subjectId);
     // editor.py:212-215 getSubject → 科目字典或 null

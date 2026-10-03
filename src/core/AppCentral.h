@@ -11,6 +11,7 @@ class AutomationManager;
 class ClassSwapManager;
 class ConfigStore;
 class CWThemeManager;
+class DisplayTweaksService;
 class ExtensionManager;
 class ScheduleEditor;
 class ScheduleManager;
@@ -20,6 +21,7 @@ class ThemeRecovery;
 class Translator;
 class NotificationService;
 class RollCallService;
+class HomeworkService;
 class UpdaterBridge;
 class WidgetsModel;
 class WidgetsWindow;
@@ -42,6 +44,8 @@ class AppCentral : public QObject
     Q_PROPERTY(QObject *classSwapManager READ classSwapManager NOTIFY initialized)
     Q_PROPERTY(QObject *weather READ weather CONSTANT)
     Q_PROPERTY(QObject *rollCall READ rollCall CONSTANT)
+    Q_PROPERTY(QObject *homework READ homework CONSTANT)
+    Q_PROPERTY(QObject *displayTweaks READ displayTweaks CONSTANT)
     Q_PROPERTY(QObject *scheduleManager READ scheduleManager NOTIFY updated)
     Q_PROPERTY(QObject *translator READ translator NOTIFY initialized)
     Q_PROPERTY(QObject *themeManager READ themeManager CONSTANT)
@@ -90,6 +94,8 @@ public:
     QObject *themeManager() const;
     QObject *weather() const;
     QObject *rollCall() const;
+    QObject *homework() const;
+    QObject *displayTweaks() const;
     bool restartRequired() const { return m_restartRequired; }
     QVariant globalConfig() const;
 
@@ -142,6 +148,8 @@ private:
     WeatherService *m_weatherService = nullptr;
     ExtensionManager *m_extensionManager = nullptr;
     RollCallService *m_rollCallService = nullptr;
+    HomeworkService *m_homeworkService = nullptr;
+    DisplayTweaksService *m_displayTweaksService = nullptr;
 
     // M1 占位已全部替换（M2-M4）：SupportStubs 仅剩 PluginManagerStub
     Translator *m_translator = nullptr;

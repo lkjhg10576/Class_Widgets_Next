@@ -4,6 +4,11 @@
 > 本文档按「阶段 × 难度 × 执行顺序」组织，保留计划全文供追溯与验收比对。
 > 评审日期：2026-10-01。产品决策经用户确认，见 §10。
 > 参考先例：`weather-multi-provider-plan.md`（天气多数据源，已实施）。
+>
+> **范围说明**：本文档只覆盖框架 + 首批三项扩展（天气 / 随机点名 / 课表速览）。
+> 此后追加的两项扩展各自独立成文，不在本文档的 27 项任务表内：
+> - **显示与小组件增强**（第 4 项，2026-10-02）——见 [`four-plugins-to-extensions-plan.md`](four-plugins-to-extensions-plan.md)
+> - **当日作业**（第 5 项，2026-10-03）——见 [`homework-extension-plan.md`](homework-extension-plan.md)
 
 ---
 

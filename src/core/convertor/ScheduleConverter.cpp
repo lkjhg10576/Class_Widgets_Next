@@ -491,6 +491,7 @@ bool buildCw1Subjects(const QJsonObject &cw1, QJsonArray *subjects,
         subject.insert(QStringLiteral("id"), subjectId);
         subject.insert(QStringLiteral("icon"), QStringLiteral("ic_fluent_book_20_regular"));
         subject.insert(QStringLiteral("name"), name);
+        subject.insert(QStringLiteral("needsHomework"), true); // 转换新科目默认需要布置作业
         subjects->append(subject);
     }
     return true;
@@ -1460,6 +1461,7 @@ bool csesToCw2(const QJsonObject &cses, QJsonObject *outSchedule, QString *error
         subject.insert(QStringLiteral("id"), subjectId);
         subject.insert(QStringLiteral("icon"), QStringLiteral("ic_fluent_book_20_regular"));
         subject.insert(QStringLiteral("name"), name);
+        subject.insert(QStringLiteral("needsHomework"), true); // 转换新科目默认需要布置作业
         QJsonValue simplified;
         QJsonValue teacher;
         QJsonValue location;

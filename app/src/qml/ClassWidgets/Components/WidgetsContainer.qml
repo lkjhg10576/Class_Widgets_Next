@@ -24,8 +24,26 @@ Column {
 
     property real dragOffsetX: 0
     property real dragOffsetY: 0
+    // four-plugins B（P1 几何，去补丁化：只加覆盖绑定，不替换整文件）。
+    // hide_depth>=0 用覆盖值，-1（哨兵）按平台默认（macOS 48 / 其余 24）；
+    // display_height>=0 覆盖顶部三停靠的 offset_y（-1=跟随默认）。300ms Timer
+    // 轮询已无（现为 hideFade Behavior + C++ 绑定直驱，见 WidgetsWindow::updateMask
+    // 速览 D4 连接写法）。
+    // 扩展开关门控（质检修正）：范式同 SchedulePeekBar.qml:73-76——先读
+    // Extensions.extensions 建立通知依赖再调 isEnabled；扩展关闭时 tweakGeom
+    // 置空对象，覆盖值全部回到平台/上游默认，"特定课程不隐藏"随之失效。
+    readonly property bool extOn: {
+        Extensions.extensions
+        return Extensions.isEnabled("classwidgets.ext.displayTweaks")
+    }
+    readonly property var tweakGeom: (extOn && Configs.data.extensions
+                                      && Configs.data.extensions.display_tweaks)
+        ? Configs.data.extensions.display_tweaks : {}
+    readonly property int hideDepthOverride: tweakGeom.hide_depth === undefined ? -1 : tweakGeom.hide_depth
+    readonly property int displayTopOverride: tweakGeom.display_height === undefined ? -1 : tweakGeom.display_height
     property real hideMargin: {
         if (floatingMode) return 0  // 浮窗模式下完全移出窗口
+        if (hideDepthOverride >= 0) return hideDepthOverride
         switch (Qt.platform.os) {
             case "osx":
                 return 48
@@ -93,6 +111,11 @@ Column {
     }
 
     // 计算 Y 坐标
+    // four-plugins B：顶部三停靠 `y → displayTop>=0 ? displayTop : offset_y`
+    function displayTop() {
+        return displayTopOverride >= 0 ? displayTopOverride
+                                       : preferences.widgets_offset_y
+    }
     function calcY() {
         let y = 0
         switch (preferences.widgets_anchor) {
@@ -101,7 +124,7 @@ Column {
             if (editMode) {
                 y = (Screen.height - height) / 2
             } else {
-                y = preferences.widgets_offset_y
+                y = displayTop()
                 // 左/右不受 hide 影响
             }
             break
@@ -109,7 +132,7 @@ Column {
             if (editMode) {
                 y = (Screen.height - height) / 2
             } else {
-                y = preferences.widgets_offset_y
+                y = displayTop()
                 if (hide) y = -height + hideMargin  // 仅 center 生效
             }
             break
@@ -393,6 +416,49 @@ Column {
         function onVisibleChanged() { widgetsContainer.contentGeometryChanged() }
         function onHeightChanged() { widgetsContainer.contentGeometryChanged() }
         function onWidthChanged() { widgetsContainer.contentGeometryChanged() }
+    }
+
+    // four-plugins B（P1 特定课程不隐藏）：ScheduleRuntime 状态变化经 singleShot(0)
+    // 纠正 hide.state/mini_mode。经 ScheduleRuntime.currentEntry 取名（吸取上游 1.3.4
+    // 误读 current_subject 教训），命中排除（≤20）则纠正隐藏态。仅在
+    // interactions.hide.in_class 且 status 为 class/activity 时生效。
+    Connections {
+        target: AppCentral.scheduleRuntime
+        function onCurrentEntryChanged() { widgetsContainer.correctHideForExcluded() }
+        function onCurrentStatusChanged() { widgetsContainer.correctHideForExcluded() }
+    }
+    function correctHideForExcluded() {
+        const t = widgetsContainer.tweakGeom
+        if (!t || !t.hide_excluded_enabled) return
+        if (!Configs.data.interactions.hide.in_class) return
+        const status = AppCentral.scheduleRuntime.currentStatus
+        if (status !== "class" && status !== "activity") return
+        const entry = AppCentral.scheduleRuntime.currentEntry
+        if (!entry) return
+        // currentEntry 形状：normalizeEntry 后的 {title/subjectId,...}；科目名经 subjects 查
+        let name = entry.title || ""
+        if (!name && entry.subjectId) {
+            const subjects = AppCentral.scheduleRuntime.subjects || []
+            for (let i = 0; i < subjects.length; i++) {
+                if (subjects[i].id === entry.subjectId) {
+                    name = subjects[i].name || ""
+                    break
+                }
+            }
+        }
+        if (!name) return
+        let excluded = []
+        if (DisplayTweaks) excluded = DisplayTweaks.excludedSubjects(t.hide_excluded_subjects || "[]")
+        else {
+            try { excluded = JSON.parse(t.hide_excluded_subjects || "[]") } catch (e) { excluded = [] }
+        }
+        if (!Array.isArray(excluded) || excluded.indexOf(name) < 0) return
+        Qt.callLater(function() {
+            if (!Configs.isKeyLocked("interactions.hide.state") && Configs.data.interactions.hide.state)
+                Configs.set("interactions.hide.state", false)
+            if (!Configs.isKeyLocked("preferences.mini_mode") && Configs.data.preferences.mini_mode)
+                Configs.set("preferences.mini_mode", false)
+        })
     }
 
     // 添加小组件&完成

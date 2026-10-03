@@ -57,7 +57,8 @@ FluentPage {
     }
 
     // 导入：文件解析与合并写回都走 C++（QML 无法读本地文件）。importNamesFromUrl
-    // 纯解析；mergeNames 一次完成现有名单/批内去重 + 单次写回落盘 —— 此前逐名
+    // 纯解析（txt/docx + utf-8-sig/utf-16/gbk + 去序号 + 行内分割 + # 注释）；
+    // mergeNames 一次完成现有名单/批内去重 + 单次写回落盘 —— 此前逐名
     // addName 会让每个名字触发一次整树 dataChanged（本页 Repeater 全量重建 N 次）
     // 与整份 configs.json 落盘，导入大名单时内存暴涨、界面假死
     function importFromFile(url) {
@@ -118,6 +119,11 @@ FluentPage {
                     text: qsTr("从 TXT 导入")
                     enabled: root.canEdit()
                     onClicked: importDialog.open()
+                }
+                Button {
+                    text: qsTr("从 DOCX 导入")
+                    enabled: root.canEdit()
+                    onClicked: docxDialog.open()
                 }
                 Button {
                     text: qsTr("清空名单")
@@ -182,6 +188,126 @@ FluentPage {
                                            Configs.set("extensions.roll_call.avoid_repeat", currentValue)
                 Component.onCompleted: currentIndex = indexOfValue(
                     Configs.data.extensions.roll_call.avoid_repeat || "single")
+            }
+        }
+
+        // ── 悬浮窗 ──
+        SettingCard {
+            Layout.fillWidth: true
+
+            icon.name: "ic_fluent_circle_20_regular"
+            title: qsTr("悬浮窗")
+            description: qsTr("按钮尺寸 40–160 × 30–100，样式即时生效")
+
+            ColumnLayout {
+                spacing: 8
+                RowLayout {
+                    spacing: 8
+                    Text { text: qsTr("宽"); color: Theme.currentTheme.colors.textSecondaryColor }
+                    SpinBox {
+                        from: 40; to: 160
+                        enabled: !Configs.isKeyLocked("extensions.roll_call.button_w")
+                        Component.onCompleted: value = Configs.data.extensions.roll_call.button_w || 60
+                        onValueModified: Configs.set("extensions.roll_call.button_w", value)
+                    }
+                    Text { text: qsTr("高"); color: Theme.currentTheme.colors.textSecondaryColor }
+                    SpinBox {
+                        from: 30; to: 100
+                        enabled: !Configs.isKeyLocked("extensions.roll_call.button_h")
+                        Component.onCompleted: value = Configs.data.extensions.roll_call.button_h || 60
+                        onValueModified: Configs.set("extensions.roll_call.button_h", value)
+                    }
+                    ComboBox {
+                        Layout.preferredWidth: 140
+                        model: ListModel {
+                            ListElement { text: qsTr("悬浮"); value: "float" }
+                            ListElement { text: qsTr("实心"); value: "solid" }
+                        }
+                        textRole: "text"
+                        valueRole: "value"
+                        enabled: !Configs.isKeyLocked("extensions.roll_call.float_mode")
+                        onCurrentValueChanged: if (focus) Configs.set("extensions.roll_call.float_mode", currentValue)
+                        Component.onCompleted: currentIndex = indexOfValue(
+                            Configs.data.extensions.roll_call.float_mode || "float")
+                    }
+                }
+                CheckBox {
+                    text: qsTr("点名后隐藏悬浮窗")
+                    checked: !!(Configs.data.extensions.roll_call && Configs.data.extensions.roll_call.click_hide)
+                    enabled: !Configs.isKeyLocked("extensions.roll_call.click_hide")
+                    onToggled: Configs.set("extensions.roll_call.click_hide", checked)
+                }
+            }
+        }
+
+        // ── 结果动画与通知 ──
+        SettingCard {
+            Layout.fillWidth: true
+
+            icon.name: "ic_fluent_sparkle_20_regular"
+            title: qsTr("结果与通知")
+            description: qsTr("滚动时长 1–10 秒，通知停留 2–15 秒")
+
+            ColumnLayout {
+                spacing: 8
+                RowLayout {
+                    spacing: 8
+                    Text { text: qsTr("动画"); color: Theme.currentTheme.colors.textSecondaryColor }
+                    SpinBox {
+                        from: 1; to: 10
+                        enabled: !Configs.isKeyLocked("extensions.roll_call.animation_seconds")
+                        Component.onCompleted: value = Configs.data.extensions.roll_call.animation_seconds || 3
+                        onValueModified: Configs.set("extensions.roll_call.animation_seconds", value)
+                    }
+                    Text { text: qsTr("通知停留"); color: Theme.currentTheme.colors.textSecondaryColor }
+                    SpinBox {
+                        from: 2; to: 15
+                        enabled: !Configs.isKeyLocked("extensions.roll_call.notify_duration")
+                        Component.onCompleted: value = Configs.data.extensions.roll_call.notify_duration || 5
+                        onValueModified: Configs.set("extensions.roll_call.notify_duration", value)
+                    }
+                    Button {
+                        text: qsTr("试抽 1 名")
+                        enabled: root.roster.length > 0
+                        onClicked: {
+                            const preview = AppCentral.rollCall.testDraw(1)
+                            const name = preview.length > 0 ? preview[0].name : qsTr("无人可抽")
+                            root.notify(qsTr("试抽：%1（不影响会话）").arg(name), Severity.Info)
+                        }
+                    }
+                    Button {
+                        text: qsTr("权重清零")
+                        enabled: root.canEdit() && root.roster.length > 0
+                        onClicked: {
+                            AppCentral.rollCall.resetWeights()
+                            root.notify(qsTr("权重已清零"), Severity.Success)
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── 数据源（三选一，二期 SecRandom 为条件桩）──
+        SettingCard {
+            Layout.fillWidth: true
+
+            icon.name: "ic_fluent_database_20_regular"
+            title: qsTr("数据源")
+            description: qsTr("内置名单 / 希悦二代 / 希悦三代（后两者仅 Windows 可用，不可用时回退内置）")
+
+            ComboBox {
+                Layout.preferredWidth: 220
+                model: ListModel {
+                    ListElement { text: qsTr("内置名单"); value: "builtin" }
+                    ListElement { text: qsTr("希悦二代"); value: "secrandom2" }
+                    ListElement { text: qsTr("希悦三代"); value: "secrandom3" }
+                }
+                textRole: "text"
+                valueRole: "value"
+                enabled: !Configs.isKeyLocked("extensions.roll_call.service")
+                onCurrentValueChanged: if (focus) Configs.set("extensions.roll_call.service", currentValue)
+                Component.onCompleted: currentIndex = indexOfValue(
+                    Configs.data.extensions.roll_call.service || "builtin")
             }
         }
 
@@ -319,5 +445,12 @@ FluentPage {
         title: qsTr("导入名单（TXT，每行一个名字）")
         nameFilters: [qsTr("纯文本文件 (*.txt)"), qsTr("所有文件 (*)")]
         onAccepted: root.importFromFile(importDialog.selectedFile)
+    }
+
+    FileDialog {
+        id: docxDialog
+        title: qsTr("导入名单（DOCX，提取正文名字）")
+        nameFilters: [qsTr("Word 文档 (*.docx)"), qsTr("所有文件 (*)")]
+        onAccepted: root.importFromFile(docxDialog.selectedFile)
     }
 }

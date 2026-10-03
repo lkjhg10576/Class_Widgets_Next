@@ -186,6 +186,13 @@ QQW.Window {
         }
     }
 
+    // 当日作业扩展（classwidgets.ext.homework）：下课自动弹出右侧作业浮窗 +
+    // 「作业布置」灵动通知的常驻触发器（F1/F3）。浮窗本身关闭即销毁，触发逻辑
+    // 必须挂在主窗口；扩展开关关闭时组件内所有路径直接早退
+    HomeworkTrigger {
+        id: homeworkTrigger
+    }
+
     Component.onCompleted: {
         updateLayer()
         // 应用当前主题的主题色

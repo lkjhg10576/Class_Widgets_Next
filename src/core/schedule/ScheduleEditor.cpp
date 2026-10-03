@@ -196,7 +196,8 @@ void ScheduleEditor::submitToManager()
 
 QString ScheduleEditor::addSubject(const QString &name, const QString &teacher,
                                    const QString &icon, const QString &color,
-                                   const QString &location, bool isLocalClassroom)
+                                   const QString &location, bool isLocalClassroom,
+                                   bool needsHomework)
 {
     // editor.py:153-169 addSubject
     QJsonObject subject;
@@ -212,6 +213,7 @@ QString ScheduleEditor::addSubject(const QString &name, const QString &teacher,
     subject.insert(QLatin1String("location"), location.isEmpty() ? QJsonValue(QJsonValue::Null)
                                                                  : QJsonValue(location));
     subject.insert(QLatin1String("isLocalClassroom"), isLocalClassroom);
+    subject.insert(QLatin1String("needsHomework"), needsHomework);
 
     QJsonArray subjectList = ScheduleModel::subjects(m_schedule);
     subjectList.append(subject);
@@ -224,7 +226,8 @@ QString ScheduleEditor::addSubject(const QString &name, const QString &teacher,
 void ScheduleEditor::updateSubject(const QString &subjectId, const QString &name,
                                    const QString &simplifiedName, const QString &teacher,
                                    const QString &icon, const QString &color,
-                                   const QString &location, bool isLocalClassroom)
+                                   const QString &location, bool isLocalClassroom,
+                                   bool needsHomework)
 {
     // editor.py:171-194 updateSubject
     QJsonObject subject = subjectById(subjectId);
@@ -238,6 +241,7 @@ void ScheduleEditor::updateSubject(const QString &subjectId, const QString &name
     const QString oldTeacher = subject.value(QLatin1String("teacher")).toString();
     const QString oldLocation = subject.value(QLatin1String("location")).toString();
     const bool oldLocal = subject.value(QLatin1String("isLocalClassroom")).toBool(true);
+    const bool oldNeedsHomework = subject.value(QLatin1String("needsHomework")).toBool(true);
 
     // `name or subject.name`：空串保留旧值；icon/color/teacher/location 直接落 None
     const QString newName = name.isEmpty() ? oldName : name;
@@ -246,7 +250,8 @@ void ScheduleEditor::updateSubject(const QString &subjectId, const QString &name
     // editor.py:188-189：全部字段一致时不做任何变更
     const bool changed = newName != oldName || newSimplified != oldSimplified
         || icon != oldIcon || color != oldColor || teacher != oldTeacher
-        || location != oldLocation || isLocalClassroom != oldLocal;
+        || location != oldLocation || isLocalClassroom != oldLocal
+        || needsHomework != oldNeedsHomework;
     if (!changed) {
         return;
     }
@@ -263,6 +268,7 @@ void ScheduleEditor::updateSubject(const QString &subjectId, const QString &name
     subject.insert(QLatin1String("location"), location.isEmpty() ? QJsonValue(QJsonValue::Null)
                                                                  : QJsonValue(location));
     subject.insert(QLatin1String("isLocalClassroom"), isLocalClassroom);
+    subject.insert(QLatin1String("needsHomework"), needsHomework);
 
     QJsonArray subjectList = ScheduleModel::subjects(m_schedule);
     for (int i = 0; i < subjectList.size(); ++i) {

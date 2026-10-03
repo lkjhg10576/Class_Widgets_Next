@@ -194,6 +194,34 @@ void AppWindowManager::closeRollCallResult()
     releaseWindow(WindowId::RollCallResult);
 }
 
+// ─────────────── 当日作业扩展浮窗（本仓库自有，上游无对应）───────────────
+
+void AppWindowManager::openHomeworkFloat()
+{
+    // 单例语义同 openSettings/openRollCallFloat：已存在仅 show/raise/activate；
+    // 位置/尺寸/锁定状态留在 extensions.homework.* 配置键，重建时恢复
+    open(WindowId::HomeworkFloat);
+}
+
+void AppWindowManager::closeHomeworkFloat()
+{
+    // 关闭即销毁（releaseWindow 的 0ms singleShot 语义）；自动隐藏（上课/预备）
+    // 与手动关闭都走这里，下次触发重建
+    releaseWindow(WindowId::HomeworkFloat);
+}
+
+// ─────────────── four-plugins E（二期白板挂载点）───────────────
+
+void AppWindowManager::openLessonsBoard()
+{
+    open(WindowId::LessonsBoard);
+}
+
+void AppWindowManager::closeLessonsBoard()
+{
+    releaseWindow(WindowId::LessonsBoard);
+}
+
 // ─────────────────────────── C++ API ───────────────────────────
 
 void AppWindowManager::openThemeLoadError(const QString &failedThemeId, bool recovered)
@@ -400,6 +428,8 @@ QString AppWindowManager::windowName(WindowId id)
     case WindowId::Debugger: return QStringLiteral("debugger");
     case WindowId::RollCallFloat: return QStringLiteral("roll_call_float");
     case WindowId::RollCallResult: return QStringLiteral("roll_call_result");
+    case WindowId::HomeworkFloat: return QStringLiteral("homework_float");
+    case WindowId::LessonsBoard: return QStringLiteral("lessons_board");
     }
     return QString();
 }
@@ -445,6 +475,12 @@ QString AppWindowManager::windowQmlPath(WindowId id)
     case WindowId::RollCallResult:
         // 阶段 C4：点名结果窗
         return cwRoot + QStringLiteral("/Windows/RollCallResult.qml");
+    case WindowId::HomeworkFloat:
+        // 当日作业：右侧作业浮窗（Windows 目录，路径写法照 RollCallFloat）
+        return cwRoot + QStringLiteral("/Windows/HomeworkFloat.qml");
+    case WindowId::LessonsBoard:
+        // four-plugins E：全屏课程白板（独立 Frameless+Tool+StaysOnTop，不进主窗口蒙版）
+        return cwRoot + QStringLiteral("/Windows/LessonsBoard.qml");
     }
     return QString();
 }
@@ -469,6 +505,10 @@ QString AppWindowManager::notInitializedMessage(WindowId id)
         return QStringLiteral("RollCallFloat window not initialized correctly.");
     case WindowId::RollCallResult:
         return QStringLiteral("RollCallResult window not initialized correctly.");
+    case WindowId::HomeworkFloat:
+        return QStringLiteral("HomeworkFloat window not initialized correctly.");
+    case WindowId::LessonsBoard:
+        return QStringLiteral("LessonsBoard window not initialized correctly.");
     }
     return QStringLiteral("Window not initialized correctly.");
 }

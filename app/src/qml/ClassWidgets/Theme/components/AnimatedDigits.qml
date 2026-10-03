@@ -13,6 +13,10 @@ Rectangle {
     property double progress: 1  // 0-1
     property int duration: 700
     property real scaleFactor: Configs.data.preferences.scale_factor || 1.0
+    // four-plugins B（P1 组件动画）：上层经 displayTweaks 开关传入；关闭时跳过
+    // 擦除动画直接切值（不整文件替换，只在触发点加 flag 门）。
+    // 注意文件头 A3 纪律：layer.enabled 保持常开，只跳过 progressAnimation。
+    property bool animEnabled: true
 
     property alias font: oldDigit.font
     implicitWidth: Math.max(oldDigit.width, newDigit.width)
@@ -73,6 +77,13 @@ Rectangle {
     }
 
     onValueChanged: {
+        if (!root.animEnabled) {
+            // 动画关闭：直接切值，无擦除过程（progress=1 即终态，不启动画）
+            root.oldValue = root.value
+            root.progress = 1
+            newDigitGradient.visible = false
+            return
+        }
         newDigitGradient.visible = true
         progressAnimation.start()
     }

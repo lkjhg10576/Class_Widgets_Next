@@ -102,7 +102,9 @@ Widget {
                 spacing: 4
 
                 Title {
-                    text: root.current
+                    // temperature 逐键判缺（补充质检修正：NMC 主路径可能仅
+                    // weatherCode 有效，缺键直接 Math.round 会显示 NaN°）
+                    text: root.current && root.current.temperature !== undefined
                         ? Math.round(root.current.temperature) + "°"
                         : "--°"
                 }
@@ -120,9 +122,18 @@ Widget {
                     if (!root.current)
                         return qsTr("Loading…")
                     let line = weatherText(root.current.weatherCode)
-                    if (root.today)
-                        line += " · " + Math.round(root.today.tempMax) + "° / "
-                                + Math.round(root.today.tempMin) + "°"
+                    if (root.today) {
+                        // tempMax/tempMin 逐键判缺（补充质检修正：NMC 备源可能
+                        // 只补到最低温，缺键直接进 Math.round 会显示 NaN°）
+                        const hi = root.today.tempMax
+                        const lo = root.today.tempMin
+                        if (hi !== undefined && lo !== undefined)
+                            line += " · " + Math.round(hi) + "° / " + Math.round(lo) + "°"
+                        else if (hi !== undefined)
+                            line += " · " + Math.round(hi) + "°"
+                        else if (lo !== undefined)
+                            line += " · " + qsTr("最低 %1°").arg(Math.round(lo))
+                    }
                     return line
                 }
             }

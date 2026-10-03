@@ -66,6 +66,13 @@ private:
     // 此刻 AppCentral 尚未接线（connectServices 在其后才执行），且启动期实例
     // 本就由 WidgetsModel::loadConfig 从配置装载，无需信号驱动的补加/补删。
     void migrateLegacyWeatherConfig();
+    // four-plugins A2：上游 `plugins.configs.com.kryon.more_settings`（MoreSettingsConfig，
+    // 15 键）一次性迁移到 `extensions.display_tweaks.*`。幂等：以专用标记键
+    // extensions.display_tweaks.migrated 判定（质检修正——原"目标非默认痕迹"判定
+    // 在源配置为全默认时每次启动重写目标键，回滚用户调参）；
+    // 源缺失/非对象同样置标记后直接返回。display_height/hide_depth 浮点取整；
+    // 旧版逗号分隔 hide_excluded_lessons 兼容转为 JSON 数组字符串。
+    void migrateMoreSettingsConfig();
 
     ConfigStore *m_configs;
 };

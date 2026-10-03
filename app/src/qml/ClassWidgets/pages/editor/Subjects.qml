@@ -10,7 +10,7 @@ Item {
     // SaveFlyout {}
     property string editedSubjectId: ""
 
-    function openEditDialog(subjectId, name, simplifiedName, teacher, icon, color, location, isLocalClassroom) {
+    function openEditDialog(subjectId, name, simplifiedName, teacher, icon, color, location, isLocalClassroom, needsHomework) {
         editedSubjectId = subjectId
         subjectID.text = subjectId
         subjectSimplifiedName.text = simplifiedName || ""
@@ -18,7 +18,8 @@ Item {
         subjectTeacher.text = teacher || ""
         subjectLocation.text = location || ""
         subjectColor.color = color || "#13c4d6"
-        subjectIsLocalClassroom.checked = isLocalClassroom
+        subjectIsLocalClassroom.checked = isLocalClassroom !== false
+        subjectNeedsHomework.checked = needsHomework !== false
         iconBtn.icon.name = icon || "ic_fluent_square_hint_20_regular"
         editDialog.open()
     }
@@ -85,9 +86,9 @@ Item {
 
             delegate: SubjectClip {
                 enabled: !AppCentral.scheduleManager.isReadonly()
-                onEditRequested: function(subjectId, name, simplifiedName, teacher, icon, color, location, isLocalClassroom) {
+                onEditRequested: function(subjectId, name, simplifiedName, teacher, icon, color, location, isLocalClassroom, needsHomework) {
                     root.openEditDialog(
-                        subjectId, name, simplifiedName, teacher, icon, color, location, isLocalClassroom
+                        subjectId, name, simplifiedName, teacher, icon, color, location, isLocalClassroom, needsHomework
                     )
                 }
             }
@@ -159,6 +160,18 @@ Item {
             }
 
             RowLayout {
+                Text { text: qsTr("需要布置作业"); Layout.fillWidth: true }
+                Button {
+                    id: homeworkExplainButton
+                    icon.name: "ic_fluent_question_circle_20_regular"
+                    implicitWidth: 24
+                    implicitHeight: 24
+                    onClicked: homeworkExplainFlyout.open()
+                }
+                Switch { id: subjectNeedsHomework }
+            }
+
+            RowLayout {
                 Text { text: qsTr("Icon"); Layout.fillWidth: true }
                 DropDownButton {
                     id: iconBtn
@@ -185,11 +198,21 @@ Item {
             )
         }
 
+        Flyout {
+            id: homeworkExplainFlyout
+            parent: homeworkExplainButton
+            width: 300
+            text: qsTr(
+                "Enable if the subject assigns homework.  \n" +
+                "When disabled, the end-of-class notification will not remind the representative for this subject."
+            )
+        }
+
         standardButtons: Dialog.Ok | Dialog.Cancel
         onAccepted: AppCentral.scheduleEditor.updateSubject(
             editedSubjectId, subjectName.text, subjectSimplifiedName.text, subjectTeacher.text,
             iconBtn.icon.name, subjectColor.color.toString(), subjectLocation.text,
-            subjectIsLocalClassroom.checked
+            subjectIsLocalClassroom.checked, subjectNeedsHomework.checked
         )
     }
 }

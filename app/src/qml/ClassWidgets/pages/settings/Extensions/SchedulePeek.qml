@@ -53,6 +53,27 @@ FluentPage {
 
         SettingCard {
             Layout.fillWidth: true
+            icon.name: "ic_fluent_calendar_ltr_20_regular"
+            title: qsTr("展示形态")
+            description: qsTr("缩写格：单行首字格；全量条：全名 + 剩余倒计时 + 横向滚动")
+
+            ComboBox {
+                Layout.preferredWidth: 180
+                model: ListModel {
+                    ListElement { text: qsTr("缩写格"); value: "peek" }
+                    ListElement { text: qsTr("全量条"); value: "full" }
+                }
+                textRole: "text"
+                valueRole: "value"
+                enabled: !Configs.isKeyLocked("extensions.schedule_peek.display_mode")
+                onCurrentValueChanged: if (focus) Configs.set("extensions.schedule_peek.display_mode", currentValue)
+                Component.onCompleted: currentIndex = indexOfValue(
+                    (Configs.data.extensions.schedule_peek.display_mode) || "peek")
+            }
+        }
+
+        SettingCard {
+            Layout.fillWidth: true
             icon.name: "ic_fluent_slide_text_20_regular"
             title: qsTr("分组间隔阈值")
             description: qsTr("相邻两节课间隔达到该分钟数时，速览条中插入分组竖线；普通课间不插")
