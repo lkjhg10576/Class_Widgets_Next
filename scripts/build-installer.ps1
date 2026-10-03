@@ -24,53 +24,9 @@ Set-Location $repoRoot
 
 # ---- 工具函数 ----
 
-# 定位 vcvarsall.bat：vswhere -> VSINSTALLDIR -> 常见安装路径。
-# 必须用 vswhere 而非写死路径：VS 装在非默认盘符/路径时（本机 E:\VSBuild），
-# windeployqt 自身探测不到，会漏掉运行库。
-function Get-VcVarsAllPath {
-    $candidates = @()
-    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
-    if (${env:ProgramFiles(x86)} -and (Test-Path $vswhere)) {
-        $vsRoot = & $vswhere -latest -products * `
-            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-            -property installationPath
-        if ($vsRoot) {
-            $candidates += (Join-Path ($vsRoot | Select-Object -First 1).Trim() `
-                'VC\Auxiliary\Build\vcvarsall.bat')
-        }
-    }
-    if ($env:VSINSTALLDIR) {
-        $candidates += (Join-Path $env:VSINSTALLDIR 'VC\Auxiliary\Build\vcvarsall.bat')
-    }
-    foreach ($ed in 'Community', 'Professional', 'Enterprise', 'BuildTools') {
-        $candidates += "$env:ProgramFiles\Microsoft Visual Studio\2022\$ed\VC\Auxiliary\Build\vcvarsall.bat"
-    }
-    $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-}
-
-# 把 vcvarsall 的环境导入当前进程，使 windeployqt 能定位 MSVC 运行库与 Windows SDK
-# 的 dxcompiler/dxil。vcvarsall 只对其自身进程树生效，故导出后逐条并入当前会话。
-function Initialize-MSVCEnvironment {
-    $vcvars = Get-VcVarsAllPath
-    if (-not $vcvars) {
-        Write-Warning '未找到 vcvarsall.bat：windeployqt 可能定位不到 MSVC 运行库与 dxcompiler'
-        return $false
-    }
-    Write-Host "==> 初始化 MSVC 环境: $vcvars"
-    $envLines = & cmd /c "call `"$vcvars`" x64 >nul 2>&1 && set"
-    foreach ($line in $envLines) {
-        # set 输出的 "=C:=C:\..." 这类以 = 开头的行不匹配 [^=]+
-        if ($line -match '^([^=]+)=(.*)$') {
-            [Environment]::SetEnvironmentVariable($Matches[1], $Matches[2], 'Process')
-        }
-    }
-    if (-not $env:VCINSTALLDIR) {
-        Write-Warning 'vcvarsall 执行后 VCINSTALLDIR 仍为空'
-        return $false
-    }
-    Write-Host "    VCINSTALLDIR=$($env:VCINSTALLDIR)"
-    return $true
-}
+# MSVC 环境定位/导入与 CI 共用一份实现（CI 的 windeployqt 步骤同样要导入，
+# 否则 dist 缺 dxcompiler/dxil 与运行库，下面的断言必然失败）。
+. (Join-Path $PSScriptRoot 'msvc-env.ps1')
 
 # 断言 windeployqt 的产物：MSVC 运行库 + dxcompiler/dxil 缺一不可。
 # 缺运行库 = 没装 VC++ 运行库的机器上装完起不来；缺 dxcompiler = Qt6ShaderTools

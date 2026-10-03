@@ -124,6 +124,12 @@ cmake --install build --prefix dist
 windeployqt --release --compiler-runtime --qmldir app dist\ClassWidgetsNext.exe
 ```
 
+> ⚠️ 手跑 windeployqt 前先导入 MSVC 环境（`. .\scripts\msvc-env.ps1` 后调用
+> `Initialize-MSVCEnvironment`），否则它找不到 `VCINSTALLDIR` /
+> `VCToolsRedistDir` / `WindowsSdkVerBinPath`，只打一行 warning 就跳过
+> MSVC 运行库与 `dxcompiler.dll` / `dxil.dll`，装出来的程序起不来。
+> `scripts\build-installer.ps1` 与 CI 都已自动做这一步（并有断言兜底）。
+
 ### Windows 安装器（Inno Setup 6）
 
 一键产出全中文向导安装器，依赖本机装有 [Inno Setup 6](https://jrsoftware.org/isinfo.php)

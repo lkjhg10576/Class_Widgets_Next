@@ -43,6 +43,14 @@ jobs:
       - name: Deploy Qt runtime (windeployqt)
         shell: pwsh
         run: |
+          # windeployqt 靠 VCINSTALLDIR / VCToolsRedistDir / WindowsSdkVerBinPath 定位
+          # MSVC 运行库与 dxcompiler.dll / dxil.dll。runner 上这些变量默认不在会话里，
+          # 缺了它 windeployqt 只打两行 warning、退出码仍是 0（deploy-output.log 里可见），
+          # 于是 dist/ 静默少文件，紧接着 build-installer.ps1 的运行时断言 exit 1。
+          # 与本地打包共用同一份实现；必须同一步内完成——GitHub Actions 每个 step 是
+          # 独立进程，导出的环境变量不跨 step 生效。
+          . ./scripts/msvc-env.ps1
+          Initialize-MSVCEnvironment
           windeployqt --release --compiler-runtime --verbose 1 `
             --qmldir app `
             dist/ClassWidgetsNext.exe 2>&1 | Tee-Object -FilePath deploy-output.log
@@ -96,7 +104,14 @@ jobs:
       # 与本地同一脚本：解析 CWN_VERSION（CMakeLists 缺省值）+ 定位 ISCC + 编译安装器
       - name: Package (Inno Setup installer)
         shell: pwsh
-        run: scripts/build-installer.ps1 -SkipBuild
+        run: |
+          # 整体输出留档到 installer-output.log：运行时依赖断言的排查指引、ISCC 缺失
+          # 提示、ISCC 编译报错都只打在控制台（Write-Host / Write-Error），build/deploy
+          # 两个日志文件里根本没有 —— 不留档则这类失败在下文的诊断步骤里查无实据。
+          # *>&1 才能收进 Write-Host 的信息流；exit 码由 $LASTEXITCODE 透传。
+          & scripts/build-installer.ps1 -SkipBuild *>&1 |
+            Tee-Object -FilePath installer-output.log
+          exit $LASTEXITCODE
 
       - name: Upload artifact (zip)
         uses: actions/upload-artifact@v4
@@ -117,9 +132,10 @@ jobs:
         if: failure()
         shell: pwsh
         run: |
-          $patterns = 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:'
+          # 编译/链接错误 + 打包脚本自检失败（缺运行时依赖、找不到 ISCC、ISCC 编译失败）
+          $patterns = 'error C\d|fatal error|error LNK|ninja: build stopped|FAILED:|dist 缺少运行时文件|ISCC|未找到 Inno Setup'
           $collected = @()
-          foreach ($f in @('build-output.log', 'deploy-output.log')) {
+          foreach ($f in @('build-output.log', 'deploy-output.log', 'installer-output.log')) {
             if (-not (Test-Path $f)) { continue }
             $collected += "== $f =="
             # 连同上下文一起抓：MSVC 的 "see reference to" 行能定位 connect/模板错误源头
@@ -137,7 +153,7 @@ jobs:
         shell: pwsh
         run: |
           $collected = @()
-          foreach ($f in @('build-output.log', 'deploy-output.log')) {
+          foreach ($f in @('build-output.log', 'deploy-output.log', 'installer-output.log')) {
             if (Test-Path $f) { $collected += $f }
           }
           if ($collected.Count -eq 0) { Write-Host "no logs"; exit 0 }
