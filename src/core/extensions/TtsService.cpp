@@ -704,9 +704,12 @@ void TtsService::initSpeech()
     m_speech->setVolume(volume());
     rebuildVoiceList();
 
-    if (m_speech->state() == QTextToSpeech::BackendError) {
+    if (m_speech->state() == QTextToSpeech::Error) {
         // 构造即失败（后端缺失/初始化异常）：不能落到"可用"分支，否则设置页
         // 显示健康却永远不出声，且 m_failedEngines 为空、故障转移也无从触发
+        // State 枚举在 Qt 6 全系只有 Ready/Speaking/Synthesizing/Paused/Error，
+        // 没有 BackendError；插件加载失败与引擎初始化失败都报 Error（且是
+        // 同步置位，Ready 才可能异步补上），细分原因看 errorReason()
         cwn::Log::error(QStringLiteral("TtsService: engine '%1' failed to initialize")
                             .arg(m_activeEngine));
         updateHealth(false, tr("TTS 引擎 %1 初始化失败").arg(m_activeEngine));

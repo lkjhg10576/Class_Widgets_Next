@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.21)
 #
 # CI（.github/workflows/build.yml）以 -SkipBuild 调用打包脚本，不参与本段配置，
 # 其安装器版本号同样取自下面的缺省值 —— 改版本号只需改这一处。
-set(CWN_VERSION "2.1.3.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
+set(CWN_VERSION "2.1.3.1" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
 if(CWN_VERSION_OVERRIDE)
     set(CWN_VERSION "${CWN_VERSION_OVERRIDE}")
 endif()
