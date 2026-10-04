@@ -23,8 +23,9 @@ jobs:
           version: '6.10.3'
           arch: win64_msvc2022_64
           # Qt5Compat 是独立模块：WidgetsContainer.qml 依赖 Qt5Compat.GraphicalEffects；
-          # qtshadertools 是 Qt6Quick 的运行时依赖（windeployqt 会找 Qt6ShaderTools.dll）
-          modules: 'qt5compat qtshadertools'
+          # qtshadertools 是 Qt6Quick 的运行时依赖（windeployqt 会找 Qt6ShaderTools.dll）；
+          # qttexttospeech：TTS 真实后端；缺席则构建走 CWN_NO_TTS 桩
+          modules: 'qt5compat qtshadertools qttexttospeech'
           cache: true
 
       - name: Configure (CMake)

@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.21)
 #
 # CI（.github/workflows/build.yml）以 -SkipBuild 调用打包脚本，不参与本段配置，
 # 其安装器版本号同样取自下面的缺省值 —— 改版本号只需改这一处。
-set(CWN_VERSION "2.1.2.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
+set(CWN_VERSION "2.1.3.0" CACHE STRING "Class Widgets Next 版本号（x[.y[.z[.w]]）")
 if(CWN_VERSION_OVERRIDE)
     set(CWN_VERSION "${CWN_VERSION_OVERRIDE}")
 endif()
@@ -55,6 +55,15 @@ if(NOT TARGET Qt6::CorePrivate)
         "Qt6CorePrivate 未找到：docx 名单导入依赖 QtCore 私有 API QZipReader"
         "（CI 与本机均为 Qt 6.10.3，请检查 Qt 安装完整性）")
 endif()
+# 语音播报扩展（tts-extension §4.6）：Qt TextToSpeech 为可选模块（本机/CI 的
+# Qt 均未安装该组件）。QUIET 探测：存在则链接真实合成后端；缺失则以
+# CWN_NO_TTS 编译桩实现（healthy=false，设置页只读提示），不阻塞主构建。
+find_package(Qt6 COMPONENTS TextToSpeech QUIET)
+if(TARGET Qt6::TextToSpeech)
+    message(STATUS "Qt6 TextToSpeech found: TTS speech backend enabled")
+else()
+    message(STATUS "Qt6 TextToSpeech NOT found: TTS builds as stub (CWN_NO_TTS)")
+endif()
 
 qt_standard_project_setup()
 
@@ -80,6 +89,9 @@ set(CWN_SOURCES
     # 显示增强扩展服务（four-plugins A1：健康自检 + 排除科目解析）
     src/core/extensions/DisplayTweaksService.cpp
     src/core/extensions/DisplayTweaksService.h
+    # 语音播报扩展服务（tts-extension：Qt TextToSpeech 通知朗读 + 模板 + 来源过滤）
+    src/core/extensions/TtsService.cpp
+    src/core/extensions/TtsService.h
     # P2 二期 SecRandom 桥（仅 Windows 编译，见文件内 #ifdef；Linux 为空桩）
     src/core/extensions/SecRandomBridge.cpp
     src/core/extensions/SecRandomBridge.h
@@ -153,6 +165,13 @@ target_link_libraries(ClassWidgetsNext PRIVATE
     Qt6::Network   # M4 更新器 UpdaterBridge 的 HTTP 检查
     Qt6::Svg
 )
+
+# 语音播报：模块存在即链接真实后端，否则全工程注入 CWN_NO_TTS 切桩实现
+if(TARGET Qt6::TextToSpeech)
+    target_link_libraries(ClassWidgetsNext PRIVATE Qt6::TextToSpeech)
+else()
+    target_compile_definitions(ClassWidgetsNext PRIVATE CWN_NO_TTS)
+endif()
 
 if(WIN32)
     target_link_libraries(ClassWidgetsNext PRIVATE shell32)  # AppUserModelID + B4 托盘 Shell_NotifyIcon

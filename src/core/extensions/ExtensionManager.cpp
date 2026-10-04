@@ -86,6 +86,15 @@ QList<ExtensionManager::ExtensionDefinition> ExtensionManager::definitions()
     homework.settingsPageQml = QStringLiteral("pages/settings/Extensions/Homework.qml");
     defs.append(homework);
 
+    ExtensionDefinition tts;
+    tts.id = QStringLiteral("classwidgets.ext.tts");
+    tts.name = QCoreApplication::translate("Extensions", "语音播报");
+    tts.icon = QStringLiteral("ic_fluent_speaker_2_20_regular");
+    tts.description = QCoreApplication::translate(
+        "Extensions", "为通知提供 TTS 语音播报");
+    tts.settingsPageQml = QStringLiteral("pages/settings/Extensions/Tts.qml");
+    defs.append(tts);
+
     return defs;
 }
 

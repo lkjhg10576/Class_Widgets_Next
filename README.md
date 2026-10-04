@@ -9,17 +9,17 @@ Python (PySide6) 编写的 Windows 桌面课程表小组件；本仓库将其宿
 C++ + Qt Quick，目标是把安装体积从 ~226 MB 压到 **40–50 MB**、常驻内存压到
 **≤140 MB**，同时 **100% 复用上游 21,650 行 QML**（零修改）。
 
-> 当前状态：**2.1.2.0** —— 设置窗口、课表编辑器、主题切换、托盘菜单与
-> 5 个官方扩展全部落地；7 个内置小组件（6 个上游对齐 + 倒数日）经 C++ 注册表显示。
+> 当前状态：**2.1.3.0** —— 设置窗口、课表编辑器、主题切换、托盘菜单与
+> 6 个官方扩展全部落地；7 个内置小组件（6 个上游对齐 + 倒数日）经 C++ 注册表显示。
 > **本版本暂不支持外部插件**（插件系统推迟到 Phase 2，见下）。
 
 ## 扩展功能
 
 除小组件外，内置「扩展功能」模块（设置窗口 → 扩展功能）：不绑定小组件的
-官方功能单元，独立开关与配置页，配置键统一在 `extensions.*`。当前五项
-（实施计划与记录见 [extensions-feature-plan.md](extensions-feature-plan.md)；
-四插件移植见 [four-plugins-to-extensions-plan.md](four-plugins-to-extensions-plan.md)；
-当日作业见 [homework-extension-plan.md](homework-extension-plan.md)）：
+官方功能单元，独立开关与配置页，配置键统一在 `extensions.*`。当前六项
+（实施计划与记录见文末「计划与记录文档」表——前五份计划文档已随 2.1.3.0
+从仓库删除，标题在表内以「已归档」保留；语音播报计划在仓库外
+`docs/plans/class-widgets-next-tts-extension.md`）：
 
 - **天气**（迁入 + 第 6 数据源 NMC）：天气小组件不再以自由添加的内置组件出现，改由扩展开关
   控制——开启自动添加、关闭移除；城市/数据源/API 凭据/刷新间隔等配置收敛
@@ -49,6 +49,15 @@ C++ + Qt Quick，目标是把安装体积从 ~226 MB 压到 **40–50 MB**、常
   （`configs/homework/YYYY-MM-DD.json`，保留最近 1/3/7 天，损坏文件先留底再开新）。
   拖堂延迟 0–10 分钟、锁定、通知与自动展示均可关；科目侧可逐门关闭「需要布置作业」
   （只抑制通知，不抑制浮窗），键 `extensions.homework.*`。
+- **语音播报**（新增，Qt6 TextToSpeech 离线合成，Windows 走 winrt/sapi 后端）：
+  通知到达时按五类模板（上课 / 活动开始 / 下课 / 放学 / 预备铃）朗读，模板变量
+  `{title} {message} {subject} {teacher} {location} {next_subject} {next_teacher}
+  {next_location}` 取自当前与下一节课的运行态上下文，空模板即该类不播报。引擎可手动
+  切换（默认 `auto`，合成失败自动换下一后端重试）、语音下拉带语言筛选、音量
+  0–100%，另有按通知来源（provider）逐项开关的朗读范围，键 `extensions.tts.*`。
+  只读订阅通知信号，不碰 `playNotificationSound` 路径，现有铃声不受影响；
+  需 Qt **TextToSpeech** 模块，缺席时构建走 `CWN_NO_TTS` 桩（扩展仍可见但置灰只读，
+  见下）。
 
 与插件（Phase 2）的区别：扩展是**官方功能模块**，随程序构建，**不加载任何
 第三方代码**；配置键空间 `extensions.*` 与插件的 `plugins.*` 严格分离，
@@ -68,7 +77,7 @@ Class_Widgets_Next/
 │     ├─ WidgetsModel.*    # WidgetListModel 移植（上游 9 role + 9 slot 一字不改）
 │     ├─ BuiltinWidgets.*  # IWidgetProvider + 内置 7 个小组件注册表 + backend
 │     ├─ weather/          # WeatherService：天气数据门面（小米/高德/和风/华风爱科/彩云/NMC）
-│     ├─ extensions/       # 扩展注册表/开关 + 各扩展服务（点名 / 显示增强 / 当日作业）
+│     ├─ extensions/       # 扩展注册表/开关 + 各扩展服务（点名 / 显示增强 / 当日作业 / 语音播报）
 │     ├─ CWThemeManager.*  # 主题扫描/查询/切换信号面（M3 补拦截器）
 │     ├─ AppCentral.*      # 聚合门面 + QML 上下文注册（名字与上游逐字一致）
 │     ├─ RinUiWindowBase.* # pip RinUI 的 Python 层等价物（每窗口引擎 + release 语义）
@@ -90,18 +99,30 @@ Class_Widgets_Next/
 
 | 文档 | 内容 |
 |---|---|
-| [extensions-feature-plan.md](extensions-feature-plan.md) | 「扩展功能」框架 + 天气/点名/速览三项扩展的实施计划与验收 |
-| [four-plugins-to-extensions-plan.md](four-plugins-to-extensions-plan.md) | 四个上游 Python 插件移植为官方扩展（显示增强/点名增强/NMC/课程全量） |
-| [homework-extension-plan.md](homework-extension-plan.md) | 当日作业扩展的详细计划、数据安全约定与实施增补 |
-| [weather-multi-provider-plan.md](weather-multi-provider-plan.md) | 天气多数据源设计 |
-| [upcoming-activities-abbreviation-and-autosize.md](upcoming-activities-abbreviation-and-autosize.md) | 即将上课组件缩写与宽度自适应 |
+| extensions-feature-plan.md（已归档） | 「扩展功能」框架 + 天气/点名/速览三项扩展的实施计划与验收 |
+| four-plugins-to-extensions-plan.md（已归档） | 四个上游 Python 插件移植为官方扩展（显示增强/点名增强/NMC/课程全量） |
+| homework-extension-plan.md（已归档） | 当日作业扩展的详细计划、数据安全约定与实施增补 |
+| weather-multi-provider-plan.md（已归档） | 天气多数据源设计 |
+| upcoming-activities-abbreviation-and-autosize.md（已归档） | 即将上课组件缩写与宽度自适应 |
+| `docs/plans/class-widgets-next-tts-extension.md`（**仓库外路径**） | 语音播报（TTS）扩展的完整实施计划、双轨验收与发行步骤 |
 | [QML_MODIFICATIONS.md](QML_MODIFICATIONS.md) | **上游同步区纪律**：`app/src/qml` 每一处改动与新增文件的登记簿 |
+
+> 前五份计划文档已随 2.1.3.0 从仓库删除（实施记录分别见
+> `QML_MODIFICATIONS.md` 的改动 12 / 17 / 20 各节），此处保留标题备查，不再是指向
+> 仓库内文件的链接；TTS 计划文档同样不在仓库内，按 `docs/plans/` 实际路径标注。
 
 ## 构建（Windows）
 
 依赖：**CMake ≥ 3.21**、**MSVC 2022**（或 MinGW-w64）、**Qt ≥ 6.9**
 （建议 6.10，与上游 PySide6 版本对齐），模块需含 **qt5compat**
 （`Qt5Compat.GraphicalEffects`）。
+
+> 可选模块 **qttexttospeech**：语音播报扩展（`classwidgets.ext.tts`）的真实后端。
+> 缺席**不阻塞**构建——CMake 以 QUIET 方式查找，缺模块时全工程注入
+> `CWN_NO_TTS` 编译为桩：扩展在设置页仍可见，但显示黄色只读条、不发声。
+> CI（`.github/workflows/build.yml`）的 `aqtinstall` modules 已含
+> `qttexttospeech`；本机装好后重跑一次 `cmake -S . -B build` 即自动切回真实后端
+> （配置阶段会打印 `Qt6 TextToSpeech found` 反之 `NOT found: TTS builds as stub`）。
 
 > ⚠️ 随机点名的 DOCX 名单导入走 QtCore 私有 API `QZipReader`，因此还要求
 > **Qt6CorePrivate** 开发组件（`Qt6::CorePrivate` 目标）。缺失时 CMake **配置阶段**

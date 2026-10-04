@@ -62,8 +62,7 @@ constexpr const char *kSchedulePeekMode[] = { "auto", "always", nullptr };
 // four-plugins-to-extensions-plan §4.1/§6：displayTweaks 时间标题布局
 constexpr const char *kDisplayTitleMode[] = { "side_by_side", "alternate", nullptr };
 // P2 点名一期：悬浮窗样式 float=悬浮半透明 / solid=实心不透明
-constexpr const char *kRollCallFloatMode[] = { "float", "solid", nullptr };
-// （质检修正）死键 extensions.roll_call.mode 的枚举 kRollCallMode 已随键移除
+constexpr const char *kRollCallFloatMode[] = { "float", "solid", nullptr };// （质检修正）死键 extensions.roll_call.mode 的枚举 kRollCallMode 已随键移除
 // P2 二期 SecRandom 数据源三选一：builtin=内置名单 / secrandom2=希悦二代 / secrandom3=希悦三代
 constexpr const char *kRollCallService[] = { "builtin", "secrandom2", "secrandom3", nullptr };
 // P4 一期：速览条展示形态 peek=缩写格 / full=全量条
@@ -176,6 +175,16 @@ const ScalarSpec kScalarSpecs[] = {
     { "extensions.homework.notify_enabled", ScalarKind::Bool },
     { "extensions.homework.auto_show", ScalarKind::Bool },
     { "extensions.homework.retention_days", ScalarKind::Int },
+    // 语音播报扩展（class-widgets-next-tts-extension §4.5，本仓库自有模型）：
+    // engine 用 Str 而非 Enum——Qt TTS 后端名是平台动态枚举（Windows 下 winrt/sapi、
+    // Linux 下 speechd、macOS 下 macos），白名单写死会把真实后端值在 sanitize/set
+    // 时打回 "auto"，持久化失效；"auto" 本身只是普通字符串值，无需白名单承载。
+    // voice 为 Qt 语音名（"" = 引擎默认），volume 0~1（sanitize 钳位）。
+    // templates/provider_enabled 为 map 容器（见 defaultConfig/sanitize，不落声明表，
+    // 与 extensions.roll_call.names 数组先例一致）。
+    { "extensions.tts.engine", ScalarKind::Str },
+    { "extensions.tts.voice", ScalarKind::Str },
+    { "extensions.tts.volume", ScalarKind::Float },
     // 天气全局城市（extensions-feature-plan §5 B3 天气迁移的收敛键）：JSON 字符
     // 串 {cityId,name,lat,lon,province,adcode,wcnKey}，"" = 未配置。声明为 Str
     // 后 sanitize 会在 load 时补默认空串，QML 侧 Configs.data.weather.city
@@ -568,6 +577,66 @@ bool normalizeRollCallNames(QJsonObject &root, const QString &path, const QJsonO
     return true;
 }
 
+// extensions.tts.templates：五类朗读模板 {class,activity,break,free,preparation}。
+// 缺键/非字符串值回填默认模板（对齐 cw2-tts tconfig.py 缺键补默认）；空字符串
+// 保留——用户清空即"该类不播报"（buildAnnounceText 空结果跳过），与"未配置"区分。
+// extensions.tts.provider_enabled：{provider_id: bool}，缺省 true（缺键即朗读）。
+// 非对象整体回默认空对象；不可纠正为 bool 的值丢弃（等价缺省 true）。
+bool normalizeTtsMaps(QJsonObject &root, const QJsonObject &defaults)
+{
+    bool changed = false;
+    const QJsonObject defaultTemplates =
+        defaults.value(QLatin1String("extensions")).toObject()
+            .value(QLatin1String("tts")).toObject()
+            .value(QLatin1String("templates")).toObject();
+
+    const QJsonValue templatesValue = jsonGetAt(root, QStringLiteral("extensions.tts.templates"));
+    if (!templatesValue.isObject()) {
+        jsonSetAt(root, QStringLiteral("extensions.tts.templates"), defaultTemplates);
+        changed = true;
+    } else {
+        QJsonObject templates = templatesValue.toObject();
+        for (auto it = defaultTemplates.constBegin(); it != defaultTemplates.constEnd(); ++it) {
+            const QJsonValue v = templates.value(it.key());
+            if (v.isUndefined() || (!v.isString() && !v.isNull())) {
+                templates.insert(it.key(), it.value());
+                changed = true;
+            } else if (v.isNull()) {
+                templates.insert(it.key(), it.value());
+                changed = true;
+            }
+        }
+        if (changed)
+            jsonSetAt(root, QStringLiteral("extensions.tts.templates"), templates);
+    }
+
+    const QJsonValue enabledValue =
+        jsonGetAt(root, QStringLiteral("extensions.tts.provider_enabled"));
+    if (!enabledValue.isObject()) {
+        jsonSetAt(root, QStringLiteral("extensions.tts.provider_enabled"), QJsonObject());
+        changed = true;
+    } else {
+        const QJsonObject enabled = enabledValue.toObject();
+        QJsonObject out;
+        bool mapChanged = false;
+        for (auto it = enabled.constBegin(); it != enabled.constEnd(); ++it) {
+            const std::optional<QJsonValue> coerced = coerceBool(it.value());
+            if (!coerced.has_value()) {
+                mapChanged = true; // 不可纠正→丢弃（等价缺省 true=朗读）
+                continue;
+            }
+            if (*coerced != it.value())
+                mapChanged = true;
+            out.insert(it.key(), *coerced);
+        }
+        if (mapChanged) {
+            jsonSetAt(root, QStringLiteral("extensions.tts.provider_enabled"), out);
+            changed = true;
+        }
+    }
+    return changed;
+}
+
 // model.py:22-24 的默认 preset 条目构造（type_id + instance_id + 空 settings）
 QJsonObject defaultWidgetPreset(const char *typeId, const char *instanceId)
 {
@@ -783,12 +852,33 @@ QJsonObject ConfigStore::defaultConfig()
     homework.insert(QStringLiteral("auto_show"), true);
     homework.insert(QStringLiteral("retention_days"), 7);
 
+    // 语音播报扩展（classwidgets.ext.tts）：engine "auto"=自动选后端并故障转移；
+    // voice ""=引擎默认语音；volume 1.0；templates 五类通知模板（默认值对齐
+    // cw2-tts tconfig.py DEFAULT_TEMPLATES）；provider_enabled 缺键即朗读
+    // （缺省 true 语义，空对象=全部朗读）
+    QJsonObject ttsTemplates;
+    ttsTemplates.insert(QStringLiteral("class"), QStringLiteral("上课了，{subject}"));
+    ttsTemplates.insert(QStringLiteral("activity"), QStringLiteral("活动开始，{subject}"));
+    ttsTemplates.insert(QStringLiteral("break"), QStringLiteral("下课了，下节课是{next_subject}"));
+    ttsTemplates.insert(QStringLiteral("free"), QStringLiteral("放学了"));
+    ttsTemplates.insert(QStringLiteral("preparation"),
+                        QStringLiteral("预备铃，下节课是{next_subject}"));
+    QJsonObject tts;
+    tts.insert(QStringLiteral("engine"), QStringLiteral("auto"));
+    // voice 用显式空字符串而非 null：与「默认空 = 引擎默认语音」的语义口径
+    // 自洽（照 weather.city 先例，"" 即未指定），避免下游读到 null 键再各自兜底
+    tts.insert(QStringLiteral("voice"), QStringLiteral(""));
+    tts.insert(QStringLiteral("volume"), 1.0);
+    tts.insert(QStringLiteral("templates"), ttsTemplates);
+    tts.insert(QStringLiteral("provider_enabled"), QJsonObject());
+
     QJsonObject extensions;
     extensions.insert(QStringLiteral("enabled"), QJsonArray()); // 启用中的扩展 id 列表
     extensions.insert(QStringLiteral("roll_call"), rollCall);
     extensions.insert(QStringLiteral("schedule_peek"), schedulePeek);
     extensions.insert(QStringLiteral("display_tweaks"), displayTweaks);
     extensions.insert(QStringLiteral("homework"), homework);
+    extensions.insert(QStringLiteral("tts"), tts);
 
     // 天气分区（本仓库自有模型，weather-multi-provider-plan / extensions-feature-plan
     // §5 B3）：仅声明全局城市 weather.city（JSON 字符串，"" = 未配置）。
@@ -889,6 +979,10 @@ void ConfigStore::sanitize()
         ++fixed;
     if (normalizeRollCallNames(m_json, QStringLiteral("extensions.roll_call.names"), defaults))
         ++fixed;
+    // 语音播报扩展：模板/来源开关两 map 形状修正（标量 engine/voice/volume 已由
+    // kScalarSpecs 覆盖，此处只处理容器与数值钳位）
+    if (normalizeTtsMaps(m_json, defaults))
+        ++fixed;
 
     // 3) four-plugins 数值钳位（范围语义见各设置页；非法值钳到合法区间而非回退默认，
     // 保留用户意图；display_height -1 为哨兵“跟随默认”，不参与下限钳制）
@@ -927,6 +1021,17 @@ void ConfigStore::sanitize()
     clampInt(QStringLiteral("extensions.homework.delay_minutes"), 0, 10);
     clampInt(QStringLiteral("extensions.homework.window_w"), 240, 4096);
     clampInt(QStringLiteral("extensions.homework.window_h"), 200, 4096);
+    // 语音播报：音量 0~1（Float 叶子，sanitize 钳位保留用户意图；setVolume 另做钳位）
+    {
+        const QJsonValue cur = jsonGetAt(m_json, QStringLiteral("extensions.tts.volume"));
+        if (cur.isDouble()) {
+            const double clamped = qBound(0.0, cur.toDouble(), 1.0);
+            if (clamped != cur.toDouble()) {
+                jsonSetAt(m_json, QStringLiteral("extensions.tts.volume"), clamped);
+                ++fixed;
+            }
+        }
+    }
     {
         const QJsonValue cur =
             jsonGetAt(m_json, QStringLiteral("extensions.homework.retention_days"));

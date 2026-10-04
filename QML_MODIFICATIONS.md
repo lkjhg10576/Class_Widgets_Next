@@ -3,11 +3,12 @@
 > 移植方案 §9.5：QML 目录是**上游同步区**——能不改就不改，改动必须集中记录在本文档，
 > 并定期（建议每月）从上游 `main` 拉取 `src/qml/` 变更做回归。
 
-## 当前状态：`app/src/qml` 共 13 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限 + 2 处扩展功能接入（Settings 导航项 / WidgetsContainer 速览条挂载，改动 12），见下；另有改动 13–17 增量与改动 18 质检修正、改动 19 点名交互修复、改动 20 当日作业见各节）
-> 另有 15 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
+## 当前状态：`app/src/qml` 共 13 处改动（4 处 M3 插件入口遮蔽 + 2 处 M5 方法名改写 + 2 处 Interactions 页 sourceSize 移除 + 1 处 WidgetLoader 失败恢复 + 2 个「即将上课」组件文件 + 1 处 AddWidgetsDialog 数量上限 + 2 处扩展功能接入（Settings 导航项 / WidgetsContainer 速览条挂载，改动 12），见下；另有改动 13–17 增量与改动 18 质检修正、改动 19 点名交互修复、改动 20 当日作业、改动 21 语音播报见各节）
+> 另有 16 个**新增文件**（非上游改动）：天气小组件及其设置页（改动 5）、
 > 倒数日小组件及其设置页（改动 9）、扩展功能 7 个 QML（改动 12），
 > 四插件移植新增 3 个 QML（改动 17：DisplayTweaks 页 / AddOverlayMemberDialog / LessonsBoard，RollCall/Weather/Peek 系为既有文件增量），
-> 当日作业新增 4 个 QML（改动 20：HomeworkTrigger / HomeworkFloat / HomeworkEditDialog / Homework 设置页）。
+> 当日作业新增 4 个 QML（改动 20：HomeworkTrigger / HomeworkFloat / HomeworkEditDialog / Homework 设置页），
+> 语音播报新增 1 个 QML（改动 21：Tts 设置页；该扩展在上游同步区**改动 0 处**）。
 > `app/src/themes/**` 不再逐字同步上游：改动 7（material Color.qml，A6 引入、本版修正）
 > 与改动 8（WidgetLoader.qml 失败恢复，属 `app/src/qml`）已偏离上游。
 
@@ -484,6 +485,110 @@ QML 上下文名 `Homework`；**读/写双路**：`readDayFile` 的 `Corrupt` �
 `CMakeLists.txt` 注册 `HomeworkService.{h,cpp}`。
 
 **验证**：MSVC 全量重建（`build/Release/ClassWidgetsNext.exe`）通过。
+
+## 改动 21：语音播报扩展（2026-10-04，第 6 个官方扩展 `classwidgets.ext.tts`）
+
+功能蓝本 cw2-tts（`example/cw2-tts-main/`）原生移植：Qt6 TextToSpeech 离线合成
+（Windows 走 winrt/sapi 后端），引擎自带播放（无临时文件、无 QtMultimedia），
+对齐 cw2-tts 全量（通知监听/silent 跳过/五类模板/变量/引擎切换 + auto 故障转移/
+音量/试听）+ 新增按通知来源 provider 的朗读范围过滤。
+C++ 实现全部在同步区外；本节登记**上游同步区改动 0 处**与**新增 QML 文件 1 个**
+（按下文纪律：新增文件不与上游冲突，上游若出现同名路径需复核）。
+扩展列表页（`Index.qml`，改动 12.3）全自动枚举注册表，本扩展零改动即现。
+
+**新增（QML，1 个）**：
+
+| # | 文件 | 说明 |
+|---|---|---|
+| 21.1 | `ClassWidgets/pages/settings/Extensions/Tts.qml` | 配置页（Homework.qml 三件套范式：受锁约束 / 用户操作回写 / 初始化读取 + `activeFocus` 守卫防 dataChanged 打断模板输入）。启用开关 + 健康黄条（桩构建/无引擎时只读提示，范式照 DisplayTweaks.qml）+ 引擎下拉（auto 居首）/语音下拉 + 刷新/音量 Slider（0–100%，pressed 期间写回，落盘靠自动保存）/测试朗读 + 停止/五类模板 TextField + 重置 + 试听（示例值替换，照 cw2-tts settings.qml）/朗读范围 Repeater（`notificationProviders()` 动态列出，含作业/点名等后来注册项）。**必须走 `AppCentral.tts`，禁裸写 `Tts.*`**（文件名隐式类型遮蔽上下文属性，同 RollCall.qml 教训，见页头注释） |
+
+配套改动（C++，同步区外，登记于此供追溯）：新增 `extensions/TtsService.{h,cpp}`
+（QML 上下文名 `Tts` + `AppCentral.tts` 属性；`notified` 只读订阅，不过
+`playNotificationSound` 路径；provider 后缀映射 `.class/.activity/.break/.free/`
+`.preparation` → 模板，残留 `{…}` 占位回退 `title。message`，标点清理对齐
+announcer.py；运行时上下文经 `ScheduleRuntime` 属性动态读取，
+`currentSubject`（name/teacher/location）→ `currentEntry.title` 兜底 →
+`nextEntries[0]` 经 `subjects` 解析 `next_*`；FIFO 朗读队列串行语义；
+auto 下 `errorOccurred` 换下一后端并重试当前句，非 auto 放弃；
+`provider_enabled` 整表读-改-写——provider_id 含点，不能走点分路径直写）；
+`ExtensionManager::definitions() +1`（`classwidgets.ext.tts`）；
+`ConfigStore`（`extensions.tts.engine/voice/volume` 进 `kScalarSpecs`——engine 用
+`Str` 而非枚举白名单：后端名平台动态枚举，白名单会把真实后端值打回 `auto`；
+`templates`/`provider_enabled` 进默认树 + `normalizeTtsMaps` 形状修正，
+`volume` 钳 0–1）；
+`AppCentral.{h,cpp}`（`tts` 属性 + `Tts` 上下文 + 启动期已启用补接线 +
+`extensionToggled` 接线：开→恢复订阅，关→断开并 `stopSpeaking()`）；
+`CMakeLists.txt`（注册 `TtsService.{h,cpp}` + `find_package(Qt6 COMPONENTS
+TextToSpeech QUIET)`：存在即链真实后端，否则全工程注入 `CWN_NO_TTS`
+切桩实现——本机/CI 的 Qt 均未装该组件，当前构建即走桩路径，
+装模块后重配 CMake 自动切回真实后端）。
+
+配套翻译：本次未补 `.ts` 词条（随翻译流程滞后，见 tts 计划 §4.7；`Extensions`
+上下文"语音播报"等名称/描述未译语种回退中文源文，与既有扩展同策略）。
+
+**验证**（2026-10-04，本机 Qt 6.10.3 + MSVC + offscreen）：
+- `cmake` 重配置确认 `Qt6 TextToSpeech NOT found: TTS builds as stub (CWN_NO_TTS)`
+ （本机/CI 均未装该组件，走桩路径；装模块后重配自动切真实后端）；
+- MSVC Release 全量重建 exit 0（`build/Release/ClassWidgetsNext.exe`），零警告；
+- 冒烟 `--smoke-test`（隔离沙箱 `CW2_APP_ROOT` + offscreen）：扩展关闭/预置启用
+  `classwidgets.ext.tts` 两种状态均 `Event loop finished with code 0`，
+  `configs.json` 正确落盘 `extensions.tts`（engine auto/voice ""/volume 1.0/
+  五类默认模板/provider_enabled {}），`extensions.enabled` 开关往返保持；
+  残留 WARN 均为退出 teardown 上下文置空告警（与改前同类）；
+- `qmllint`：Tts.qml 零 error（告警类与 Homework/RollCall 基线一致）；
+- QML 真机 harness（`%TEMP%/cwn-tts-qmltest/`：C++ 无 moc 加载器 + mock 上下文 +
+  真实 RinUI，offscreen）7/7 通过：页面 Ready、refresh() 回填 5 模板 + 同步
+  3 provider 开关、`previewText` 变量替换无残留、`Configs.dataChanged` 触发重读。
+  该 harness 抓到一处生产 bug 并已修复：`notificationProviders` 为函数，
+  QML 漏 `()` 取到函数引用致朗读范围 Repeater 无数据——现命令式设 model +
+  `providersChanged` 转发（`NotificationService::notificationProvidersChanged`）重建
+  （首版做法；质检后模型改为绑定式属性，见下方补遗）：
+- 真实后端编译风险（本机无模块）：对照 Qt 官方成员表逐项核对所用 API
+  （`availableEngines` static/`availableVoices`/`engine`/`setVoice`/`setVolume`/
+  `say`/`stop()`/`stateChanged(State)`/`errorOccurred(ErrorReason,QString)`/
+  构造器），据此把错误枚举从 `Error` 修正为 `ErrorReason`（6.8+；
+  `stop()` 无参调用在 6.10/6.12 均合法——后者带默认 `BoundaryHint` 实参）。
+
+### 质检修复（2026-10-04）
+
+上述为改动 21 的首版实施记录。首轮全量质检另发现 6 类问题，已在本仓库修完，
+不改变本节的登记口径（C++ 改动均在同步区外，QML 改动均落在新增的 `Tts.qml`）：
+
+- **朗读队列有界**（`TtsService`）：队列上限 8 条（溢出丢最旧并记 debug）、入队后
+  60s 仍未播到即作废（排他式 FIFO 下用户早已离开该课）、单条文本截断 300 字——
+  三者共同封住「开关扩展后积压一批通知、上课后集中朗读」的最坏路径。
+- **模板单遍替换 + 悬空收尾**（`applyTemplate`）：改单遍 `QRegularExpression`
+  扫描替换（原 8 次串行 `replace` 会把「替换值里的 `{…}`」当占位做二次替换，
+  课程名含花括号即踩，且残留判据同样误报），未知变量名原样保留并置 `ok=false`
+  整句回退；`next_subject` 为空时先删掉「下节课是」悬空短语与前置标点，
+  再由既有 `stripPunct` 收尾（对齐 `announcer.py`）。
+- **故障转移三处加固**（`onSpeechError`）：旧合成器改 `stop` + `disconnect` +
+  `deleteLater`（原栈内同步 `delete` 会踩正在派发的 `errorOccurred` 信号栈）；
+  新实例构造完成后以 `QTimer::singleShot(0, …)` 延迟重试当前句（构造栈内直接
+  `say` 不安全）；候选后端按 `failoverPriority()` 定优先级 winrt(0) → sapi(1) →
+  其他(2)，同优先级保持 `QTextToSpeech::availableEngines()` 的返回顺序。
+- **换引擎清语音**（`setEngine`）：跨引擎语音 ID 不通用，换引擎时一并把
+  `extensions.tts.voice` 清空并补发 `voiceChanged()`——否则新引擎按旧名匹配不到、
+  设置页却显示「选了语音」；与 engine 同一批写入（`m_applying` 抑制 `dataChanged`
+  回授），结尾只落盘一次。对齐 cw2-tts。
+- **`providers` 绑定式属性**（`TtsService` + `Tts.qml`）：新增带
+  `providersChanged` 的 `Q_PROPERTY providers`（转发
+  `NotificationService::notificationProvidersChanged`），设置页 Repeater 改为
+  `model: AppCentral.tts ? AppCentral.tts.providers : []`；原先在 `refresh()` 里
+  命令式赋 model，会被拖动音量滑杆触发的 `dataChanged` 带着整份列表重建一次
+  `SettingCard`（高频操作下的纯浪费）。`notificationProviders()` 命令式入口保留。
+- **QML 三处修正**（`Tts.qml`）：①「停止」按钮 `enabled` 绑定
+  `AppCentral.tts.speaking`（并接 `onSpeakingChanged`）——原实现任何时候都可点，
+  空闲时点击无意义；② 语音下拉新增语言（locale）筛选下拉，`localeOptions` 由
+  `voiceList` 的 locale 去重派生、首项「全部语言」，`voiceOptions` 按其过滤——
+  Windows 上 winrt 一次可枚举数百个语音，不筛根本挑不出来；③ 删除
+  `testField.enabled = !isKeyLocked("extensions.tts.volume")`——测试框是页内临时
+  输入（`testSpeak` 不落盘），无对应配置键，绑音量锁键只会让锁 volume 的用户
+  连试读都不能用。附带：`previewText` 补空模板守卫（空模板 = 该类不播报）、
+  `{title}` 示例值改固定「通知标题」而非模板键显示名（对齐 cw2-tts）；五处
+  「重置」删掉冗余 `root.refresh()`（`templatesChanged` 已覆盖，模板已是默认值时
+  `setTemplate` 短路不发信号）；朗读范围说明补「需该来源的应用内通知保持开启，
+  否则不会播报」。
 
 ## 修改申请流程
 1. 尽量不动 QML：能由 C++ 宿主、部署脚本或 vendored 副本解决的，不改上游文件；

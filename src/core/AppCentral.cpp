@@ -13,6 +13,7 @@
 #include "extensions/ExtensionManager.h"
 #include "extensions/HomeworkService.h"
 #include "extensions/RollCallService.h"
+#include "extensions/TtsService.h"
 #include "notification/NotificationService.h"
 #include "schedule/ClassSwapManager.h"
 #include "schedule/ScheduleEditor.h"
@@ -79,6 +80,12 @@ void AppCentral::initialize(bool enableFirstRunGate)
     m_homeworkService = new HomeworkService(m_configs, this);
     // four-plugins A1：显示增强服务骨架（健康自检 + 排除科目解析；行为由 QML 绑定驱动）
     m_displayTweaksService = new DisplayTweaksService(this);
+    // 语音播报扩展（class-widgets-next-tts-extension §4.4）：与其余扩展服务同处
+    // 教程门之前创建——首跑教程模式在下方 initialize 中途 return，此时若服务缺席，
+    // AppCentral.tts 属性与 QML 上下文 "Tts" 均为 null，设置页/调试入口取用即崩。
+    // 故此处先创建保证两个入口在教程模式下亦非空；构造传 runtime=nullptr，
+    // 真正需要运行时上下文的时刻见下方 ScheduleRuntime 就绪后的延迟注入。
+    m_ttsService = new TtsService(m_configs, m_notification, nullptr, this);
     // B4（extensions-feature-plan §5）：天气 60s 轮询 tick 改由扩展开关控制——
     // 未启用时不唤醒网络检查。本行必须在 ExtensionManager 构造之后：构造内的
     // 一次性迁移（B3）若识别出存量天气实例会自动启用扩展，此处 isEnabled 即
@@ -137,6 +144,12 @@ void AppCentral::initialize(bool enableFirstRunGate)
     m_scheduleRuntime->refreshWith(m_scheduleManager->schedule());
     UnionTimer::instance().start(); // 对应 central.py:461 统一秒级刷新
 
+    // 语音播报扩展：延迟注入运行时（tts-extension §4.4）。服务本体已在教程门
+    // 之前创建，此处补上构造时拿不到的 ScheduleRuntime——读当前/下一节上下文与
+    // provider 列表均经该指针，自开定时器、不发通知，只读订阅 notified
+    if (m_ttsService)
+        m_ttsService->setScheduleRuntimeSource(m_scheduleRuntime);
+
     // M4 更新器与自动化（对应 central.py:464-467 _run_utils 的 updater/automation 部分）
     m_updaterBridge = new UpdaterBridge(m_configs, this);
     m_automationManager = new AutomationManager(m_configs, this);
@@ -192,6 +205,14 @@ void AppCentral::connectServices()
             qOverload<const QString &>(&NotificationService::dispatchStatusChange));
     connect(m_scheduleRuntime, &ScheduleRuntime::updated, m_notification,
             &NotificationService::checkPreparationBell);
+
+    // ---- 语音播报：只读订阅 notified（不碰 playNotificationSound 路径，
+    // 现有通知铃声不受影响）。扩展启用时才接线，禁用即断开（见下方 toggled
+    // 分支）；启动期已启用的扩展在此补接线
+    if (m_extensionManager->isEnabled(QStringLiteral("classwidgets.ext.tts"))) {
+        connect(m_notification, &NotificationService::notified,
+                m_ttsService, &TtsService::onNotified, Qt::UniqueConnection);
+    }
 
     // ---- 自动化任务驱动（对应 central.py:457 union_update_timer.tick → automation_manager.update）----
     connect(&UnionTimer::instance(), &UnionTimer::tick,
@@ -280,6 +301,20 @@ void AppCentral::connectServices()
                         } else {
                             m_windowManager->closeHomeworkFloat();
                         }
+                    }
+                } else if (id == QLatin1String("classwidgets.ext.tts")) {
+                    // 语音播报（tts-extension §4.4）：开 → 恢复 notified 只读
+                    // 订阅；关 → 断开订阅并立即停声（队列清空，不残留半句）。
+                    // UniqueConnection 防重复接线（启动补接 + 开关连点）。
+                    if (enabled) {
+                        connect(m_notification, &NotificationService::notified,
+                                m_ttsService, &TtsService::onNotified,
+                                Qt::UniqueConnection);
+                    } else {
+                        disconnect(m_notification, &NotificationService::notified,
+                                   m_ttsService, &TtsService::onNotified);
+                        if (m_ttsService)
+                            m_ttsService->stopSpeaking();
                     }
                 }
                 // 课表速览（classwidgets.ext.schedulePeek）无需 C++ 接线：
@@ -392,6 +427,10 @@ void AppCentral::setupQmlContext(QQmlEngine *engine)
     // 显示增强服务（four-plugins A1，QML 名 "DisplayTweaks"；设置页健康黄条与
     // WidgetsContainer 不隐藏纠正的科目解析入口）
     context->setContextProperty(QStringLiteral("DisplayTweaks"), m_displayTweaksService);
+    // 语音播报服务（tts-extension，QML 名 "Tts"；设置页必须经 AppCentral.tts
+    // 访问，裸写 Tts.* 会被文件名隐式类型遮蔽，见 RollCall.qml 头注释；
+    // 首跑教程模式下同样非空——服务已在教程门之前创建）
+    context->setContextProperty(QStringLiteral("Tts"), m_ttsService);
     context->setContextProperty(QStringLiteral("UtilsBackend"), m_utilsBackend);
     context->setContextProperty(QStringLiteral("UpdaterBridge"), m_updaterBridge);
     context->setContextProperty(QStringLiteral("ThemeLoadErrorDialog"),
@@ -421,6 +460,7 @@ QObject *AppCentral::scheduleManager() const { return m_scheduleManager; }
 QObject *AppCentral::translator() const { return m_translator; }
 QObject *AppCentral::themeManager() const { return m_themeManager; }
 QObject *AppCentral::displayTweaks() const { return m_displayTweaksService; }
+QObject *AppCentral::tts() const { return m_ttsService; }
 
 void AppCentral::quit()
 {

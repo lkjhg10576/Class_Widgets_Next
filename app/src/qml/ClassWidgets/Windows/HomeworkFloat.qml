@@ -588,24 +588,39 @@ QQW.Window {
         title: qsTr("删除作业")
         modal: true
         width: Math.min(340, Math.max(0, floatWindow.width - 24))
-        standardButtons: Dialog.Ok | Dialog.Cancel
 
-        Text {
-            width: parent ? parent.width : 0
-            wrapMode: Text.Wrap
-            font.pixelSize: 14 // Theme.Text 遮蔽 QtQuick.Text，必须显式给字号
-            text: qsTr("即将删除一条作业，此操作不可撤销，是否继续？")
+        // 正文必须挂进布局：RinUI.Dialog 的 contentItem 是 ColumnLayout，布局会用
+        // implicitWidth 接管子项 width，原先的 `width: parent.width` 被覆盖；
+        // 而 wrapMode: Text.Wrap 的 implicitWidth 是不换行的自然宽度，窄浮窗下整行
+        // 正文冲出对话框右边界、被浮窗裁断（Layout.fillWidth 才是约束后的可用宽）
+        ColumnLayout {
+            Layout.fillWidth: true
+
+            Text {
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                font.pixelSize: 14 // Theme.Text 遮蔽 QtQuick.Text，必须显式给字号
+                text: qsTr("即将删除一条作业，此操作不可撤销，是否继续？")
+            }
         }
 
-        onAccepted: {
+        // footer 自绘（同 HomeworkEditDialog）：RinUI.DialogButtonBox 的 background
+        // 带底色 + windowBorderColor 描边，叠在对话框自己的圆角边框内会多出一圈
+        // 直角框线（顶部还有块方角补片），圆角与方角边框同时出现；这里只留按钮
+        footer: DialogButtonBox {
+            standardButtons: DialogButtonBox.Ok | DialogButtonBox.Cancel
+            background: Item {} // 去掉底板：对白框本身已是底色
+
+            onAccepted: deleteDialog.acceptDelete()
+            onRejected: deleteDialog.close()
+        }
+
+        // 确定删除：走 Homework 服务落盘；取消不回写，下次 confirmDelete 会覆盖暂存 id
+        function acceptDelete() {
             if (floatWindow.deleteTargetId && Homework)
                 Homework.removeItem(floatWindow.deleteTargetId)
             floatWindow.deleteTargetId = ""
             itemList.currentIndex = -1
-            deleteDialog.close()
-        }
-        onRejected: {
-            floatWindow.deleteTargetId = ""
             deleteDialog.close()
         }
     }
